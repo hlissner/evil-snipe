@@ -119,8 +119,7 @@ you don't like this, see `evil-snipe-auto-disable-substitute`.
 
 ## TODO
 
-* s<enter> repeat support
-* Evil-snipe-t/T motions (phase out evil-snipe-lazy setting)
+* `s<enter>` repeat support
 * Evil-snipe-enable-* options to disable skulking or sniping
 * Highlighting, either ala isearch or ace-jump
 * *Incremental* highlighting for first character too
