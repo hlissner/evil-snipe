@@ -52,7 +52,7 @@ highlighted. Otherwise, only highlight after you've typed both characters.")
 
     'line    ;; search only on the line (this is vim-seek behavior)
     'buffer  ;; search rest of the buffer (vim-sneak behavior)
-    'visible ;; search rest of *visible* buffer (more performant than 'buffer... maybe)
+    'visible ;; search rest of visible buffer (more performant than 'buffer... maybe)
     'count   ;; search within [count] lines after (point), otherwise behaves like
              ;; line.")
 
@@ -61,18 +61,52 @@ highlighted. Otherwise, only highlight after you've typed both characters.")
   default this is t, since they are mostly redundant with other motions. s can
   be done via cl and S with cc.")
 
+(defvar evil-snipe-repeat t
+  "(NOT IMPLEMENTED YET) Which type of repeat to use, can be any of:
+
+    non-nil  ;; repeat with ; and ,
+    'next    ;; repeat with s and S
+    'search  ;; repeat with n and N")
+
+(defvar evil-snipe-count-scope 'repeat
+  "(NOT IMPLEMENTED YET) Dictates the scope of searches, which can be one of:
+
+    'repeat      ;; jump to Nth match from point
+    'horizontal  ;; find first match within N lines
+    'vertical    ;; find first match within N (visible) columns")
+
+(defvar evil-snipe--last nil
+  "The last search performed.")
+
+(defvar evil-snipe--was-repeat nil
+  "The last search performed.")
+
+(defvar evil-snipe--consume-match-p nil
+  "The last search performed.")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(evil-define-motion evil-snipe-f (count &optional first second consume-match-p)
+(evil-define-motion evil-snipe-f (count &optional first second)
   "Jump to the position of a two-character string."
   :jump t
   :type inclusive
   (interactive "<c>")
-  (evil-half-cursor)
+  (unless evil-snipe--was-repeat
+    (evil-half-cursor))
   (let ((first (or first (evil-read-key ">"))))
     (cond ((or (char-equal first ?\n)
                (eq first 13))
-           (message "Repeat unimplemented"))
+           (if (not evil-snipe--last)
+               (site-error "No previous search to repeat")
+             (let ((evil-snipe--was-repeat t)
+                   (-count (nth 1 evil-snipe--last)))
+               (funcall (first evil-snipe--last)
+                        (if (> -count 0)
+                            count
+                          (* count -1))
+                        (nth 2 evil-snipe--last)
+                        (nth 3 evil-snipe--last)
+                        (nth 4 evil-snipe--last)))))
           (t
            (setq second (or second (evil-read-key (concat ">" (char-to-string first)))))
            (setq count (or count 1))
@@ -105,32 +139,41 @@ highlighted. Otherwise, only highlight after you've typed both characters.")
                   ;; (bound (if fwdp (point-max) (point-min)))
                   )
 
+             (when fwdp (forward-char 1))
+
              ;; TODO Implement highlighting
              (if (search-forward charstr
                                  (if fwdp (if (< eob 0) 0 eob) bob)
                                  t count)
-                 (when fwdp
-                   (backward-char (if consume-match-p 2 1)))
+                 (progn
+                   (when fwdp
+                     (backward-char (if evil-snipe--consume-match-p 2 1)))
+                   (unless evil-snipe--was-repeat
+                     (setq evil-snipe--last (list 'evil-snipe-f count first second evil-snipe--consume-match-p))))
+
+               (when fwdp (backward-char 1))
                (user-error "Can't find %s" charstr)))))))
 
-(evil-define-motion evil-snipe-F (count &optional first second consume-match-p)
+(evil-define-motion evil-snipe-F (count &optional first second)
   "Jump backwards to the position of a two-character string."
   :jump t
   :type inclusive
   (interactive "<c>")
-  (evil-snipe-f (- (or count 1)) first second consume-match-p))
+  (evil-snipe-f (- (or count 1)) first second))
 
 (evil-define-motion evil-snipe-t (count &optional first second)
   :jump t
-  :type inclusive
+  :type exclusive
   (interactive "<c>")
-  (evil-snipe-f (or count 1) first second t))
+  (let ((evil-snipe--consume-match-p t))
+    (evil-snipe-f (or count 1) first second)))
 
 (evil-define-motion evil-snipe-T (count &optional first second)
   :jump t
-  :type inclusive
+  :type exclusive
   (interactive "<c>")
-  (evil-snipe-F (or count 1) first second t))
+  (let ((evil-snipe--consume-match-p t))
+    (evil-snipe-F (or count 1) first second)))
 
 ;; TODO Write evil-snipe-p
 ;; (evil-define-motion evil-snipe-p (count &optional first second))

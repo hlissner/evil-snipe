@@ -74,7 +74,7 @@ which belong to 'evil-substitute'. If you miss it, `s` can be accomplished with
     to just before ab (inclusive, by default. Exclusive motion is bound to x/X
     instead of z/Z).
   * Press `ctrl-o` or \`\` to go back to the starting point.
-  * [PLANNED] Press `s<Enter>` at any time to repeat the last snipe.
+  * Press `s<Enter>` at any time to repeat the last snipe. Use S to do the reverse.
   * [PLANNED] If `evil-snipe-search-highlight` is non-nil, matches are
     highlighted.
   * [PLANNED] If `evil-snipe-search-incremental-highlight` is non-nil, matches for your
@@ -107,7 +107,6 @@ which belong to 'evil-substitute'. If you miss it, `s` can be accomplished with
 
 ## TODO
 
-* `s<enter>` repeating
 * Highlighting, either ala isearch or ace-jump
 * *Incremental* highlighting for first character too
   (`evil-snipe-search-incremental-highlight`)
