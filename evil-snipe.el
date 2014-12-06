@@ -152,17 +152,13 @@ matches. Otherwise, only highlight after you've finished skulking.")
 
 (defun evil-snipe--highlight-rest (matches beg end)
   (let ((string (buffer-substring-no-properties beg end))
-        (beg-offset (+ (point-min) beg -1)))
-    (let ((i 0))
-      (while (and (< i (length string))
-                  (string-match matches string i))
-        (setq i (1+ (match-beginning 0)))
-
-        (evil-snipe--highlight (+ beg-offset (match-beginning 0)) (+ beg-offset (match-end 0)))
-        )
-      )
-    )
-  )
+        (beg-offset (+ (point-min) beg -1))
+        (i 0))
+    (while (and (< i (length string))
+                (string-match (regexp-quote matches) string i))
+      (setq i (1+ (match-beginning 0)))
+      (evil-snipe--highlight (+ beg-offset (match-beginning 0))
+                             (+ beg-offset (match-end 0))))))
 
 (defun evil-snipe--highlight-clear ()
   (remove-overlays nil nil 'category 'evil-snipe)
@@ -198,7 +194,6 @@ matches. Otherwise, only highlight after you've finished skulking.")
                  (old-pos (point))
                  new-pos new-pos-p)
 
-             ;; TODO Implement highlighting
              (save-excursion
                (unless (eq old-pos
                            (progn
@@ -222,14 +217,15 @@ matches. Otherwise, only highlight after you've finished skulking.")
              (if new-pos
                  (progn
                    (goto-char new-pos)
-                   (unless evil-snipe--was-repeat
-                     (evil-snipe--highlight-reset))
-                   (unless (or (evil-operator-state-p) (not evil-snipe-search-highlight))
-                     (evil-snipe--highlight new-pos (+ new-pos (length charstr)) t)
-                     (evil-snipe--highlight-rest charstr beg end)
-                     (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))
-                   )
-               (evil-snipe--highlight-clear)
+                   (when evil-snipe-search-highlight
+                     (unless evil-snipe--was-repeat
+                       (evil-snipe--highlight-clear))
+                     (unless (evil-operator-state-p)
+                       (evil-snipe--highlight new-pos (+ new-pos (length charstr)) t)
+                       (evil-snipe--highlight-rest charstr beg end)
+                       (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))))
+               (when evil-snipe-search-highlight
+                 (evil-snipe--highlight-clear))
                (user-error "Can't find %s" charstr))
              )
            )
