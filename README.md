@@ -77,7 +77,7 @@ which belong to 'evil-substitute'. If you miss it, `s` can be accomplished with
   * [PLANNED] Press `s<Enter>` at any time to repeat the last snipe.
   * [PLANNED] If `evil-snipe-search-highlight` is non-nil, matches are
     highlighted.
-  * [PLANNED] If `evil-snipe-search-live-highlight` is non-nil, matches for your
+  * [PLANNED] If `evil-snipe-search-incremental-highlight` is non-nil, matches for your
     first key are highlighted as well (like incremental search).
 
 * **Sniping**
@@ -107,7 +107,7 @@ which belong to 'evil-substitute'. If you miss it, `s` can be accomplished with
 
 ## TODO
 
-* `s<enter>` repeat support
+* `s<enter>` repeating
 * Highlighting, either ala isearch or ace-jump
 * *Incremental* highlighting for first character too
   (`evil-snipe-search-incremental-highlight`)
