@@ -8,9 +8,9 @@ Snipe is an attempt to bring a marriage of
 [vim-sneak](https://github.com/justinmk/vim-sneak) and
 [vim-seek](https://github.com/goldfeld/vim-seek) to evil-mode.
 
-Everythign it can do can be summaried into two actions: skulking and sniping.
-Skulking pertains to finding and jumping to two-character matches. Sniping
-pertains to performing actions (yank, delete, change, etc.) on remote words.
+Everything snipe does can be summaried into two actions: skulking and sniping.
+Skulking is two-character f/F/t/T, essentially. Sniping pertains to performing
+actions (yank, delete, change, etc.) on remote words, away from the cursor.
 
 **Sniping** (which hasn't been implemented yet) is like vim-seek's
 [remote and presential leaps](https://github.com/goldfeld/vim-seek#leaping-motions).
@@ -44,6 +44,8 @@ If you prefer vim-sneak and its rest-of-buffer-scoped search:
     ;; Note: highlighting hasn't been implemented yet.
     (setq evil-snipe-enable-highlight t)
     (setq evil-snipe-enable-incremental-highlight t)
+
+### Inconsistencies with vim-sneak/vim-seek
 
 #### vim-sneak's vertical scoping
 
