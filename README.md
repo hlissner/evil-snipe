@@ -8,28 +8,23 @@ Snipe is an attempt to bring a marriage of
 [vim-sneak](https://github.com/justinmk/vim-sneak) and
 [vim-seek](https://github.com/goldfeld/vim-seek) to evil-mode.
 
-Specifically, it brings two functions to evil: skulking and sniping. Skulking
-pertains to finding and jumping to two-character matches. Sniping pertains to
-performing actions (yank, delete, change, etc.) on remote words, far from the
-cursor.
+Everythign it can do can be summaried into two actions: skulking and sniping.
+Skulking pertains to finding and jumping to two-character matches. Sniping
+pertains to performing actions (yank, delete, change, etc.) on remote words.
 
-**Skulking** is synonymous with f/F and t/T. By default (like vim-seek and f/F/t/T),
-it only search for matches on the same line relative to (point). If you
-prefer buffer-wide search, see `evil-snipe-bounds`.
-
-**Sniping**, however, is like vim-seek's
+**Sniping** (which hasn't been implemented yet) is like vim-seek's
 [remote and presential leaps](https://github.com/goldfeld/vim-seek#leaping-motions).
-For instance, you can delete a nearby word that contains "ev" with `direv`.
-That's d for delete, `ir` for inner-remote and `ev` for 'word that contains
-`ev`.
-
-<!-- You can turn either off by setting either `evil-snipe-enable-skulking` and -->
-<!-- `evil-snipe-enable-sniping` to nil. -->
+For instance, you can delete a nearby inner word that contains "ev" with
+`direv`. That's d for delete, `ir` for inner-remote and `ev` for 'word that
+contains `ev`'.
 
 ## Installation
 
+Download evil-snipe.el, place it on your loadpath and insert this into your
+emacs configuration:
+
 ```elisp
-   (add-to-list 'load-path "/directory/containing/evil-snipe")
+   (add-to-list 'load-path "/directory/containing/evil-snipe/")
    (require 'evil-snipe)
    (global-evil-snipe-mode)
 
@@ -39,49 +34,47 @@ That's d for delete, `ir` for inner-remote and `ev` for 'word that contains
 
 ## Configuration
 
-### vim-seek
+Skulking is synonymous with f/F and t/T. By default its scope is limited to
+the current line (relative to your cursor), and no further. This is consistent
+with vim-seek.
 
-If you preferred vim-seek, or would simply like a line-bound search, the default
-settings should suite you. For posterity, this is how you configure evil-snipe
-to act like vim-seek:
+If you prefer vim-sneak and its rest-of-buffer-scoped search:
 
-    (setq evil-snipe-bounds 'line)
-    (setq evil-snipe-live-search nil)
-    (setq evil-snipe-search-incremental-highlight nil)
-
-
-### vim-sneak
-
-    (setq evil-snipe-bounds 'visible)  ;; or use 'buffer
+    (setq evil-snipe-scope 'visible)  ;; or 'buffer
     ;; Note: highlighting hasn't been implemented yet.
-    (setq evil-snipe-search-highlight t)
-    (setq evil-snipe-search-incremental-highlight t)
+    (setq evil-snipe-enable-highlight t)
+    (setq evil-snipe-enable-incremental-highlight t)
 
-#### Vertical Scoping
+#### vim-sneak's vertical scoping
 
-If you're interested in vim-sneak's vertical scoping, I'm not sure if I will try
-to implement it. However, I *will* implement horizontal scoping. Meaning the
-count will determine the horizontal extent to search. e.g. `5sev` will search
-the next 5 lines for ev.
+~I'm not sure if I will try to implement vertical scoping~ I will try to
+implement vertical scoping, but horizontal scoping is first on the roadmap. This
+means, when enabled, the count will determine the horizontal extent to search.
+e.g. `5sev` will search the next 5 lines for ev.
+
+Thsi will be controlled with the variable `evil-snipe-count-scope`.
 
 By default, count is interpreted as is standard in vim: as a repeat count.
 
 #### Original s/S bindings (substitute)
 
-Snipe hijacks the s/S bindings in normal/visual mode (e.g. `s{char]{char}}`. If
-you don't like this, see `evil-snipe-auto-disable-substitute`.
+Snipe hijacks the s/S bindings in normal/visual mode (e.g. `s{char]{char}}`,
+which belong to 'evil-substitute'. If you miss it, `s` can be accomplished with
+`cl` and `S` with `cc`. If that isn't enough, see
+`evil-snipe-auto-disable-substitute`.
 
 ## Features
 
 * **Skulking**
   * Press sab to move the cursor immediately to the next instance of
     the text `ab`.
-  * Press dzab to delete up to just before ab (inclusive, by default. Exclusive
-    motion is bound to x/X instead of z/Z)
+  * Press `S` to search backwards.
+  * Evil-snipe is always literal! `s\*` will jump to a literal \*
+  * Use `z` to use snipe in operator mode. For instance, `dzab` will delete up
+    to just before ab (inclusive, by default. Exclusive motion is bound to x/X
+    instead of z/Z).
   * Press `ctrl-o` or \`\` to go back to the starting point.
   * [PLANNED] Press `s<Enter>` at any time to repeat the last snipe.
-  * Press `S` to search backwards.
-  * evil-snipe is always literal! `s\*` will jump to a literal \*
   * [PLANNED] If `evil-snipe-search-highlight` is non-nil, matches are
     highlighted.
   * [PLANNED] If `evil-snipe-search-live-highlight` is non-nil, matches for your
@@ -104,23 +97,17 @@ you don't like this, see `evil-snipe-auto-disable-substitute`.
     * If it's `'search`, then use n and N.
     * If nil, do not pass go. Do not collect $200.
 
-### Inconsistencies with vim-seek/sneak
-
-* Vertically scoped searches (e.g. 5sxy) are not implemented. Instead,
-  the number is treated as a count as per normal vim conventions. E.g.
-  5sxy will jump to the 5th match of "xy". Unless `evil-snipe-bounds' is
-  set to 'count, in which case it's horizontally scoped, not vertically.
-
 ### Compatibility with other evil plugins
 
 * [evil-space](https://github.com/linktohack/evil-space) needs more investigating.
 * [evil-surround](https://github.com/timcharper/evil-surround)'s s/S mappings
-  override snipe in visual mode. Up to you how you want to deal with that.
+  override snipe in visual mode. It **does not** affect evil-surround's `s`
+  operator though. Snipe uses `z` instead. Perhaps we can use that in visual
+  mode as well.
 
 ## TODO
 
 * `s<enter>` repeat support
-* Evil-snipe-enable-* options to disable skulking or sniping
 * Highlighting, either ala isearch or ace-jump
 * *Incremental* highlighting for first character too
   (`evil-snipe-search-incremental-highlight`)
@@ -128,6 +115,8 @@ you don't like this, see `evil-snipe-auto-disable-substitute`.
 * Other kinds of repeat support (`evil-snipe-repeat`)
   * `'next` for s/S (like vim-sneak)
   * `'search'` for n/N (like evil-search)
+* Horizontal scoping
+* Vertical scoping
 
 ## Credits
 

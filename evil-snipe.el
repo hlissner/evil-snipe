@@ -22,7 +22,7 @@
 ;;
 ;; Skulking is synonymous with f/F and t/T. By default (like vim-seek and f/F/t/T),
 ;; it only search for matches on the same line relative to (point). If you prefer
-;; buffer-wide search, see evil-snipe-bounds.
+;; buffer-wide search, see evil-snipe-scope.
 ;;
 ;; Sniping, however, is like vim-seek's remote and presential leaps. For instance,
 ;; you can delete a nearby word that contains "ev" with direv. That's d for delete,
@@ -47,7 +47,7 @@
   "(NOT IMPLEMENTED YET) If non-nil, matches of the first key you enter will be
 highlighted. Otherwise, only highlight after you've typed both characters.")
 
-(defvar evil-snipe-bounds 'line
+(defvar evil-snipe-scope 'line
   "Dictates the scope of searches, which can be one of:
 
     'line    ;; search only on the line (this is vim-seek behavior)
@@ -80,23 +80,23 @@ highlighted. Otherwise, only highlight after you've typed both characters.")
                   (charstr (string first second))
 
                   ;; Beginning of bounds
-                  (bob (cond ((eq evil-snipe-bounds 'line)
+                  (bob (cond ((eq evil-snipe-scope 'line)
                               (line-beginning-position))
-                             ((eq evil-snipe-bounds 'visible)
+                             ((eq evil-snipe-scope 'visible)
                               (window-start))
-                             ((eq evil-snipe-bounds 'buffer)
+                             ((eq evil-snipe-scope 'buffer)
                               (point-min))
-                             ((eq evil-snipe-bounds 'count)
+                             ((eq evil-snipe-scope 'count)
                               (error "Not implemented yet"))))
 
                   ;; End of bounds
-                  (eob (cond ((eq evil-snipe-bounds 'line)
+                  (eob (cond ((eq evil-snipe-scope 'line)
                               (line-end-position))
-                             ((eq evil-snipe-bounds 'visible)
+                             ((eq evil-snipe-scope 'visible)
                               (window-end))
-                             ((eq evil-snipe-bounds 'buffer)
+                             ((eq evil-snipe-scope 'buffer)
                               (point-max))
-                             ((eq evil-snipe-bounds 'count)
+                             ((eq evil-snipe-scope 'count)
                               (error "Not implemeneted yet"))))
 
                   ;; For highlight bounds
@@ -158,14 +158,6 @@ highlighted. Otherwise, only highlight after you've typed both characters.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;###autoload
-(defun evil-snipe-surround-compatibility ()
-  "Map evil-snipe bindings over s and S, overriding evil-surround. I recommend
-you add alternate keymaps for surround elsewhere."
-  (evil-define-key 'visual evil-snipe-mode-map "s" 'evil-snipe-f)
-  (evil-define-key 'visual evil-snipe-mode-map "S" 'evil-snipe-F))
-
-;;;###autoload
 ;; TODO Is this necessary?
 ;; (defun evil-snipe-space-compatibility ()
 ;;   "Allow evil-space to 'index' the the motion keybindings for evil-snipe."
@@ -232,6 +224,13 @@ you add alternate keymaps for surround elsewhere."
 (defun turn-off-evil-snipe-mode ()
   "Disable evil-snipe-mode in the current buffer."
   (evil-snipe-mode -1))
+
+;;;###autoload
+(defun evil-snipe-override-surround ()
+  "Map evil-snipe bindings over s and S, overriding evil-surround. I recommend
+you add alternate keymaps for surround elsewhere."
+  (evil-define-key 'visual evil-snipe-mode-map "z" 'evil-snipe-f)
+  (evil-define-key 'visual evil-snipe-mode-map "Z" 'evil-snipe-F))
 
 ;;;###autoload
 (define-globalized-minor-mode global-evil-snipe-mode
