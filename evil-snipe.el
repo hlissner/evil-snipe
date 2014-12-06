@@ -41,11 +41,13 @@
   "(NOT IMPLEMENTED YET)")
 
 (defvar evil-snipe-search-highlight nil
-  "(NOT IMPLEMENTED YET)")
+  "If non-nil, all matches will be highlighted after the initial jump.
+  Highlights will disappear as soon as you do anything afterwards, like move the
+  cursor.")
 
 (defvar evil-snipe-search-incremental-highlight nil
-  "(NOT IMPLEMENTED YET) If non-nil, matches of the first key you enter will be
-highlighted. Otherwise, only highlight after you've typed both characters.")
+  "If non-nil, each additional keypress will incrementally search and highlight
+matches. Otherwise, only highlight after you've finished skulking.")
 
 (defvar evil-snipe-scope 'line
   "Dictates the scope of searches, which can be one of:
