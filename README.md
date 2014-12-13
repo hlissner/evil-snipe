@@ -5,7 +5,7 @@
 
 Snipe is a marriage of [vim-sneak](https://github.com/justinmk/vim-sneak) and
 [vim-seek](https://github.com/goldfeld/vim-seek), but for
-[evil-mode](https://gitorious.org/evil/pages/Home).
+[evil-mode](https://gitorious.org/evil/pages/Home) on Emacs.
 
 Put simply, evil-snipe is f/F/t/T on steroids. It can be configured to accept N
 characters, but by default will accept 2; `shi` will jump to the next occurrence
@@ -17,9 +17,9 @@ Download evil-snipe.el, place it on your loadpath and insert this into your
 emacs configuration:
 
 ```elisp
-   (add-to-list 'load-path "/directory/containing/evil-snipe/")
-   (require 'evil-snipe)
-   (global-evil-snipe-mode)
+(add-to-list 'load-path "/directory/containing/evil-snipe/")
+(require 'evil-snipe)
+(global-evil-snipe-mode)
 ```
 
 ## Configuration
@@ -32,26 +32,42 @@ approach, do:
 (setq evil-snipe-scope 'visible)  ;; or 'buffer, 'whole-visible or 'whole-buffer
 ```
 
-If you *don't* want highlighting (or incremental highlighting) -- without which
-it becomes more vim-seek-like:
+If you *don't* want incremental or highlighting at all (without which it becomes
+more vim-seek-like):
 
 ```elisp
 (setq evil-snipe-enable-highlight nil)
 (setq evil-snipe-enable-incremental-highlight nil)
 ```
 
-#### vim-sneak vertical scoping
+To get sniping in visual mode:
 
-**vim-sneak's vertical scoping is not yet implemented**, but will allow you to
-specify the column bounds of a search. e.g. `5shi` will jump to the next
-occurance of 'hi' that is within 5 columns of the cursor on any following line.
+```elisp
+(define-key evil-visual-state-map "z" 'evil-snipe-f)
+(define-key evil-visual-state-map "Z" 'evil-snipe-F)
+```
 
-#### Overriding substitute
-
-Snipe hijacks the s/S bindings in normal mode (e.g. `s{char]{char}}`, which
-belong to 'evil-substitute'. If you miss it, `s` can be accomplished with `cl`
-and `S` with `cc`. If that isn't enough, see
+**Note:** snipe hijacks the s/S bindings in normal mode (e.g. `s{char]{char}}`,
+which belong to 'evil-substitute'. If you miss it, `s` can be accomplished with
+`cl` and `S` with `cc`. If that isn't enough, see
 `evil-snipe-auto-disable-substitute`.
+
+For more information, look up any of the following functions:
+
+```elisp
+'evil-snipe-f
+'evil-snipe-F
+'evil-snipe-t
+'evil-snipe-T
+```
+
+### Compatibility
+
+* [evil-surround](https://github.com/timcharper/evil-surround)'s s/S mappings
+  override snipe in visual mode. It **does not** affect evil-surround's `s`
+  operator though. Snipe uses `z/Z/x/X` instead. Perhaps we can use that in visual
+  mode as well.
+* [evil-space](https://github.com/linktohack/evil-space) needs more investigating.
 
 ## Features
 
@@ -84,6 +100,8 @@ and `S` with `cc`. If that isn't enough, see
 
   * `;` and `,` repeat support
   * `n` and `N` repeat support
+  * Vertical-scoping: `5shi` will jump to the next occurance of 'hi' that is
+    within 5 columns of the cursor on any following line.
   * Use `r` as an operator or text-object to target remove objects.
   * As an operator, it defaults to word mode. So `drwo` will delete the
     next word containg `wo`.
@@ -93,20 +111,6 @@ and `S` with `cc`. If that isn't enough, see
   * Use `R` for reverse remote snipes.
   * Use `p` for the same functionality as `r` except that it stays at the
     destination.
-
-### Compatibility with other evil plugins
-
-* [evil-surround](https://github.com/timcharper/evil-surround)'s s/S mappings
-  override snipe in visual mode. It **does not** affect evil-surround's `s`
-  operator though. Snipe uses `z/Z/x/X` instead. Perhaps we can use that in visual
-  mode as well.
-* [evil-space](https://github.com/linktohack/evil-space) needs more investigating.
-
-## TODO
-
-* `;` and `,` repeating
-* `n` and `N` repeating
-* Vertical scoping
 
 ## Credits
 
