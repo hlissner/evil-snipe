@@ -52,6 +52,7 @@ matches. Otherwise, only highlight after you've finished skulking.")
     'buffer  ;; search rest of the buffer (vim-sneak behavior)
     'visible ;; search rest of visible buffer. Is more performant than 'buffer, but
              ;; will not highlight past the visible buffer
+    'whole-line     ;; same as 'line, but highlight matches on either side of cursor
     'whole-buffer   ;; same as 'buffer, but highlight *all* matches in buffer
     'whole-visible  ;; same as 'visible, but highlight *all* visible matches in buffer")
 
@@ -131,6 +132,8 @@ matches. Otherwise, only highlight after you've finished skulking.")
        (if forward-p
            `(,point+1 . ,(point-max))
          `(,(point-min) . ,(point))))
+      ('whole-line
+       `(,(line-beginning-position) . ,(line-end-position)))
       ('whole-visible
        `(,(window-start) . ,(window-end)))
       ('whole-buffer
