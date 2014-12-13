@@ -121,7 +121,7 @@ matches. Otherwise, only highlight after you've finished skulking.")
                      (evil-snipe--highlight-rest keystr forward-p)
                      (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))
                    (setq i (1- i))))))
-      (s-split "" keystr t))))
+      (split-string keystr nil t))))
 
 (defun evil-snipe--bounds (&optional forward-p)
   (let ((point+1 (1+ (point))))
