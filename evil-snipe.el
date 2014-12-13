@@ -56,7 +56,7 @@ matches. Otherwise, only highlight after you've finished skulking.")
     'whole-visible  ;; same as 'visible, but highlight *all* visible matches in buffer")
 
 (defvar evil-snipe-count-scope nil
-  "(NOT IMPLEMENTED YET) Dictates the scope of searches, which can be one of:
+  "Dictates the scope of searches, which can be one of:
 
     nil          ;; default; treat count as repeat count
     'letters     ;; count = how many characters to expect and search for
@@ -66,13 +66,6 @@ matches. Otherwise, only highlight after you've finished skulking.")
   "Disables evil's native s/S functionality (substitute) if non-nil. By default
   this is t, since they are mostly redundant with other motions. s can be done
   via cl and S with cc.")
-
-(defvar evil-snipe-repeat t
-  "(NOT IMPLEMENTED YET) Which type of repeat to use, can be any of:
-
-    non-nil  ;; repeat with ; and ,
-    'next    ;; repeat with s and S
-    'search  ;; repeat with n and N")
 
 ;; State vars ;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar evil-snipe--last nil
