@@ -34,18 +34,14 @@
 
 (require 'evil)
 
-(defvar evil-snipe-enable-skulking t
-  "(NOT IMPLEMENTED YET)")
+(defvar evil-snipe--debug-mode t)
 
-(defvar evil-snipe-enable-sniping t
-  "(NOT IMPLEMENTED YET)")
-
-(defvar evil-snipe-search-highlight nil
+(defvar evil-snipe-search-highlight t
   "If non-nil, all matches will be highlighted after the initial jump.
   Highlights will disappear as soon as you do anything afterwards, like move the
   cursor.")
 
-(defvar evil-snipe-search-incremental-highlight nil
+(defvar evil-snipe-search-incremental-highlight t
   "If non-nil, each additional keypress will incrementally search and highlight
 matches. Otherwise, only highlight after you've finished skulking.")
 
@@ -55,13 +51,15 @@ matches. Otherwise, only highlight after you've finished skulking.")
     'line    ;; search only on the line (this is vim-seek behavior) (default)
     'buffer  ;; search rest of the buffer (vim-sneak behavior)
     'visible ;; search rest of visible buffer. Is more performant than 'buffer, but
-             ;; will not highlight past the visible buffer")
+             ;; will not highlight past the visible buffer
+    'whole-buffer   ;; same as 'buffer, but highlight *all* matches in buffer
+    'whole-visible  ;; same as 'visible, but highlight *all* visible matches in buffer")
 
-(defvar evil-snipe-count-scope 'horizontal
+(defvar evil-snipe-count-scope nil
   "(NOT IMPLEMENTED YET) Dictates the scope of searches, which can be one of:
 
-    'horizontal  ;; find first match within N lines (default)
-    'repeat      ;; jump to Nth match from point
+    nil          ;; default; treat count as repeat count
+    'letters     ;; count = how many characters to expect and search for
     'vertical    ;; find first match within N (visible) columns")
 
 (defvar evil-snipe-auto-disable-substitute t
@@ -76,13 +74,14 @@ matches. Otherwise, only highlight after you've finished skulking.")
     'next    ;; repeat with s and S
     'search  ;; repeat with n and N")
 
+;; State vars ;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar evil-snipe--last nil
   "The last search performed.")
 
 (defvar evil-snipe--was-repeat nil
   "The last search performed.")
 
-(defvar evil-snipe--consume-match-p nil
+(defvar evil-snipe--consume-match t
   "The last search performed.")
 
 (defvar evil-snipe--match-count 2
@@ -90,72 +89,75 @@ matches. Otherwise, only highlight after you've finished skulking.")
   for N characters. Do not set directly, unless you want to change the default
   number of characters to search.")
 
+(defvar evil-snipe--this-func nil)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; TODO Make helper to collect variable keys
-;; (defun evil-snipe-collect-keys ()
-;;   (interactive)
-;;   (evil-half-cursor)
-;;   (let* ((i (1- evil-snipe--match-count))
-;;          (first (evil-read-key ">"))
-;;          (keys (list first))
-;;          (keystr (string first)))
-;;     (cond ((or (char-equal first ?\n)
-;;                (eq first 13))
-;;            (list first))
-;;           (t (while (> i 0)
-;;                (setq keystr (concat keystr (string (evil-read-key (concat ">" keystr)))))
-;;                (setq i (1- i))
-;;                keys)
-;;              )
-;;           )
-;;     )
-;;   )
+(defun evil-snipe--collect-keys (&optional count forward-p)
+  (evil-half-cursor)
+  (let* ((count (or (if (and count (> count 1)) (abs count)) evil-snipe--match-count))
+         (keystr "")
+         (how-many (or count evil-snipe--match-count))
+         (i how-many))
+    (catch 'abort
+      (while (> i 0)
+        (let* ((prompt (concat (number-to-string i) ">" keystr))
+               (key (evil-read-key prompt)))
+          (cond ((char-equal key ?\t)     ; Tab = adds more characters to search
+                 (setq i (1+ i)))
+                ((and (= i how-many)
+                      (or (char-equal key ?\n)
+                          (char-equal key 13)))
+                 (throw 'abort '(?\n)))
+                ((char-equal key ?\C-\[)  ; Escape = abort
+                 (throw 'abort '(abort)))
+                ((char-equal key ?\^?)    ; Backspace = delete character
+                 (when (= i how-many) (throw 'abort '(abort)))
+                 (setq i (1+ i))
+                 (when (= i how-many) (setq keystr (substring keystr 0 -1))))
+                (t (setq keystr (concat keystr (char-to-string key)))
+                   (when evil-snipe-search-incremental-highlight
+                     (evil-snipe--highlight-clear)
+                     (evil-snipe--highlight-rest keystr forward-p)
+                     (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))
+                   (setq i (1- i))))))
+      (s-split "" keystr t))))
 
-(defun evil-snipe--collect-keys ())
-
-(defun evil-snipe--repeat (&optional count)
-  (if (not evil-snipe--last)
-      (site-error "No previous search to repeat")
-    (let ((evil-snipe--was-repeat t)
-          (-count (nth 1 evil-snipe--last)))
-      (funcall (first evil-snipe--last)
-               (if (> -count 0)
-                   count
-                 (* count -1))
-               (nth 2 evil-snipe--last)
-               (nth 3 evil-snipe--last)))))
-
-(defun evil-snipe--scope-beg ()
-  (cond ((eq evil-snipe-scope 'line)
-         (line-beginning-position))
-        ((eq evil-snipe-scope 'visible)
-         (window-start))
-        ((eq evil-snipe-scope 'buffer)
-         (point-min)))
-  )
-
-(defun evil-snipe--scope-end ()
-  (cond ((eq evil-snipe-scope 'line)
-         (line-end-position))
-        ((eq evil-snipe-scope 'visible)
-         (window-end))
-        ((eq evil-snipe-scope 'buffer)
-         (point-max))))
-
-(defun evil-snipe--search (count))
+(defun evil-snipe--bounds (&optional forward-p)
+  (let ((point+1 (1+ (point))))
+    (case evil-snipe-scope
+      ('line
+       (if forward-p
+           `(,point+1 . ,(line-end-position))
+         `(,(line-beginning-position) . ,(point))))
+      ('visible
+       (if forward-p
+           `(,point+1 . ,(window-end))
+         `(,(window-start) . ,(point))))
+      ('buffer
+       (if forward-p
+           `(,point+1 . ,(point-max))
+         `(,(point-min) . ,(point))))
+      ('whole-visible
+       `(,(window-start) . ,(window-end)))
+      ('whole-buffer
+       `(,(point-min) . ,(point-max))))))
 
 (defun evil-snipe--highlight (beg end &optional first)
   (let ((x (make-overlay beg end)))
     (overlay-put x 'face (if first 'isearch 'region))
     (overlay-put x 'category 'evil-snipe)))
 
-(defun evil-snipe--highlight-rest (matches beg end)
-  (let ((string (buffer-substring-no-properties beg end))
-        (beg-offset (+ (point-min) beg -1))
-        (i 0))
+(defun evil-snipe--highlight-rest (match forward-p)
+  (let* ((bounds (evil-snipe--bounds forward-p))
+         (beg (car bounds))
+         (end (cdr bounds))
+         (string (buffer-substring-no-properties beg end))
+         (beg-offset (+ (point-min) beg -1))
+         (i 0))
     (while (and (< i (length string))
-                (string-match (regexp-quote matches) string i))
+                (string-match (regexp-quote match) string i))
+      ;; TODO Apply column-bound highlighting
       (setq i (1+ (match-beginning 0)))
       (evil-snipe--highlight (+ beg-offset (match-beginning 0))
                              (+ beg-offset (match-end 0))))))
@@ -164,107 +166,130 @@ matches. Otherwise, only highlight after you've finished skulking.")
   (remove-overlays nil nil 'category 'evil-snipe)
   (remove-hook 'pre-command-hook 'evil-snipe--highlight-clear))
 
-;; TODO Refactor pls!
-(evil-define-motion evil-snipe-f (count &optional first second)
-  "Jump to the position of a two-character string."
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun evil-snipe--seek (count string scope-beg scope-end)
+  (when (> (length string) 0)
+    (let ((fwdp (> count 0))
+          (orig-point (point))
+          (type (evil-visual-type))
+          (skip-pad (length string))
+          (evil-op-vs-state-p (or (evil-operator-state-p) (evil-visual-state-p))))
+      (when fwdp (forward-char 1))
+      (if (search-forward string (if fwdp scope-end scope-beg) t count)
+          (progn
+            (case evil-snipe--this-func
+              ('evil-snipe-f
+               (setq skip-pad (if fwdp (if evil-op-vs-state-p 1 skip-pad) 0)))
+              ('evil-snipe-t
+               (setq skip-pad (if fwdp (+ skip-pad 1) (- skip-pad)))))
+
+            (unless evil-op-vs-state-p
+              (when (or evil-snipe-search-highlight evil-snipe-search-incremental-highlight)
+                (evil-snipe--highlight-clear))
+              (when evil-snipe-search-highlight
+                (evil-snipe--highlight-rest string fwdp)
+                (evil-snipe--highlight (point) (- (point) skip-pad) t)
+                (add-hook 'pre-command-hook 'evil-snipe--highlight-clear)))
+            (backward-char skip-pad))
+        (goto-char orig-point)
+        (user-error "Can't find %s" string)))))
+
+;; TODO Implement evil-snipe--seek-vertical
+(defun evil-snipe--seek-vertical (count string scope-beg scope-end)
+  (error "Not implemented"))
+
+;; TODO Update for evil-snipe new defun signatures
+(defun evil-snipe--repeat (count)
+  (if evil-snipe--last
+      (let ((evil-snipe--was-repeat t)
+            (-count (nth 1 evil-snipe--last)))
+        (funcall (first evil-snipe--last) ;;func name
+                 (if (> -count 0) count (* count -1)) ;;count
+                 (nth 2 evil-snipe--last) ;;keys
+                 ))
+    (user-error "No search to repeat")))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(evil-define-interactive-code "<+c>"
+  "Regular count"
+  (let ((count (when current-prefix-arg
+                 (prefix-numeric-value current-prefix-arg))))
+    (list (or count 1))))
+
+(evil-define-interactive-code "<-c>"
+  "Inverted count"
+  (let ((count (when current-prefix-arg
+                 (prefix-numeric-value current-prefix-arg))))
+    (list (if count (* count -1) -1))))
+
+(evil-define-motion evil-snipe-f (count &optional keys)
   :jump t
   :type inclusive
-  (interactive "<c>")
-  (unless evil-snipe--was-repeat
-    (evil-half-cursor))
-  (setq count (or count 1))
-  (let* ((first (or first (evil-read-key ">")))
-         (fwdp (> count 0))
-         ;; Beginning of bounds
-         (bob (evil-snipe--scope-beg))
-         ;; End of bounds
-         (eob (evil-snipe--scope-end))
+  (interactive "<+c>")
+  (unless keys
+    (setq keys (evil-snipe--collect-keys count (> count 0)))
+    (message ""))
+  (case (first keys)
+    ('abort)
+    ;; if <enter>, repeat last search
+    (?\n (evil-snipe--repeat count))
+    ;; Otherwise, perform the search
+    (t (let* ((--was-repeat-p evil-snipe--was-repeat)
 
-         ;; For highlight bounds
-         (beg (if fwdp (1+ (point)) bob))
-         (end (if fwdp eob (point))))
-    (cond ((or (char-equal first ?\n)
-               (eq first 13))
-           (evil-snipe--repeat count))
-          (t
-           (unless (or (evil-operator-state-p) (not evil-snipe-search-incremental-highlight))
-             (evil-snipe--highlight-rest (string first) beg end))
-           (setq second (or second (evil-read-key (concat ">" (char-to-string first)))))
-           (let ((charstr (string first second))
-                 (old-pos (point))
-                 new-pos new-pos-p)
+              (count (or count 1))
+              (forward-p (> count 0))
+              (scope (evil-snipe--bounds forward-p))
+              (scope-beg (car scope))
+              (scope-end (cdr scope))
+              (evil-snipe--this-func (or evil-snipe--this-func 'evil-snipe-f))
 
-             (save-excursion
-               (unless (eq old-pos
-                           (progn
-                             (when fwdp (forward-char 1))
-                             (if (search-forward charstr
-                                                 (if fwdp (if (< eob 0) 0 eob) bob)
-                                                 t count)
+              (charstr (mapconcat 'identity keys "")))
+         (unless --was-repeat-p
+           (setq evil-snipe--last (list evil-snipe--this-func count keys)))
 
-                                 (let ((offset (if evil-snipe--consume-match-p 2 1)))
-                                   (when fwdp
-                                     (backward-char offset))
-                                   (setq new-pos (point)))
+         (case evil-snipe-count-scope
+           ('vertical
+            (evil-snipe--seek-vertical count charstr scope-beg scope-end))
+           ('letters
+            (evil-snipe--seek (if forward-p 1 -1) charstr scope-beg scope-end))
+           (t
+            (evil-snipe--seek count charstr scope-beg scope-end)))))))
 
-                               (when fwdp (backward-char 1)))
-                             new-pos))
-                 (setq new-pos (point))
-                 (unless evil-snipe--was-repeat
-                   (setq evil-snipe--last (list 'evil-snipe-f count first second evil-snipe--consume-match-p)))
-                 ))
-
-             (if new-pos
-                 (progn
-                   (goto-char new-pos)
-                   (when evil-snipe-search-highlight
-                     (unless evil-snipe--was-repeat
-                       (evil-snipe--highlight-clear))
-                     (unless (evil-operator-state-p)
-                       (evil-snipe--highlight new-pos (+ new-pos (length charstr)) t)
-                       (evil-snipe--highlight-rest charstr beg end)
-                       (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))))
-               (when evil-snipe-search-highlight
-                 (evil-snipe--highlight-clear))
-               (user-error "Can't find %s" charstr))
-             )
-           )
-          )
-    )
-  )
-
-(evil-define-motion evil-snipe-F (count &optional first second)
+(evil-define-motion evil-snipe-F (count &optional keys)
   "Jump backwards to the position of a two-character string."
   :jump t
   :type inclusive
-  (interactive "<c>")
-  (evil-snipe-f (- (or count 1)) first second))
+  (interactive "<-c>")
+  (evil-snipe-f count keys))
 
-(evil-define-motion evil-snipe-t (count &optional first second)
+(evil-define-motion evil-snipe-t (count &optional keys)
   :jump t
-  :type exclusive
-  (interactive "<c>")
-  (let ((evil-snipe--consume-match-p t))
-    (evil-snipe-f (or count 1) first second)))
+  :type inclusive
+  (interactive "<+c>")
+  (let ((evil-snipe--consume-match nil)
+        (evil-snipe--this-func 'evil-snipe-t))
+    (evil-snipe-f count keys)))
 
-(evil-define-motion evil-snipe-T (count &optional first second)
+(evil-define-motion evil-snipe-T (count &optional keys)
   :jump t
-  :type exclusive
-  (interactive "<c>")
-  (let ((evil-snipe--consume-match-p t))
-    (evil-snipe-F (or count 1) first second)))
+  :type inclusive
+  (interactive "<-c>")
+  (evil-snipe-t count keys))
 
 ;; TODO Write evil-snipe-p
-;; (evil-define-motion evil-snipe-p (count &optional first second))
+;; (evil-define-operator evil-snipe-p (count &optional first second))
 
 ;; TODO Write evil-snipe-P
-;; (evil-define-motion evil-snipe-P (count &optional first second))
+;; (evil-define-operator evil-snipe-P (count &optional first second))
 
 ;; TODO Write evil-snipe-r
-;; (evil-define-motion evil-snipe-r (count &optional first second))
+;; (evil-define-operator evil-snipe-r (count &optional first second))
 
 ;; TODO Write evil-snipe-R
-;; (evil-define-motion evil-snipe-R (count &optional first second))
+;; (evil-define-operator evil-snipe-R (count &optional first second))
 
 ;; TODO Write evil-snipe-p-inner
 ;; (evil-define-text-object evil-snipe-p-inner (count &optional first second))
@@ -307,8 +332,8 @@ matches. Otherwise, only highlight after you've finished skulking.")
 
 (defvar evil-snipe-mode-map
   (let ((map (make-sparse-keymap)))
-    (evil-define-key 'motion   map "s" 'evil-snipe-t)
-    (evil-define-key 'motion   map "S" 'evil-snipe-T)
+    (evil-define-key 'motion   map "s" 'evil-snipe-f)
+    (evil-define-key 'motion   map "S" 'evil-snipe-F)
     (evil-define-key 'operator map "z" 'evil-snipe-f)
     (evil-define-key 'operator map "Z" 'evil-snipe-F)
     (evil-define-key 'operator map "x" 'evil-snipe-t)
@@ -340,24 +365,20 @@ matches. Otherwise, only highlight after you've finished skulking.")
 ;;;###autoload
 (defun turn-on-evil-snipe-mode ()
   "Enable evil-snipe-mode in the current buffer."
+  (advice-add 'evil-force-normal-state :before #'evil-snipe--highlight-clear)
   (evil-snipe-mode 1))
 
 ;;;###autoload
 (defun turn-off-evil-snipe-mode ()
   "Disable evil-snipe-mode in the current buffer."
+  (advice-remove 'evil-force-normal-state :before #'evil-snipe--highlight-clear)
   (evil-snipe-mode -1))
-
-;;;###autoload
-(defun evil-snipe-override-surround ()
-  "Map evil-snipe bindings over s and S, overriding evil-surround. I recommend
-you add alternate keymaps for surround elsewhere."
-  (evil-define-key 'visual evil-snipe-mode-map "z" 'evil-snipe-f)
-  (evil-define-key 'visual evil-snipe-mode-map "Z" 'evil-snipe-F))
 
 ;;;###autoload
 (define-globalized-minor-mode global-evil-snipe-mode
   evil-snipe-mode turn-on-evil-snipe-mode
   "Global minor mode to emulate surround.vim.")
+
 
 (provide 'evil-snipe)
 ;;; evil-snipe.el ends here
