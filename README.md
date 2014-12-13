@@ -1,22 +1,15 @@
 # evil-snipe
 
-> This is a new (and potentially buggy) plugin, much functionaly hasn't be
-> implemented. I'm also an elisp newbie, so any help or contributions would be
-> appreciated!
+> This is a new (and potentially buggy) plugin, much functionality has yet to be
+> implemented. I'm also an elisp noob, so help or contributions are appreciated!
 
-Snipe is an attempt to bring a marriage of
-[vim-sneak](https://github.com/justinmk/vim-sneak) and
-[vim-seek](https://github.com/goldfeld/vim-seek) to evil-mode.
+Snipe is a marriage of [vim-sneak](https://github.com/justinmk/vim-sneak) and
+[vim-seek](https://github.com/goldfeld/vim-seek), but for
+[evil-mode](https://gitorious.org/evil/pages/Home) on Emacs.
 
-Everything snipe does can be summaried into two actions: skulking and sniping.
-Skulking is two-character f/F/t/T, essentially. Sniping pertains to performing
-actions (yank, delete, change, etc.) on remote words, away from the cursor.
-
-**Sniping** (which hasn't been implemented yet) is like vim-seek's
-[remote and presential leaps](https://github.com/goldfeld/vim-seek#leaping-motions).
-For instance, you can delete a nearby inner word that contains "ev" with
-`direv`. That's d for delete, `ir` for inner-remote and `ev` for 'word that
-contains `ev`'.
+Put simply, evil-snipe is f/F/t/T on steroids. It can be configured to accept N
+characters, but by default will accept 2; `shi` will jump to the next occurrence
+of 'hi'.
 
 ## Installation
 
@@ -24,100 +17,100 @@ Download evil-snipe.el, place it on your loadpath and insert this into your
 emacs configuration:
 
 ```elisp
-   (add-to-list 'load-path "/directory/containing/evil-snipe/")
-   (require 'evil-snipe)
-   (global-evil-snipe-mode)
-
-   ;; for compatibility with evil-surround and evil-space
-   (evil-snipe-surround-compatibility)
+(add-to-list 'load-path "/directory/containing/evil-snipe/")
+(require 'evil-snipe)
+(global-evil-snipe-mode)
 ```
 
 ## Configuration
 
-Skulking is synonymous with f/F and t/T. By default its scope is limited to
-the current line (relative to your cursor), and no further. This is consistent
-with vim-seek.
+By default sniping is scoped to the current line (relative to your cursor). This
+is consistent with vim-seek. If you prefer vim-sneak's rest-of-buffer-scoped
+approach, do:
 
-If you prefer vim-sneak and its rest-of-buffer-scoped search:
+```elisp
+(setq evil-snipe-scope 'visible)  ;; or 'buffer, 'whole-visible or 'whole-buffer
+```
 
-    (setq evil-snipe-scope 'visible)  ;; or 'buffer
-    ;; Note: highlighting hasn't been implemented yet.
-    (setq evil-snipe-enable-highlight t)
-    (setq evil-snipe-enable-incremental-highlight t)
+If you *don't* want incremental or highlighting at all (without which it becomes
+more vim-seek-like):
 
-### Inconsistencies with vim-sneak/vim-seek
+```elisp
+(setq evil-snipe-enable-highlight nil)
+(setq evil-snipe-enable-incremental-highlight nil)
+```
 
-#### vim-sneak's vertical scoping
+To get sniping in visual mode:
 
-~I'm not sure if I will try to implement vertical scoping~ I will try to
-implement vertical scoping, but horizontal scoping is first on the roadmap. This
-means, when enabled, the count will determine the horizontal extent to search.
-e.g. `5sev` will search the next 5 lines for ev.
+```elisp
+(define-key evil-visual-state-map "z" 'evil-snipe-f)
+(define-key evil-visual-state-map "Z" 'evil-snipe-F)
+```
 
-Thsi will be controlled with the variable `evil-snipe-count-scope`.
-
-By default, count is interpreted as is standard in vim: as a repeat count.
-
-#### Original s/S bindings (substitute)
-
-Snipe hijacks the s/S bindings in normal/visual mode (e.g. `s{char]{char}}`,
+**Note:** snipe hijacks the s/S bindings in normal mode (e.g. `s{char]{char}}`,
 which belong to 'evil-substitute'. If you miss it, `s` can be accomplished with
 `cl` and `S` with `cc`. If that isn't enough, see
 `evil-snipe-auto-disable-substitute`.
 
-## Features
+For more information, look up any of the following functions:
 
-* **Skulking**
-  * Press sab to move the cursor immediately to the next instance of
-    the text `ab`.
-  * Press `S` to search backwards.
-  * Evil-snipe is always literal! `s\*` will jump to a literal \*
-  * Use `z` to use snipe in operator mode. For instance, `dzab` will delete up
-    to just before ab (inclusive, by default. Exclusive motion is bound to x/X
-    instead of z/Z).
-  * Press `ctrl-o` or \`\` to go back to the starting point.
-  * Press `s<Enter>` at any time to repeat the last snipe. Use S to do the reverse.
-  * [PLANNED] If `evil-snipe-search-highlight` is non-nil, matches are
-    highlighted.
-  * [PLANNED] If `evil-snipe-search-incremental-highlight` is non-nil, matches for your
-    first key are highlighted as well (like incremental search).
+```elisp
+'evil-snipe-f
+'evil-snipe-F
+'evil-snipe-t
+'evil-snipe-T
+```
 
-* **Sniping**
-  * [PLANNED] Use `r` as an operator or text-object to target remove objects.
-  * [PLANNED] As an operator, it defaults to word mode. So `drwo` will delete the
-    next word containg `wo`.
-  * [PLANNED] As a text-object, you can specify inner or outer: `dirwo` will
-    delete the next INNER word containing `wo`. dorwo will target the next OUTER
-    word.
-  * [PLANNED] Use `R` for reverse remote snipes.
-  * [PLANNED] Use `p` for the same functionality as `r` except that it stays at the
-    destination.
+### Compatibility
 
-* **Both**
-  * [PLANNED] If `evil-snipe-repeat` is t, jump to next match with ; and ,
-    * If it's `'next`, then use s and S.
-    * If it's `'search`, then use n and N.
-    * If nil, do not pass go. Do not collect $200.
-
-### Compatibility with other evil plugins
-
-* [evil-space](https://github.com/linktohack/evil-space) needs more investigating.
 * [evil-surround](https://github.com/timcharper/evil-surround)'s s/S mappings
   override snipe in visual mode. It **does not** affect evil-surround's `s`
-  operator though. Snipe uses `z` instead. Perhaps we can use that in visual
+  operator though. Snipe uses `z/Z/x/X` instead. Perhaps we can use that in visual
   mode as well.
+* [evil-space](https://github.com/linktohack/evil-space) needs more investigating.
 
-## TODO
+## Features
 
-* Highlighting, either ala isearch or ace-jump
-* *Incremental* highlighting for first character too
-  (`evil-snipe-search-incremental-highlight`)
-* `;` and `,` repeating
-* Other kinds of repeat support (`evil-snipe-repeat`)
-  * `'next` for s/S (like vim-sneak)
-  * `'search'` for n/N (like evil-search)
-* Horizontal scoping
-* Vertical scoping
+  * Press `sab` to move the cursor immediately onto the 'a' of the next
+    occurrence of `ab`.
+  * Use `S` to search backwards.
+  * Evil-snipe is always literal: `s\*` will jump to a literal `\*`
+  * In operator mode, evil-snipe is bound to `z/Z` (inclusive) and `x/X`
+    (exclusive). For instance, `dzab` will delete up to and including the 'ab'.
+    `x/X` will stop short of the 'ab'.
+  * Press `s<Enter>` to repeat the last snipe. `S<enter>` does the inverse.
+  * Highlight matches if `evil-snipe-search-highlight` is non-nil.
+  * Incrementally highlight matches as you type if
+    `evil-snipe-search-incremental-highlight` is non-nil.
+  * `evil-snipe-scope` controls the scope of searches. Use `'line` to mimic
+    vim-seek and `'visible` or `'buffer` to mimic vim-sneak. See variable for
+    other options and better explanations.
+  * `evil-snipe-count-scope`
+    * If nil, `count` will specify how many times to repeat the command (e.g.
+      `3shi` will find the 3rd 'hi').
+    * If `'vertical`, snipe uses vim-sneak's vertical scoping. `3shi` will
+      find the first 'hi' within 3 columns on any line after the cursor.
+    * If `'letters`, the count will set how many characters to accept. `5shello`
+      will jump to the first 'hello'.
+  * While typing your search characters, press `TAB` to increment the character
+    count. e.g. `s<tab><tab>goal` will search for the next instance of "goal".
+  * Backspace works in the snipe prompt.
+
+### Planned
+
+  * `;` and `,` repeat support
+  * `n` and `N` repeat support
+  * Vertical-scoping: `5shi` will jump to the next occurance of 'hi' that is
+    within 5 columns of the cursor on any following line.
+  * Use `r` as an operator or text-object to target remove objects.
+  * As an operator, it defaults to word mode. So `drwo` will delete the
+    next word containg `wo`.
+  * As a text-object, you can specify inner or outer: `dirwo` will
+    delete the next INNER word containing `wo`. dorwo will target the next OUTER
+    word.
+  * Use `R` for reverse remote snipes.
+  * Use `p` for the same functionality as `r` except that it stays at the
+    destination.
 
 ## Credits
 
