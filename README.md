@@ -82,9 +82,9 @@ For more information, look up any of the following functions:
   * Highlight matches if `evil-snipe-search-highlight` is non-nil.
   * Incrementally highlight matches as you type if
     `evil-snipe-search-incremental-highlight` is non-nil.
-  * `evil-snipe-scope` controls the scope of searches. `'line` mimics vim-seek
-    while `'visible` or `'buffer` mimics vim-sneak. See variable for other
-    options.
+  * `evil-snipe-scope` controls the scope of searches. Use `'line` to mimic
+    vim-seek and `'visible` or `'buffer` to mimic vim-sneak. See variable for
+    other options and better explanations.
   * `evil-snipe-count-scope`
     * If nil, `count` will specify how many times to repeat the command (e.g.
       `3shi` will find the 3rd 'hi').
@@ -94,7 +94,7 @@ For more information, look up any of the following functions:
       will jump to the first 'hello'.
   * While typing your search characters, press `TAB` to increment the character
     count. e.g. `s<tab><tab>goal` will search for the next instance of "goal".
-  * You can use backspace in the character prompt.
+  * Backspace works in the snipe prompt.
 
 ### Planned
 
