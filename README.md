@@ -61,6 +61,20 @@ For more information, look up any of the following functions:
 'evil-snipe-T
 ```
 
+### N-character searching
+
+If you'd like to add extra commands for 3 (or 4) character sniping, something
+like this will work:
+
+```elisp
+(evil-define-motion my-evil-snipe (count &optional keys)
+   (interactive "<+c>") ;; use <-c> for reverse commands
+   (let ((evil-snipe--match-count 3)) ;; or 4
+     (evil-snipe-f count keys)))
+
+(define-key evil-motion-state-map "<some key>" 'my-evil-snipe)
+```
+
 ### Compatibility
 
 * [evil-surround](https://github.com/timcharper/evil-surround)'s s/S mappings
@@ -102,15 +116,11 @@ For more information, look up any of the following functions:
   * `n` and `N` repeat support
   * Vertical-scoping: `5shi` will jump to the next occurance of 'hi' that is
     within 5 columns of the cursor on any following line.
-  * Use `r` as an operator or text-object to target remove objects.
-  * As an operator, it defaults to word mode. So `drwo` will delete the
-    next word containg `wo`.
-  * As a text-object, you can specify inner or outer: `dirwo` will
-    delete the next INNER word containing `wo`. dorwo will target the next OUTER
-    word.
-  * Use `R` for reverse remote snipes.
-  * Use `p` for the same functionality as `r` except that it stays at the
-    destination.
+  * `r/R` operators for targeting remote objects (e.g. `driwhi` = delete remote inner word
+    'hi'), then return to starting point
+  * `p/P` operators that do what `r/R` does, but stays in the modified location.
+  * `r/R/p/P` text-objects, so: `dirwo` will delete the next inner word containing `wo`.
+    dorwo will target the next OUTER word.
 
 ## Credits
 
