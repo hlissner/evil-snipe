@@ -1,7 +1,7 @@
 # evil-snipe
 
-> This is a new (and potentially buggy) plugin, much functionality has yet to be
-> implemented. I'm also an elisp noob, so help or contributions are appreciated!
+> This is a new (and potentially buggy) plugin, and am an elisp newb, any advice
+> or contributions would be appreciated!
 
 Snipe is a marriage of [vim-sneak](https://github.com/justinmk/vim-sneak) and
 [vim-seek](https://github.com/goldfeld/vim-seek), but for
