@@ -63,8 +63,8 @@
 
 (defvar evil-snipe-search-highlight t
   "If non-nil, all matches will be highlighted after the initial jump.
-  Highlights will disappear as soon as you do anything afterwards, like move the
-  cursor.")
+Highlights will disappear as soon as you do anything afterwards, like move the
+cursor.")
 
 (defvar evil-snipe-search-incremental-highlight t
   "If non-nil, each additional keypress will incrementally search and highlight
@@ -90,8 +90,10 @@ matches. Otherwise, only highlight after you've finished skulking.")
 
 (defvar evil-snipe-auto-disable-substitute t
   "Disables evil's native s/S functionality (substitute) if non-nil. By default
-  this is t, since they are mostly redundant with other motions. s can be done
-  via cl and S with cc.")
+this is t, since they are mostly redundant with other motions. s can be done
+via cl and S with cc.
+
+MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 
 ;; State vars ;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar evil-snipe--last nil
@@ -187,7 +189,6 @@ matches. Otherwise, only highlight after you've finished skulking.")
   (remove-overlays nil nil 'category 'evil-snipe)
   (remove-hook 'pre-command-hook 'evil-snipe--highlight-clear))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun evil-snipe--seek (count string scope-beg scope-end)
@@ -205,7 +206,6 @@ matches. Otherwise, only highlight after you've finished skulking.")
                (setq skip-pad (if fwdp (if evil-op-vs-state-p 1 skip-pad) 0)))
               ('evil-snipe-t
                (setq skip-pad (if fwdp (+ skip-pad 1) (- skip-pad)))))
-
             (unless evil-op-vs-state-p
               (when (or evil-snipe-search-highlight evil-snipe-search-incremental-highlight)
                 (evil-snipe--highlight-clear))
