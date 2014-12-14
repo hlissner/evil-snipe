@@ -1,6 +1,6 @@
 ;;; evil-snipe.el --- emulate vim-sneak & vim-seek
 ;;
-;; Copyright (C) 2010-2014 Henrik Lissner
+;; Copyright (C) 2014 Henrik Lissner
 ;;
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
@@ -10,25 +10,52 @@
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;;
 ;; This file is not part of GNU Emacs.
-;;
+
 ;;; Commentary:
 ;;
-;; Snipe is an attempt to bring a marriage of vim-sneak and vim-seek to evil-mode.
+;; Snipe is a marriage of vim-sneak and vim-seek, but for evil-mode on Emacs.
 ;;
-;; Specifically, it brings two functions to evil: skulking and sniping. Skulking
-;; pertains to finding and jumping to two-character matches. Sniping pertains to
-;; performing actions (yank, delete, change, etc.) on remote words, far from the
-;; cursor.
+;; Put simply, evil-snipe is f/F/t/T on steroids. It can be configured to accept N
+;; characters, but by default will accept 2; `shi` will jump to the next occurrence
+;; of 'hi'.
 ;;
-;; Skulking is synonymous with f/F and t/T. By default (like vim-seek and f/F/t/T),
-;; it only search for matches on the same line relative to (point). If you prefer
-;; buffer-wide search, see evil-snipe-scope.
+;; To install: download evil-snipe.el, place it on your loadpath and insert this
+;; into your emacs configuration:
 ;;
-;; Sniping, however, is like vim-seek's remote and presential leaps. For instance,
-;; you can delete a nearby word that contains "ev" with direv. That's d for delete,
-;; ir for inner-remote and ev for 'word that contains ev.
+;;     (add-to-list 'load-path "/directory/containing/evil-snipe/")
+;;     (require 'evil-snipe)
+;;     (global-evil-snipe-mode)
+
+;;; Configuration
 ;;
-;; See the README.md for more information.
+;; By default sniping is scoped to the current line (relative to your cursor). This
+;; is consistent with vim-seek. If you prefer vim-sneak's rest-of-buffer-scoped
+;; approach, do:
+;;
+;;     (setq evil-snipe-scope 'visible)  ;; or 'buffer, 'whole-visible or 'whole-buffer
+;;
+;; If you *don't* want incremental or highlighting at all (without which it becomes
+;; more vim-seek-like):
+;;
+;;     (setq evil-snipe-enable-highlight nil)
+;;     (setq evil-snipe-enable-incremental-highlight nil)
+;;
+;; To get sniping in visual mode:
+;;
+;;     (define-key evil-visual-state-map "z" 'evil-snipe-f)
+;;     (define-key evil-visual-state-map "Z" 'evil-snipe-F)
+;;
+;; Note: snipe hijacks the s/S bindings in normal mode (e.g. `s{char]{char}}`,
+;; which belong to 'evil-substitute'. If you miss it, `s` can be accomplished with
+;; `cl` and `S` with `cc`. If that isn't enough, see
+;; `evil-snipe-auto-disable-substitute`.
+
+;;; Compatibility
+;;
+;; * evil-surround's s/S mappings override snipe in visual mode. It **does not**
+;;   affect evil-surround's `s` operator though. Snipe uses `z/Z/x/X` instead.
+;;   Perhaps we can use that in visual mode as well.
+;; * evil-space needs more investigating.
 ;;
 ;;; Code:
 
