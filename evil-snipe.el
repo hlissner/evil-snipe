@@ -61,8 +61,6 @@
 
 (require 'evil)
 
-(defvar evil-snipe--debug-mode t)
-
 (defvar evil-snipe-search-highlight t
   "If non-nil, all matches will be highlighted after the initial jump.
   Highlights will disappear as soon as you do anything afterwards, like move the
