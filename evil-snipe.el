@@ -221,16 +221,21 @@ MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 (defun evil-snipe--seek-vertical (count string scope-beg scope-end)
   (error "Not implemented"))
 
-;; TODO Update for evil-snipe new defun signatures
-(defun evil-snipe--repeat (count)
+(evil-define-command evil-snipe-repeat (count)
+  (interactive "<c>")
   (if evil-snipe--last
       (let ((evil-snipe--was-repeat t)
-            (-count (nth 1 evil-snipe--last)))
+            (-count (nth 1 evil-snipe--last))
+            (evil-snipe-scope 'buffer))
         (funcall (first evil-snipe--last) ;;func name
                  (if (> -count 0) count (* count -1)) ;;count
                  (nth 2 evil-snipe--last) ;;keys
                  ))
     (user-error "No search to repeat")))
+
+(evil-define-command evil-snipe-repeat-reverse (count)
+  (interactive "<c>")
+  (evil-snipe-repeat (if count (- count) -1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -277,7 +282,10 @@ MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
            ('letters
             (evil-snipe--seek (if forward-p 1 -1) charstr scope-beg scope-end))
            (t
-            (evil-snipe--seek count charstr scope-beg scope-end)))))))
+            (evil-snipe--seek count charstr scope-beg scope-end)))
+
+         (set-transient-map evil-snipe-active-mode-map)
+         (setq evil-last-find nil)))))
 
 (evil-define-motion evil-snipe-F (count &optional keys)
   "Jump backwards to the position of a two-character string."
@@ -349,7 +357,14 @@ MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
   :prefix "evil-snipe-"
   :group 'evil)
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar evil-snipe-active-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map ";" 'evil-snipe-repeat)
+    (define-key map "," 'evil-snipe-repeat-reverse)
+    map))
 
 (defvar evil-snipe-mode-map
   (let ((map (make-sparse-keymap)))

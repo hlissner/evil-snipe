@@ -75,6 +75,13 @@ like this will work:
 (define-key evil-motion-state-map "<some key>" 'my-evil-snipe)
 ```
 
+You can repeat search using `;` and `,`. To change these (or add) bindings, do:
+
+```elisp
+(define-key evil-snipe-active-mode-map "s" 'evil-snipe-repeat)
+(define-key evil-snipe-active-mode-map "S" 'evil-snipe-repeat-reverse)
+```
+
 ### Compatibility
 
 * [evil-surround](https://github.com/timcharper/evil-surround)'s s/S mappings
@@ -109,11 +116,10 @@ like this will work:
   * While typing your search characters, press `TAB` to increment the character
     count. e.g. `s<tab><tab>goal` will search for the next instance of "goal".
   * Backspace works in the snipe prompt.
+  * `;` and `,` repeat support
 
 ### Planned
 
-  * `;` and `,` repeat support
-  * `n` and `N` repeat support
   * Vertical-scoping: `5shi` will jump to the next occurance of 'hi' that is
     within 5 columns of the cursor on any following line.
   * `r/R` operators for targeting remote objects (e.g. `driwhi` = delete remote inner word
