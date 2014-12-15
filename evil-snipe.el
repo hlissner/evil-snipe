@@ -110,13 +110,14 @@ Backspace works for correcting yourself too.
 
 If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
 5 characters."
-  (evil-half-cursor)
   (let* ((how-many (if (eq evil-snipe-count-scope 'letters)
                        (or (if count (abs count))
                            evil-snipe--match-count)
                      evil-snipe--match-count))
          (keys '())
          (i how-many))
+    (unless (evil-operator-state-p)
+      (evil-half-cursor))
     (catch 'abort
       (while (> i 0)
         (let* ((prompt (concat (number-to-string i) ">" keys))
@@ -333,7 +334,6 @@ KEYS is a list of character codes or strings."
   :type inclusive
   (interactive "<+c><1C>")
   (let ((evil-snipe-count-scope nil)
-        (evil-snipe--match-count 1)
         (evil-snipe--this-func 'evil-snipe-f))
     (evil-snipe-s count keys)))
 
