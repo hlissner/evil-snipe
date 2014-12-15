@@ -12,7 +12,9 @@ characters, but by default will accept 2.
 
 ## Installation
 
-To enable globally, add the following to `~/.emacs`:
+Evil-snipe can be installed from MELPA, via `M-x package-install RET evil-snipe`
+
+Then, to enable globally, add the following to `~/.emacs`:
 
 ```elisp
 (require 'evil-snipe)
@@ -32,8 +34,6 @@ To enable globally, add the following to `~/.emacs`:
   * In operator mode, evil-snipe is bound to `z/Z` (inclusive) and `x/X`
     (exclusive). For instance, `dzab` will delete up to and including the 'ab'.
     `x/X` will stop short of the 'ab'.
-  * Press `s<Enter>` to repeat the last snipe. `S<enter>` does the inverse.
-  * `;` and ',' repeat the last search, if you haven't moved since.
   * Highlight matches if `evil-snipe-search-highlight` is non-nil.
   * Incrementally highlight matches as you type if
     `evil-snipe-search-incremental-highlight` is non-nil.
@@ -45,7 +45,8 @@ To enable globally, add the following to `~/.emacs`:
     count on the fly. e.g. `s<tab><tab>goal` will search for the next instance
     of "goal".
   * Backspace works in the snipe prompt.
-  * `;` and `,` repeat support
+  * Press `s<Enter>` to repeat the last snipe. `S<enter>` does the inverse.
+  * `;` and `,` repeat support (as well as `s/S` and `n/N` support; see below)
 
 ### Planned
 

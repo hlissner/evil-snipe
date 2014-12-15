@@ -209,12 +209,12 @@ depending on what `evil-snipe-scope' is set to."
                 (evil-snipe--highlight (point) (+ (point) skip-pad) t)
                 (add-hook 'pre-command-hook 'evil-snipe--highlight-clear)))
             ;; Adjustments for operator/visual mode
-            (if evil-op-vs-state-p               ;; d{?}hi
+            (if evil-op-vs-state-p                ;; d{?}hi
               (if fwdp
                   (progn
-                    (backward-char 1)              ;; h|i => |hi
+                    (backward-char 1)             ;; h|i => |hi
                     (if evil-snipe--consume-match
-                        (forward-char skip-pad)))  ;; hi| (z)
+                        (forward-char skip-pad))) ;; hi| (z)
                 (unless evil-snipe--consume-match
                   (forward-char skip-pad)))       ;; hi| (X)
               (unless evil-snipe--consume-match
