@@ -55,10 +55,17 @@ which belong to 'evil-substitute'. If you miss it, `s` can be accomplished with
 For more information, look up any of the following functions:
 
 ```elisp
-'evil-snipe-f
-'evil-snipe-F
-'evil-snipe-t
-'evil-snipe-T
+'evil-snipe-s
+'evil-snipe-S
+'evil-snipe-x
+'evil-snipe-X
+```
+
+If you'd like, evil-snipe can replace evil-mode's f/F/t/T by doing:
+
+```elisp
+(setq evil-snipe-override t) ;; must be *before* loading evil-snipe
+(require 'evil-snipe')
 ```
 
 ### N-character searching
@@ -70,7 +77,7 @@ like this will work:
 (evil-define-motion my-evil-snipe (count &optional keys)
    (interactive "<+c>") ;; use <-c> for reverse commands
    (let ((evil-snipe--match-count 3)) ;; or 4
-     (evil-snipe-f count keys)))
+     (evil-snipe-s count keys)))
 
 (define-key evil-motion-state-map "<some key>" 'my-evil-snipe)
 ```
