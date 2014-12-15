@@ -216,7 +216,7 @@ depending on what `evil-snipe-scope' is set to."
             (if evil-op-vs-state-p                ;; d{?}hi
               (if fwdp
                   (progn
-                    (backward-char 1)             ;; h|i => |hi
+                    (backward-char)               ;; h|i => |hi
                     (if evil-snipe--consume-match
                         (forward-char skip-pad))) ;; hi| (z)
                 (unless evil-snipe--consume-match
@@ -259,10 +259,15 @@ depending on what `evil-snipe-scope' is set to."
   "Inverted count"
   (setq evil-snipe--last-direction nil)
   (let ((count (when current-prefix-arg (prefix-numeric-value current-prefix-arg))))
-    (list (if count (* count -1)))))
+    (list (if count (- count)))))
 
-(evil-define-interactive-code "<nkeys>"
+(evil-define-interactive-code "<nC>"
   (let ((count (when current-prefix-arg (prefix-numeric-value current-prefix-arg))))
+    (list (evil-snipe--collect-keys count evil-snipe--last-direction))))
+
+(evil-define-interactive-code "<1C>"
+  (let ((count (when current-prefix-arg (prefix-numeric-value current-prefix-arg)))
+        (evil-snipe--match-count 1))
     (list (evil-snipe--collect-keys count evil-snipe--last-direction))))
 
 (evil-define-motion evil-snipe-s (count keys)
@@ -274,7 +279,7 @@ COUNT is how many times to repeat the snipe (behaves differently depending on
 KEYS is a list of character codes or strings."
   :jump t
   :type inclusive
-  (interactive "<+c><nkeys>")
+  (interactive "<+c><nC>")
   (case keys
     ('abort)
     ;; if <enter>, repeat last search
@@ -296,14 +301,13 @@ KEYS is a list of character codes or strings."
             (evil-snipe--seek (if forward-p 1 -1) charstr scope-beg scope-end))
            (t
             (evil-snipe--seek count charstr scope-beg scope-end)))
-         (when (or evil-snipe-repeat-nN evil-snipe-repeat-sS)
-           (set-transient-map evil-snipe-active-mode-map))))))
+         (set-transient-map evil-snipe-active-mode-map)))))
 
 (evil-define-motion evil-snipe-S (count keys)
   "Performs a reverse `evil-snipe-s'"
   :jump t
   :type inclusive
-  (interactive "<-c><nkeys>")
+  (interactive "<-c><nC>")
   (let ((evil-snipe--this-func 'evil-snipe-s))
     (evil-snipe-s count keys)))
 
@@ -311,7 +315,7 @@ KEYS is a list of character codes or strings."
   "Performs an exclusive `evil-snipe-s'"
   :jump t
   :type inclusive
-  (interactive "<+c><nkeys>")
+  (interactive "<+c><nC>")
   (let ((evil-snipe--consume-match nil)
         (evil-snipe--this-func 'evil-snipe-x))
     (evil-snipe-s count keys)))
@@ -320,16 +324,16 @@ KEYS is a list of character codes or strings."
   "Performs an backwards, exclusive `evil-snipe-S'"
   :jump t
   :type inclusive
-  (interactive "<-c><nkeys>")
+  (interactive "<-c><nC>")
   (evil-snipe-x count keys))
 
-(evil-define-motion evil-snipe-f (count keys)
+(evil-define-motion evil-snipe-f (&optional count keys)
   "Jump forward to next match of {char}"
   :jump t
   :type inclusive
-  (interactive "<+c><nkeys>")
-  (let ((evil-snipe--match-count 1)
-        (evil-snipe-count-scope nil)
+  (interactive "<+c><1C>")
+  (let ((evil-snipe-count-scope nil)
+        (evil-snipe--match-count 1)
         (evil-snipe--this-func 'evil-snipe-f))
     (evil-snipe-s count keys)))
 
@@ -337,24 +341,23 @@ KEYS is a list of character codes or strings."
   "Jump forward to next match of {char}"
   :jump t
   :type inclusive
-  (interactive "<-c><nkeys>")
+  (interactive "<-c><1C>")
   (evil-snipe-f count keys))
 
 (evil-define-motion evil-snipe-t (count keys)
   "Jump forward to next match of {char} (exclusive)"
   :jump t
   :type inclusive
-  (interactive "<+c><nkeys>")
+  (interactive "<+c><1C>")
   (let ((evil-snipe--this-func 'evil-snipe-t)
-        (evil-snipe--consume-match nil)
-        (evil-snipe--point-offset -1))
+        (evil-snipe--consume-match nil))
     (evil-snipe-f count keys)))
 
 (evil-define-motion evil-snipe-T (count keys)
   "Jump forward to next match of {char} (exclusive)"
   :jump t
   :type inclusive
-  (interactive "<-c><nkeys>")
+  (interactive "<-c><1C>")
   (evil-snipe-t count keys))
 
 ;; TODO Write evil-snipe-p
