@@ -47,6 +47,9 @@ Then, to enable globally, add the following to `~/.emacs`:
   * Backspace works in the snipe prompt.
   * Press `s<Enter>` to repeat the last snipe. `S<enter>` does the inverse.
   * `;` and `,` repeat support (as well as `s/S` and `n/N` support; see below)
+  * `evil-snipe-repeat-scope`, separate from `evil-snipe-scope`, controls the
+    scope of searches and highlighting when repeating searches. The default is
+    `'whole-line`.
 
 ### Planned
 
