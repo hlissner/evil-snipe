@@ -150,10 +150,11 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                (key (evil-read-key prompt)))
           (cond ((char-equal key ?\t)         ; Tab = adds more characters to search
                  (setq i (1+ i)))
-                ((and (= i how-many)
-                      (or (char-equal key ?\n)
-                          (char-equal key 13)))
-                 (throw 'abort 'repeat))
+                ((or (char-equal key ?\n)
+                     (char-equal key 13))
+                 (if (= i how-many)
+                     (throw 'abort 'repeat)
+                   (throw 'abort keys)))
                 ((or (char-equal key ?\C-\[)
                      (char-equal key ?\C-g))  ; Escape/C-g = abort
                  (throw 'abort 'abort))
