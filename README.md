@@ -85,6 +85,9 @@ Then, to enable globally, add the following to `~/.emacs`:
 * Snipe disables evil-mode's substitute commands (s/S). To prevent this,
   set `evil-snipe-auto-disable-substitute` to nil (before evil-snipe is loaded).
 
+* To change the highlight colors, configure: `evil-snipe-first-match-face` and
+  `evil-snipe-matches-face`
+
 ### Configure like vim-seek
 
 ```elisp

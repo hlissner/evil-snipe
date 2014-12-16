@@ -89,6 +89,23 @@ via cl and S with cc.
 
 MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 
+;; TODO Set more interesting default faces
+(defface evil-snipe-first-match-face
+  '(;; (((class color)) (:foreground "red" :underline nil))
+    ;; (((background dark)) (:foreground "gray100" :underline nil))
+    ;; (((background light)) (:foreground "gray0" :underline nil))
+    (t (:inherit isearch)))
+  "Face for first match when sniping"
+  :group 'evil-snipe)
+
+(defface evil-snipe-matches-face
+  '(;; (((class color)) (:foreground "red" :underline nil))
+    ;; (((background dark)) (:foreground "gray100" :underline nil))
+    ;; (((background light)) (:foreground "gray0" :underline nil))
+    (t (:inherit region)))
+  "Face for other matches when sniping"
+  :group 'evil-snipe)
+
 ;; State vars ;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar evil-snipe--last nil
   "The last search performed.")
@@ -187,7 +204,7 @@ depending on what `evil-snipe-scope' is set to."
 
 (defun evil-snipe--highlight (beg end &optional first)
   (let ((x (make-overlay beg end)))
-    (overlay-put x 'face (if first 'isearch 'region))
+    (overlay-put x 'face (if first 'evil-snipe-first-match-face 'evil-snipe-matches-face))
     (overlay-put x 'category 'evil-snipe)))
 
 (defun evil-snipe--highlight-rest (match forward-p)
