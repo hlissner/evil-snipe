@@ -203,9 +203,12 @@ depending on what `evil-snipe-scope' is set to."
        (error "Invalid scope: %s" evil-snipe-scope)))))
 
 (defun evil-snipe--highlight (beg end &optional first)
-  (let ((x (make-overlay beg end)))
-    (overlay-put x 'face (if first 'evil-snipe-first-match-face 'evil-snipe-matches-face))
-    (overlay-put x 'category 'evil-snipe)))
+  (if (and first (overlays-in beg end))
+      (remove-overlays beg end 'category 'evil-snipe))
+  (unless (overlays-in beg end))
+    (let ((x (make-overlay beg end)))
+      (overlay-put x 'face (if first 'evil-snipe-first-match-face 'evil-snipe-matches-face))
+      (overlay-put x 'category 'evil-snipe))))
 
 (defun evil-snipe--highlight-rest (match forward-p)
   (let* ((bounds (evil-snipe--bounds forward-p))
@@ -235,15 +238,17 @@ depending on what `evil-snipe-scope' is set to."
           (skip-pad (length string))
           (evil-op-vs-state-p (or (evil-operator-state-p) (evil-visual-state-p))))
       (when fwdp (forward-char 1))
+      (when evil-snipe-enable-highlight
+        (evil-snipe--highlight-rest string fwdp))
       (if (search-forward string (if fwdp scope-end scope-beg) t count) ;; hi |
           (progn
             (when fwdp (backward-char skip-pad))    ;; hi | => h|i
             (unless evil-op-vs-state-p
-              (when (or evil-snipe-enable-highlight evil-snipe-enable-incremental-highlight)
-                (evil-snipe--highlight-clear))
+              ;; (when (or evil-snipe-enable-highlight evil-snipe-enable-incremental-highlight)
+              ;;   (evil-snipe--highlight-clear))
               (when evil-snipe-enable-highlight
-                (evil-snipe--highlight-rest string fwdp)
                 (evil-snipe--highlight (point) (+ (point) skip-pad) t)
+                ;; (evil-snipe--highlight-rest string fwdp)
                 (add-hook 'pre-command-hook 'evil-snipe--highlight-clear)))
             ;; Adjustments for operator/visual mode
             (if evil-op-vs-state-p                ;; d{?}hi
