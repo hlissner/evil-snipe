@@ -89,20 +89,13 @@ via cl and S with cc.
 
 MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 
-;; TODO Set more interesting default faces
 (defface evil-snipe-first-match-face
-  '(;; (((class color)) (:foreground "red" :underline nil))
-    ;; (((background dark)) (:foreground "gray100" :underline nil))
-    ;; (((background light)) (:foreground "gray0" :underline nil))
-    (t (:inherit isearch)))
+  '((t (:inherit isearch)))
   "Face for first match when sniping"
   :group 'evil-snipe)
 
 (defface evil-snipe-matches-face
-  '(;; (((class color)) (:foreground "red" :underline nil))
-    ;; (((background dark)) (:foreground "gray100" :underline nil))
-    ;; (((background light)) (:foreground "gray0" :underline nil))
-    (t (:inherit region)))
+  '((t (:inherit region)))
   "Face for other matches when sniping"
   :group 'evil-snipe)
 
@@ -164,16 +157,18 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                 ((or (char-equal key ?\C-\[)
                      (char-equal key ?\C-g))  ; Escape/C-g = abort
                  (throw 'abort 'abort))
-                ((char-equal key ?\^?)        ; Backspace = delete character
-                 (when (= i how-many) (throw 'abort 'abort))
-                 (setq i (1+ i))
-                 (when (= i how-many) (pop keys)))
-                (t (setq keys (append keys `(,key)))
-                   (when evil-snipe-enable-incremental-highlight
-                     (evil-snipe--highlight-clear)
-                     (evil-snipe--highlight-rest (concat keys) forward-p)
-                     (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))
-                   (setq i (1- i))))))
+                (t (if (char-equal key ?\^?)
+                        (progn
+                          (when (= i how-many) (throw 'abort 'abort))
+                          (setq i (1+ i))
+                          (when (= i how-many) (pop keys)))
+                      (setq keys (append keys `(,key)))
+                      (setq i (1- i)))
+                    (when evil-snipe-enable-incremental-highlight
+                      (evil-snipe--highlight-clear)
+                      (evil-snipe--highlight-rest (concat keys) forward-p)
+                      (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))
+                    ))))
       keys)))
 
 (defun evil-snipe--bounds (&optional forward-p)
@@ -205,7 +200,7 @@ depending on what `evil-snipe-scope' is set to."
 (defun evil-snipe--highlight (beg end &optional first)
   (if (and first (overlays-in beg end))
       (remove-overlays beg end 'category 'evil-snipe))
-  (unless (overlays-in beg end))
+  (unless (overlays-in beg end)
     (let ((x (make-overlay beg end)))
       (overlay-put x 'face (if first 'evil-snipe-first-match-face 'evil-snipe-matches-face))
       (overlay-put x 'category 'evil-snipe))))
@@ -472,11 +467,6 @@ version."
     (evil-define-key 'motion map "F" 'evil-snipe-F)
     (evil-define-key 'motion map "t" 'evil-snipe-t)
     (evil-define-key 'motion map "T" 'evil-snipe-T)
-
-    (evil-define-key 'operator map "f" 'evil-snipe-f)
-    (evil-define-key 'operator map "F" 'evil-snipe-F)
-    (evil-define-key 'operator map "t" 'evil-snipe-t)
-    (evil-define-key 'operator map "T" 'evil-snipe-T)
 
     (evil-define-key 'motion map ";" 'evil-snipe-repeat)
     (evil-define-key 'motion map "," 'evil-snipe-repeat-reverse)))
