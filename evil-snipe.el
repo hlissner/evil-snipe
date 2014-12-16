@@ -6,7 +6,7 @@
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5 2014
 ;; Modified: December 15, 2014
-;; Version: 1.3
+;; Version: 1.4
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.9"))
@@ -35,16 +35,22 @@
   :prefix "evil-snipe-"
   :group 'evil)
 
-(defcustom evil-snipe-search-highlight t
+(defcustom evil-snipe-enable-highlight t
   "If non-nil, all matches will be highlighted after the initial jump.
 Highlights will disappear as soon as you do anything afterwards, like move the
 cursor."
   :group 'evil-snipe
   :type 'boolean)
 
-(defcustom evil-snipe-search-incremental-highlight t
+(defcustom evil-snipe-enable-incremental-highlight t
   "If non-nil, each additional keypress will incrementally search and highlight
 matches. Otherwise, only highlight after you've finished skulking."
+  :group 'evil-snipe
+  :type 'boolean)
+
+(defcustom evil-snipe-enable-half-cursor t
+  "Whether or not to activate half-cursor mode on activation of evil-snipe (for
+more visual feedback)."
   :group 'evil-snipe
   :type 'boolean)
 
@@ -75,18 +81,6 @@ settings)"
     'vertical    ;; find first match within N (visible) columns"
   :group 'evil-snipe
   :type 'symbol)
-
-(defcustom evil-snipe-repeat-nN nil
-  "Whether or not to use n/N to repeat searches. See also
-  `evil-snipe-repeat-sS'"
-  :group 'evil-snipe
-  :type 'boolean)
-
-(defcustom evil-snipe-repeat-sS nil
-  "Whether or not to use n/N to repeat searches. See also
-  `evil-snipe-repeat-nN'"
-  :group 'evil-snipe
-  :type 'boolean)
 
 (defvar evil-snipe-auto-disable-substitute t
   "Disables evil's native s/S functionality (substitute) if non-nil. By default
@@ -138,7 +132,7 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                      evil-snipe--match-count))
          (keys '())
          (i how-many))
-    (unless (evil-operator-state-p)
+    (unless (or (evil-operator-state-p) (not evil-snipe-enable-half-cursor))
       (evil-half-cursor))
     (catch 'abort
       (while (> i 0)
@@ -158,7 +152,7 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                  (setq i (1+ i))
                  (when (= i how-many) (pop keys)))
                 (t (setq keys (append keys `(,key)))
-                   (when evil-snipe-search-incremental-highlight
+                   (when evil-snipe-enable-incremental-highlight
                      (evil-snipe--highlight-clear)
                      (evil-snipe--highlight-rest (concat keys) forward-p)
                      (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))
@@ -228,9 +222,9 @@ depending on what `evil-snipe-scope' is set to."
           (progn
             (when fwdp (backward-char skip-pad))    ;; hi | => h|i
             (unless evil-op-vs-state-p
-              (when (or evil-snipe-search-highlight evil-snipe-search-incremental-highlight)
+              (when (or evil-snipe-enable-highlight evil-snipe-enable-incremental-highlight)
                 (evil-snipe--highlight-clear))
-              (when evil-snipe-search-highlight
+              (when evil-snipe-enable-highlight
                 (evil-snipe--highlight-rest string fwdp)
                 (evil-snipe--highlight (point) (+ (point) skip-pad) t)
                 (add-hook 'pre-command-hook 'evil-snipe--highlight-clear)))
@@ -407,20 +401,6 @@ KEYS is a list of character codes or strings."
   (let ((map (make-sparse-keymap)))
     (define-key map ";" 'evil-snipe-repeat)
     (define-key map "," 'evil-snipe-repeat-reverse)
-
-    (when evil-snipe-repeat-sS
-      (define-key map "s" 'evil-snipe-repeat)
-      (define-key map "S" 'evil-snipe-repeat-reverse))
-
-    (when evil-snipe-repeat-nN
-      (define-key map "n" 'evil-snipe-repeat)
-      (define-key map "N" 'evil-snipe-repeat-reverse))
-
-    (when evil-snipe-override
-      (define-key map "f" 'evil-snipe-repeat)
-      (define-key map "F" 'evil-snipe-repeat-reverse)
-      (define-key map "t" 'evil-snipe-repeat)
-      (define-key map "T" 'evil-snipe-repeat-reverse))
     map))
 
 (defvar evil-snipe-mode-map
@@ -456,9 +436,15 @@ KEYS is a list of character codes or strings."
   (evil-normalize-keymaps))
 
 ;;;###autoload
-(defun evil-snipe-override-evil ()
+(defun evil-snipe-replace-evil ()
   "Override evil-mode's f/F/t/T functionality and replace it with evil-snipe's
 version."
+  (let ((map evil-snipe-active-mode-map))
+    (define-key map "f" 'evil-snipe-repeat)
+    (define-key map "F" 'evil-snipe-repeat-reverse)
+    (define-key map "t" 'evil-snipe-repeat)
+    (define-key map "T" 'evil-snipe-repeat-reverse)
+    (evil-snipe-enable-sS))
   (let ((map evil-snipe-mode-map))
     (evil-define-key 'motion map "f" 'evil-snipe-f)
     (evil-define-key 'motion map "F" 'evil-snipe-F)
@@ -472,6 +458,20 @@ version."
 
     (evil-define-key 'motion map ";" 'evil-snipe-repeat)
     (evil-define-key 'motion map "," 'evil-snipe-repeat-reverse)))
+
+;;;###autoload
+(defun evil-snipe-enable-sS ()
+  "Enables s/S for repeating searches. Not necessary if using `evil-snipe-replace-evil'"
+  (let ((map evil-snipe-active-mode-map))
+    (define-key map "s" 'evil-snipe-repeat)
+    (define-key map "S" 'evil-snipe-repeat-reverse)))
+
+;;;###autoload
+(defun evil-snipe-enable-nN ()
+  "Enables n/N for repeating searches."
+  (let ((map evil-snipe-active-mode-map))
+    (define-key map "n" 'evil-snipe-repeat)
+    (define-key map "N" 'evil-snipe-repeat-reverse)))
 
 ;;;###autoload
 (defun turn-on-evil-snipe-mode ()

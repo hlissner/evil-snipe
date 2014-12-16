@@ -19,6 +19,13 @@ Then, to enable globally, add the following to `~/.emacs`:
 ```elisp
 (require 'evil-snipe)
 (global-evil-snipe-mode 1)
+
+;; Optional!
+(evil-snipe-replace-evil) ;; replaces evil-mode's f/F/t/T/;/, with snipe
+(evil-snipe-enable-nN)    ;; enable repeating searches with n/N
+
+;; not necessary if using (evil-snipe-replace-evil)
+(evil-snipe-enable-sS)    ;; enable repeating searches with s/S
 ```
 
 ## Preview
@@ -27,29 +34,35 @@ Then, to enable globally, add the following to `~/.emacs`:
 
 ## Features
 
-  * Press `sab` to move the cursor immediately onto the 'a' of the next
-    occurrence of `ab`.
-  * Use `S` to search backwards.
-  * Evil-snipe is always literal: `s\*` will jump to a literal `\*`
-  * In operator mode, evil-snipe is bound to `z/Z` (inclusive) and `x/X`
-    (exclusive). For instance, `dzab` will delete up to and including the 'ab'.
-    `x/X` will stop short of the 'ab'.
-  * Highlight matches if `evil-snipe-search-highlight` is non-nil.
-  * Incrementally highlight matches as you type if
-    `evil-snipe-search-incremental-highlight` is non-nil.
-  * `evil-snipe-scope` controls the scope of searches. Use `'line` to mimic
-    vim-seek and `'visible` or `'buffer` to mimic vim-sneak. See variable for
-    other options and better explanations.
-  * Vertical scoping when `evil-snipe-count-scope` is set to 'vertical
-  * While typing your search characters, press `TAB` to increment the character
-    count on the fly. e.g. `s<tab><tab>goal` will search for the next instance
-    of "goal".
-  * Backspace works in the snipe prompt.
-  * Press `s<Enter>` to repeat the last snipe. `S<enter>` does the inverse.
-  * `;` and `,` repeat support (as well as `s/S` and `n/N` support; see below)
-  * `evil-snipe-repeat-scope`, separate from `evil-snipe-scope`, controls the
-    scope of searches and highlighting when repeating searches. The default is
-    `'whole-line`.
+  * `s/S`
+    * `|the abacus is` => `sab`  => `the |abacus is`
+    * `the abacus| is` => `Sab`  => `the |abacus is`
+  * `z/Z` = inclusive, `x/X` = exclusive
+    * `|the abacus is` => `dzab` => `|acus is`
+    * `the abacus| is` => `dZab` => `the | is`
+    * `|the abacus is` => `dxab` => `|abacus is`
+    * `the abacus| is` => `dXab` => `the ab| is`
+  * Snipe is always literal: `s\*` jumps to a literal `\*`
+  * `s<Enter>`, `S<Enter>` (reverse), `;` and `,` (reverse) jumps to the next
+    match. Note: `;` and `,` should still work directly after sniping even if
+    you have rebound them.
+  * Repeating with `s/S` and/or `n/N` can be enabled, see
+    `(evil-snipe-enable-sS)` and `(evil-snipe-enable-sS)`.
+  * Backspace to undo characters
+  * `TAB` in the snipe prompt increments N on the fly. e.g. `s<tab><tab>goal`
+  * Highlight matches if `evil-snipe-enable-highlight`
+  * Incrementally highlight (as you type) if
+    `evil-snipe-enable-incremental-highlight`
+  * Change scope of searches with `evil-snipe-scope`
+  * Change scope of searches while repeating with `evil-snipe-repeat-scope`
+    (separate from `evil-snipe-scope`)
+  * Change what the count prefix means to snipe with `evil-snipe-count-scope`
+    * if nil, treat COUNT as default in vim: times-to-repeat
+    * if 'letters, accept COUNT characters
+    * if 'vertical, scope is column bound (vertical scoping)
+  * Use `(evil-snipe-replace-evil)` to replace evil-mode's f/F/t/T/;/, with
+    snipe. Snipe implements [clever-f](https://github.com/rhysd/clever-f.vim)
+    functionality as well in this case.
 
 ### Planned
 
@@ -63,54 +76,47 @@ Then, to enable globally, add the following to `~/.emacs`:
 
 ## Configuration
 
-**Any variable assignments should be done _before_ loading evil-snipe.**
-
-* By default sniping is scoped to the current line (relative to your cursor).
-  This is consistent with vim-seek. If you prefer vim-sneak's
-  rest-of-buffer-scoped approach, do:
-
-  ```elisp
-  (setq evil-snipe-scope 'visible)  ;; or 'buffer, 'whole-visible or 'whole-buffer
-  ```
-* Disable highlighting (and/or incremental highlighting) with:
-
-  ```elisp
-  (setq evil-snipe-enable-highlight nil)
-  (setq evil-snipe-enable-incremental-highlight nil)
-  ```
-* To get sniping is visual mode:
+* Sniping in visual mode:
 
   ```elisp
   (evil-define-key 'visual evil-snipe-mode-map "z" 'evil-snipe-f)
   (evil-define-key 'visual evil-snipe-mode-map "Z" 'evil-snipe-F)
   ```
-* evil-snipe disable's evil-mode's substitute commands (s/S), set
-  `evil-snipe-auto-disable-substitute` to nil.
+* Snipe disables evil-mode's substitute commands (s/S). To prevent this,
+  set `evil-snipe-auto-disable-substitute` to nil (before evil-snipe is loaded).
 
-* evil-snipe can override evil-mode's f/F/t/T and ;/, and replace them. To do
-  so, set `evil-snipe-override` to t. Note that ;/, will work even if you've
-  rebound them, but only *just* after you've initiated a search.
+### Configure like vim-seek
 
-* Change what the number prefix means to evil-snipe with
-  `evil-snipe-count-scope`.
-  * If set to nil, repeat search N times.
-  * If set to 'letters, search for N characters. e.g. `5shello` will jump to the
-    next 'hello'.
-  * If set to 'vertical **(NOT IMPLEMENTED YET)**: limit search to within N
-    columns of the point, on any following or preceding line. E.g. `5shi` will
-    search for the next 'hi' within 5 columns on any following line.
+```elisp
+(setq evil-snipe-scope 'line)
+(setq evil-snipe-repeat-scope 'whole-line)
+(setq evil-snipe-count-scope nil)
+(setq evil-snipe-search-highlight nil)
+(setq evil-snipe-search-incremental-highlight nil)
+(setq evil-snipe-enable-half-cursor nil)
+```
 
-* You can repeat search using `;` and `,`. To add `s/S` support, see
-  `evil-snipe-repeat-sS`, and `evil-snipe-repeat-nN` for `n/N` support.
+### Configure like vim-sneak
+
+```elisp
+(evil-snipe-enable-sS)
+
+;; or 'buffer, 'whole-visible or 'whole-buffer
+(setq evil-snipe-scope 'visible)
+(setq evil-snipe-repeat-scope 'whole-visible)
+
+(setq evil-snipe-count-scope 'vertical)  ;; not implemented yet
+(setq evil-snipe-enable-highlight t)
+(setq evil-snipe-enable-incremental-highlight t)
+(setq evil-snipe-enable-half-cursor nil)
+```
 
 ### Compatibility
 
-* [evil-surround](https://github.com/timcharper/evil-surround)'s s/S mappings
-  override snipe in visual mode. It **does not** affect evil-surround's `s`
-  operator though. Snipe uses `z/Z/x/X` instead. Perhaps we can use that in visual
-  mode as well.
+* [evil-surround](https://github.com/timcharper/evil-surround) does not conflict
+  with evil-snipe. Surround uses `s/S` in visual mode and `s` in operator mode.
+  Snipe uses `s/S` in normal mode and `z/Z/x/X` in operator mode.
 * [evil-space](https://github.com/linktohack/evil-space) needs more investigating.
-
 
 ## Credits
 
