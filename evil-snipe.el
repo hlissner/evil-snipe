@@ -29,6 +29,7 @@
 ;;; Code:
 
 (require 'evil)
+(eval-when-compile (require 'cl-lib))
 
 (defgroup evil-snipe nil
   "vim-seek/sneak emulation for Emacs"
@@ -176,7 +177,7 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
   "Returns a cons cell containing (beg . end), which represents the search scope
 depending on what `evil-snipe-scope' is set to."
   (let ((point+1 (1+ (point))))
-    (case evil-snipe-scope
+    (cl-case evil-snipe-scope
       ('line
        (if forward-p
            `(,point+1 . ,(line-end-position))
@@ -310,7 +311,7 @@ KEYS is a list of character codes or strings."
   :jump t
   :type inclusive
   (interactive "<+c><2C>")
-  (case keys
+  (cl-case keys
     ('abort)
     ;; if <enter>, repeat last search
     ('repeat (evil-snipe-repeat count))
@@ -325,7 +326,7 @@ KEYS is a list of character codes or strings."
          (set-transient-map evil-snipe-active-mode-map)
          (unless evil-snipe--last-repeat
            (setq evil-snipe--last (list evil-snipe--this-func count keys)))
-         (case evil-snipe-count-scope
+         (cl-case evil-snipe-count-scope
            ('vertical
             (evil-snipe--seek-vertical count charstr scope-beg scope-end))
            ('letters
