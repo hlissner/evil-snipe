@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5 2014
-;; Modified: December 15, 2014
-;; Version: 1.4.1
+;; Modified: December 20, 2014
+;; Version: 1.5
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.9"))
@@ -25,6 +25,10 @@
 ;;
 ;;     (require 'evil-snipe)
 ;;     (global-evil-snipe-mode 1)
+;;
+;; To replace evil-mode's f/F/t/T functionality with (1-character) snipe, use:
+;;
+;;     (evil-snipe-replace-evil)
 ;;
 ;;; Code:
 
@@ -82,6 +86,11 @@ settings)"
     'vertical    ;; find first match within N (visible) columns"
   :group 'evil-snipe
   :type 'symbol)
+
+(defcustom evil-snipe-show-prompt t
+  "If non-nil, show 'N>' prompt while sniping."
+  :group 'evil-snipe
+  :type 'boolean)
 
 (defvar evil-snipe-auto-disable-substitute t
   "Disables evil's native s/S functionality (substitute) if non-nil. By default
@@ -147,7 +156,7 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
       (evil-half-cursor))
     (catch 'abort
       (while (> i 0)
-        (let* ((prompt (concat (number-to-string i) ">" keys))
+        (let* ((prompt (if evil-snipe-show-prompt (concat (number-to-string i) ">" keys) ""))
                (key (evil-read-key prompt)))
           (cond ((char-equal key ?\t)         ; Tab = adds more characters to search
                  (setq i (1+ i)))
@@ -169,8 +178,7 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                     (when evil-snipe-enable-incremental-highlight
                       (evil-snipe--highlight-clear)
                       (evil-snipe--highlight-rest (concat keys) forward-p)
-                      (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))
-                    ))))
+                      (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))))))
       keys)))
 
 (defun evil-snipe--bounds (&optional forward-p)
@@ -234,19 +242,15 @@ depending on what `evil-snipe-scope' is set to."
           (type (evil-visual-type))
           (skip-pad (length string))
           (evil-op-vs-state-p (or (evil-operator-state-p) (evil-visual-state-p))))
-      (when fwdp (forward-char 1))
+      (when fwdp (forward-char (if evil-snipe--consume-match 2 1)))
       (when evil-snipe-enable-highlight
         (evil-snipe--highlight-rest string fwdp))
       (if (search-forward string (if fwdp scope-end scope-beg) t count) ;; hi |
           (progn
             (when fwdp (backward-char skip-pad))    ;; hi | => h|i
-            (unless evil-op-vs-state-p
-              ;; (when (or evil-snipe-enable-highlight evil-snipe-enable-incremental-highlight)
-              ;;   (evil-snipe--highlight-clear))
-              (when evil-snipe-enable-highlight
-                (evil-snipe--highlight (point) (+ (point) skip-pad) t)
-                ;; (evil-snipe--highlight-rest string fwdp)
-                (add-hook 'pre-command-hook 'evil-snipe--highlight-clear)))
+            (when (and (not evil-op-vs-state-p) evil-snipe-enable-highlight)
+              (evil-snipe--highlight (point) (+ (point) skip-pad) t)
+              (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))
             ;; Adjustments for operator/visual mode
             (if evil-op-vs-state-p                ;; d{?}hi
               (if fwdp
@@ -324,6 +328,12 @@ KEYS is a list of character codes or strings."
               (evil-snipe--this-func (or evil-snipe--this-func 'evil-snipe-s))
               (charstr (concat keys)))
          (set-transient-map evil-snipe-active-mode-map)
+         (set-transient-map
+          (cl-case evil-snipe--this-func
+            ('evil-snipe-f evil-snipe-mode-f-map)
+            ('evil-snipe-t evil-snipe-mode-t-map)
+            ('evil-snipe-s evil-snipe-mode-s-map)
+            (t (error "Tried to activate non-existant keymap: %s" evil-snipe--this-func))))
          (unless evil-snipe--last-repeat
            (setq evil-snipe--last (list evil-snipe--this-func count keys)))
          (cl-case evil-snipe-count-scope
@@ -364,7 +374,7 @@ KEYS is a list of character codes or strings."
   :type inclusive
   (interactive "<+c><1C>")
   (let ((evil-snipe-count-scope nil)
-        (evil-snipe--this-func 'evil-snipe-f))
+        (evil-snipe--this-func (or evil-snipe--this-func 'evil-snipe-f)))
     (evil-snipe-s count keys)))
 
 (evil-define-motion evil-snipe-F (count keys)
@@ -422,6 +432,24 @@ KEYS is a list of character codes or strings."
     (define-key map "," 'evil-snipe-repeat-reverse)
     map))
 
+(defvar evil-snipe-mode-f-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "f" 'evil-snipe-repeat)
+    (define-key map "F" 'evil-snipe-repeat-reverse)
+    map))
+
+(defvar evil-snipe-mode-t-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "t" 'evil-snipe-repeat)
+    (define-key map "T" 'evil-snipe-repeat-reverse)
+    map))
+
+(defvar evil-snipe-mode-s-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "s" 'evil-snipe-repeat)
+    (define-key map "S" 'evil-snipe-repeat-reverse)
+    map))
+
 (defvar evil-snipe-mode-map
   (let ((map (make-sparse-keymap)))
     (evil-define-key 'motion map "s" 'evil-snipe-s)
@@ -458,12 +486,12 @@ KEYS is a list of character codes or strings."
 (defun evil-snipe-replace-evil ()
   "Override evil-mode's f/F/t/T functionality and replace it with evil-snipe's
 version."
-  (let ((map evil-snipe-active-mode-map))
-    (define-key map "f" 'evil-snipe-repeat)
-    (define-key map "F" 'evil-snipe-repeat-reverse)
-    (define-key map "t" 'evil-snipe-repeat)
-    (define-key map "T" 'evil-snipe-repeat-reverse)
-    (evil-snipe-enable-sS))
+  ;; (let ((map evil-snipe-active-mode-map))
+  ;;   (define-key map "f" 'evil-snipe-repeat)
+  ;;   (define-key map "F" 'evil-snipe-repeat-reverse)
+  ;;   (define-key map "t" 'evil-snipe-repeat)
+  ;;   (define-key map "T" 'evil-snipe-repeat-reverse))
+  ;; (evil-snipe-enable-sS)
   (let ((map evil-snipe-mode-map))
     (evil-define-key 'motion map "f" 'evil-snipe-f)
     (evil-define-key 'motion map "F" 'evil-snipe-F)

@@ -4,7 +4,7 @@
 > advice or contributions would be appreciated!
 
 Snipe is a marriage of [vim-sneak](https://github.com/justinmk/vim-sneak) and
-[vim-seek](https://github.com/goldfeld/vim-seek), but for
+[vim-seek](https://github.com/goldfeld/vim-seek) but for
 [evil-mode](https://gitorious.org/evil/pages/Home) on Emacs.
 
 Put simply, evil-snipe is f/F/t/T on steroids. It can be configured to accept N
@@ -62,7 +62,7 @@ Then, to enable globally, add the following to `~/.emacs`:
     * if 'vertical, scope is column bound (vertical scoping)
   * Use `(evil-snipe-replace-evil)` to replace evil-mode's f/F/t/T/;/, with
     snipe. Snipe implements [clever-f](https://github.com/rhysd/clever-f.vim)
-    functionality as well in this case.
+    functionality as well.
 
 ### Planned
 
@@ -87,6 +87,8 @@ Then, to enable globally, add the following to `~/.emacs`:
 
 * To change the highlight colors, configure: `evil-snipe-first-match-face` and
   `evil-snipe-matches-face`
+
+* Disable `N>` prompt when sniping by setting `evil-snipe-show-prompt` to nil
 
 ### Configure like vim-seek
 
