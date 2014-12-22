@@ -6,7 +6,7 @@
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5 2014
 ;; Modified: December 20, 2014
-;; Version: 1.5
+;; Version: 1.5.1
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.9"))
@@ -129,6 +129,8 @@ MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 
 (defvar evil-snipe--this-func nil)
 
+(defvar evil-snipe--transient-map-func nil)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun evil-snipe--count ()
@@ -233,6 +235,11 @@ depending on what `evil-snipe-scope' is set to."
   (remove-overlays nil nil 'category 'evil-snipe)
   (remove-hook 'pre-command-hook 'evil-snipe--highlight-clear))
 
+(defun evil-snipe--disable-transient-map ()
+  (when (functionp evil-snipe--transient-map-func)
+    (funcall evil-snipe--transient-map-func)
+    (setq evil-snipe--transient-map-func nil)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun evil-snipe--seek (count string scope-beg scope-end)
@@ -242,7 +249,10 @@ depending on what `evil-snipe-scope' is set to."
           (type (evil-visual-type))
           (skip-pad (length string))
           (evil-op-vs-state-p (or (evil-operator-state-p) (evil-visual-state-p))))
-      (when fwdp (forward-char (if evil-snipe--consume-match 2 1)))
+      ;; Adjust search starting point
+      (if fwdp
+          (forward-char (if evil-snipe--consume-match 1 2))
+        (unless evil-snipe--consume-match (backward-char 1)))
       (when evil-snipe-enable-highlight
         (evil-snipe--highlight-rest string fwdp))
       (if (search-forward string (if fwdp scope-end scope-beg) t count) ;; hi |
@@ -327,13 +337,13 @@ KEYS is a list of character codes or strings."
               (scope-end (cdr scope))
               (evil-snipe--this-func (or evil-snipe--this-func 'evil-snipe-s))
               (charstr (concat keys)))
-         (set-transient-map evil-snipe-active-mode-map)
-         (set-transient-map
-          (cl-case evil-snipe--this-func
-            ('evil-snipe-f evil-snipe-mode-f-map)
-            ('evil-snipe-t evil-snipe-mode-t-map)
-            ('evil-snipe-s evil-snipe-mode-s-map)
-            (t (error "Tried to activate non-existant keymap: %s" evil-snipe--this-func))))
+         (setq evil-snipe--transient-map-func
+               (set-transient-map
+                (cl-case evil-snipe--this-func
+                  ('evil-snipe-f evil-snipe-mode-f-map)
+                  ('evil-snipe-t evil-snipe-mode-t-map)
+                  ('evil-snipe-s evil-snipe-mode-s-map)
+                  (t (error "Tried to activate non-existant keymap: %s" evil-snipe--this-func)))))
          (unless evil-snipe--last-repeat
            (setq evil-snipe--last (list evil-snipe--this-func count keys)))
          (cl-case evil-snipe-count-scope
@@ -401,51 +411,51 @@ KEYS is a list of character codes or strings."
   (evil-snipe-t count keys))
 
 ;; TODO Write evil-snipe-p
-;; (evil-define-operator evil-snipe-p (count &optional first second))
+;; (evil-define-operator evil-snipe-p (count keys))
 
 ;; TODO Write evil-snipe-P
-;; (evil-define-operator evil-snipe-P (count &optional first second))
+;; (evil-define-operator evil-snipe-P (count keys))
 
 ;; TODO Write evil-snipe-r
-;; (evil-define-operator evil-snipe-r (count &optional first second))
+;; (evil-define-operator evil-snipe-r (count keys))
 
 ;; TODO Write evil-snipe-R
-;; (evil-define-operator evil-snipe-R (count &optional first second))
+;; (evil-define-operator evil-snipe-R (count keys))
 
 ;; TODO Write evil-snipe-p-inner
-;; (evil-define-text-object evil-snipe-p-inner (count &optional first second))
+;; (evil-define-text-object evil-snipe-p-inner (count keys))
 
 ;; TODO Write evil-snipe-P-inner
-;; (evil-define-text-object evil-snipe-P-inner (count &optional first second))
+;; (evil-define-text-object evil-snipe-P-inner (count keys))
 
 ;; TODO Write evil-snipe-r-outer
-;; (evil-define-text-object evil-snipe-r-outer (count &optional first second))
+;; (evil-define-text-object evil-snipe-r-outer (count keys))
 
 ;; TODO Write evil-snipe-R-outer
-;; (evil-define-text-object evil-snipe-R-outer (count &optional first second))
+;; (evil-define-text-object evil-snipe-R-outer (count keys))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar evil-snipe-active-mode-map
+(defvar evil-snipe-mode-f-map
   (let ((map (make-sparse-keymap)))
     (define-key map ";" 'evil-snipe-repeat)
     (define-key map "," 'evil-snipe-repeat-reverse)
-    map))
-
-(defvar evil-snipe-mode-f-map
-  (let ((map (make-sparse-keymap)))
     (define-key map "f" 'evil-snipe-repeat)
     (define-key map "F" 'evil-snipe-repeat-reverse)
     map))
 
 (defvar evil-snipe-mode-t-map
   (let ((map (make-sparse-keymap)))
+    (define-key map ";" 'evil-snipe-repeat)
+    (define-key map "," 'evil-snipe-repeat-reverse)
     (define-key map "t" 'evil-snipe-repeat)
     (define-key map "T" 'evil-snipe-repeat-reverse)
     map))
 
 (defvar evil-snipe-mode-s-map
   (let ((map (make-sparse-keymap)))
+    (define-key map ";" 'evil-snipe-repeat)
+    (define-key map "," 'evil-snipe-repeat-reverse)
     (define-key map "s" 'evil-snipe-repeat)
     (define-key map "S" 'evil-snipe-repeat-reverse)
     map))
@@ -485,13 +495,7 @@ KEYS is a list of character codes or strings."
 ;;;###autoload
 (defun evil-snipe-replace-evil ()
   "Override evil-mode's f/F/t/T functionality and replace it with evil-snipe's
-version."
-  ;; (let ((map evil-snipe-active-mode-map))
-  ;;   (define-key map "f" 'evil-snipe-repeat)
-  ;;   (define-key map "F" 'evil-snipe-repeat-reverse)
-  ;;   (define-key map "t" 'evil-snipe-repeat)
-  ;;   (define-key map "T" 'evil-snipe-repeat-reverse))
-  ;; (evil-snipe-enable-sS)
+version. No need to do `evil-nipe-enable-sS' with this."
   (let ((map evil-snipe-mode-map))
     (evil-define-key 'motion map "f" 'evil-snipe-f)
     (evil-define-key 'motion map "F" 'evil-snipe-F)
@@ -518,13 +522,15 @@ version."
 ;;;###autoload
 (defun turn-on-evil-snipe-mode ()
   "Enable evil-snipe-mode in the current buffer."
-  (advice-add 'evil-force-normal-state :before #'evil-snipe--highlight-clear)
+  (advice-add 'evil-force-normal-state :before 'evil-snipe--highlight-clear)
+  (add-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map)
   (evil-snipe-mode 1))
 
 ;;;###autoload
 (defun turn-off-evil-snipe-mode ()
   "Disable evil-snipe-mode in the current buffer."
-  (advice-remove 'evil-force-normal-state :before #'evil-snipe--highlight-clear)
+  (advice-remove 'evil-force-normal-state :before 'evil-snipe--highlight-clear)
+  (remove-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map)
   (evil-snipe-mode -1))
 
 ;;;###autoload
