@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5 2014
-;; Modified: December 20, 2014
-;; Version: 1.5.1
+;; Modified: December 25, 2014
+;; Version: 1.5.2
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.9"))
@@ -92,6 +92,18 @@ settings)"
   :group 'evil-snipe
   :type 'boolean)
 
+(defcustom evil-snipe-enable-sS nil
+  "Allows s/S for repeating searches if non-nil. Automatically set to t if
+`evil-snipe-replace-evil' is used."
+  :group 'evil-snipe
+  :type 'boolean)
+
+(defcustom evil-snipe-enable-nN nil
+  "Whether to enable n/N for repeating searches"
+  :group 'evil-snipe
+  :type 'boolean)
+
+
 (defvar evil-snipe-auto-disable-substitute t
   "Disables evil's native s/S functionality (substitute) if non-nil. By default
 this is t, since they are mostly redundant with other motions. s can be done
@@ -130,6 +142,8 @@ MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 (defvar evil-snipe--this-func nil)
 
 (defvar evil-snipe--transient-map-func nil)
+
+(defvar evil-snipe--transient-common-map-func nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -238,7 +252,10 @@ depending on what `evil-snipe-scope' is set to."
 (defun evil-snipe--disable-transient-map ()
   (when (functionp evil-snipe--transient-map-func)
     (funcall evil-snipe--transient-map-func)
-    (setq evil-snipe--transient-map-func nil)))
+    (setq evil-snipe--transient-map-func nil))
+  (when (functionp evil-snipe--transient-common-map-func)
+    (funcall evil-snipe--transient-common-map-func)
+    (setq evil-snipe--transient-common-map-func nil)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -337,12 +354,14 @@ KEYS is a list of character codes or strings."
               (scope-end (cdr scope))
               (evil-snipe--this-func (or evil-snipe--this-func 'evil-snipe-s))
               (charstr (concat keys)))
+         (setq evil-snipe--transient-common-map-func
+               (set-transient-map evil-snipe-mode-common-map))
          (setq evil-snipe--transient-map-func
                (set-transient-map
                 (cl-case evil-snipe--this-func
                   ('evil-snipe-f evil-snipe-mode-f-map)
                   ('evil-snipe-t evil-snipe-mode-t-map)
-                  ('evil-snipe-s evil-snipe-mode-s-map)
+                  ('evil-snipe-s (when evil-snipe-enable-sS evil-snipe-mode-s-map))
                   (t (error "Tried to activate non-existant keymap: %s" evil-snipe--this-func)))))
          (unless evil-snipe--last-repeat
            (setq evil-snipe--last (list evil-snipe--this-func count keys)))
@@ -436,26 +455,26 @@ KEYS is a list of character codes or strings."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar evil-snipe-mode-f-map
+(defvar evil-snipe-mode-common-map
   (let ((map (make-sparse-keymap)))
     (define-key map ";" 'evil-snipe-repeat)
     (define-key map "," 'evil-snipe-repeat-reverse)
+    map))
+
+(defvar evil-snipe-mode-f-map
+  (let ((map (make-sparse-keymap)))
     (define-key map "f" 'evil-snipe-repeat)
     (define-key map "F" 'evil-snipe-repeat-reverse)
     map))
 
 (defvar evil-snipe-mode-t-map
   (let ((map (make-sparse-keymap)))
-    (define-key map ";" 'evil-snipe-repeat)
-    (define-key map "," 'evil-snipe-repeat-reverse)
     (define-key map "t" 'evil-snipe-repeat)
     (define-key map "T" 'evil-snipe-repeat-reverse)
     map))
 
 (defvar evil-snipe-mode-s-map
   (let ((map (make-sparse-keymap)))
-    (define-key map ";" 'evil-snipe-repeat)
-    (define-key map "," 'evil-snipe-repeat-reverse)
     (define-key map "s" 'evil-snipe-repeat)
     (define-key map "S" 'evil-snipe-repeat-reverse)
     map))
@@ -496,6 +515,7 @@ KEYS is a list of character codes or strings."
 (defun evil-snipe-replace-evil ()
   "Override evil-mode's f/F/t/T functionality and replace it with evil-snipe's
 version. No need to do `evil-nipe-enable-sS' with this."
+  (evil-snipe-enable-sS)
   (let ((map evil-snipe-mode-map))
     (evil-define-key 'motion map "f" 'evil-snipe-f)
     (evil-define-key 'motion map "F" 'evil-snipe-F)
@@ -507,17 +527,13 @@ version. No need to do `evil-nipe-enable-sS' with this."
 
 ;;;###autoload
 (defun evil-snipe-enable-sS ()
-  "Enables s/S for repeating searches. Not necessary if using `evil-snipe-replace-evil'"
-  (let ((map evil-snipe-active-mode-map))
-    (define-key map "s" 'evil-snipe-repeat)
-    (define-key map "S" 'evil-snipe-repeat-reverse)))
+  "Enables s/S for repeating searches. Not necessary if using `evil-snipe-replace-evil'. Kept for backwards compatibility."
+  (setq evil-snipe-enable-sS t))
 
 ;;;###autoload
 (defun evil-snipe-enable-nN ()
-  "Enables n/N for repeating searches."
-  (let ((map evil-snipe-active-mode-map))
-    (define-key map "n" 'evil-snipe-repeat)
-    (define-key map "N" 'evil-snipe-repeat-reverse)))
+  "Enables n/N for repeating searches. Kept for backwards compatibility."
+  (setq evil-snipe-enable-nN t))
 
 ;;;###autoload
 (defun turn-on-evil-snipe-mode ()
