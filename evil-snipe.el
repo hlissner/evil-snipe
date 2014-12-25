@@ -527,12 +527,14 @@ version. No need to do `evil-nipe-enable-sS' with this."
 
 ;;;###autoload
 (defun evil-snipe-enable-sS ()
-  "Enables s/S for repeating searches. Not necessary if using `evil-snipe-replace-evil'. Kept for backwards compatibility."
+  "Enables s/S for repeating searches. Not necessary if using
+`evil-snipe-replace-evil'. Kept for backwards compatibility."
   (setq evil-snipe-enable-sS t))
 
 ;;;###autoload
 (defun evil-snipe-enable-nN ()
-  "Enables n/N for repeating searches. Kept for backwards compatibility."
+  "(NOT IMPLEMENTED YET) Enables n/N for repeating searches. Kept for backwards
+compatibility."
   (setq evil-snipe-enable-nN t))
 
 ;;;###autoload

@@ -22,10 +22,10 @@ Then, to enable globally, add the following to `~/.emacs`:
 
 ;; Optional!
 (evil-snipe-replace-evil) ;; replaces evil-mode's f/F/t/T/;/, with snipe
-(evil-snipe-enable-nN)    ;; enable repeating searches with n/N
+(evil-snipe-enable-nN)    ;; enable repeating with n/N (not implemented)
 
 ;; not necessary if using (evil-snipe-replace-evil)
-(evil-snipe-enable-sS)    ;; enable repeating searches with s/S
+(evil-snipe-enable-sS)    ;; enable repeating with s/S
 ```
 
 ## Preview
@@ -46,8 +46,7 @@ Then, to enable globally, add the following to `~/.emacs`:
   * `s<Enter>`, `S<Enter>` (reverse), `;` and `,` (reverse) jumps to the next
     match. Note: `;` and `,` should still work directly after sniping even if
     you have rebound them.
-  * Repeating with `s/S` and/or `n/N` can be enabled, see
-    `(evil-snipe-enable-sS)` and `(evil-snipe-enable-sS)`.
+  * Repeating with `s/S` can be enabled, see `(evil-snipe-enable-sS)`.
   * Backspace to undo characters
   * `TAB` in the snipe prompt increments N on the fly. e.g. `s<tab><tab>goal`
   * Highlight matches if `evil-snipe-enable-highlight`
@@ -73,6 +72,7 @@ Then, to enable globally, add the following to `~/.emacs`:
   * `p/P` operators that do what `r/R` does, but stays in the modified location.
   * `r/R/p/P` text-objects, so: `dirwo` will delete the next inner word containing `wo`.
     dorwo will target the next OUTER word.
+  * Repeating with `n/N`?
 
 ## Configuration
 
