@@ -98,12 +98,6 @@ settings)"
   :group 'evil-snipe
   :type 'boolean)
 
-(defcustom evil-snipe-enable-nN nil
-  "Whether to enable n/N for repeating searches"
-  :group 'evil-snipe
-  :type 'boolean)
-
-
 (defvar evil-snipe-auto-disable-substitute t
   "Disables evil's native s/S functionality (substitute) if non-nil. By default
 this is t, since they are mostly redundant with other motions. s can be done
@@ -531,12 +525,6 @@ version. No need to do `evil-nipe-enable-sS' with this."
   "Enables s/S for repeating searches. Not necessary if using
 `evil-snipe-replace-evil'. Kept for backwards compatibility."
   (setq evil-snipe-enable-sS t))
-
-;;;###autoload
-(defun evil-snipe-enable-nN ()
-  "(NOT IMPLEMENTED YET) Enables n/N for repeating searches. Kept for backwards
-compatibility."
-  (setq evil-snipe-enable-nN t))
 
 ;;;###autoload
 (defun turn-on-evil-snipe-mode ()
