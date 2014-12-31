@@ -190,7 +190,7 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                           (setq i (1+ i))
                           (when (= i how-many) (pop keys)))
                       (setq keys (append keys `(,key)))
-                      (setq i (1- i)))
+                      (cl-decf i))
                     (when evil-snipe-enable-incremental-highlight
                       (evil-snipe--highlight-clear)
                       (evil-snipe--highlight-rest (concat keys) forward-p)
@@ -245,9 +245,9 @@ depending on what `evil-snipe-scope' is set to."
       (evil-snipe--highlight (+ beg-offset (match-beginning 0))
                              (+ beg-offset (match-end 0))))))
 
-(defun evil-snipe--highlight-clear ()
+(defun evil-snipe--pre-command ()
   (remove-overlays nil nil 'category 'evil-snipe)
-  (remove-hook 'pre-command-hook 'evil-snipe--highlight-clear))
+  (remove-hook 'pre-command-hook 'evil-snipe--pre-command))
 
 (defun evil-snipe--disable-transient-map ()
   (when (functionp evil-snipe--transient-map-func)
@@ -272,25 +272,26 @@ depending on what `evil-snipe-scope' is set to."
         (unless evil-snipe--consume-match (backward-char 1)))
       (when evil-snipe-enable-highlight
         (evil-snipe--highlight-rest string fwdp))
-      (if (search-forward string (if fwdp scope-end scope-beg) t count) ;; hi |
-          (progn
-            (when fwdp (backward-char skip-pad))    ;; hi | => h|i
-            (when (and (not evil-op-vs-state-p) evil-snipe-enable-highlight)
-              (evil-snipe--highlight (point) (+ (point) skip-pad) t)
-              (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))
-            ;; Adjustments for operator/visual mode
-            (if evil-op-vs-state-p                ;; d{?}hi
-              (if fwdp
-                  (progn
-                    (backward-char)               ;; h|i => |hi
-                    (if evil-snipe--consume-match
-                        (forward-char skip-pad))) ;; hi| (z)
-                (unless evil-snipe--consume-match
-                  (forward-char skip-pad)))       ;; hi| (X)
-              (unless evil-snipe--consume-match
-                (forward-char (if fwdp (- skip-pad) skip-pad)))))
-        (goto-char orig-point)
-        (user-error "Can't find %s" string)))))
+      (unwind-protect
+          (if (search-forward string (if fwdp scope-end scope-beg) t count) ;; hi |
+              (progn
+                (when fwdp (backward-char skip-pad))    ;; hi | => h|i
+                (when (and (not evil-op-vs-state-p) evil-snipe-enable-highlight)
+                  (evil-snipe--highlight (point) (+ (point) skip-pad) t))
+                ;; Adjustments for operator/visual mode
+                (if evil-op-vs-state-p                ;; d{?}hi
+                    (if fwdp
+                        (progn
+                          (backward-char)               ;; h|i => |hi
+                          (if evil-snipe--consume-match
+                              (forward-char skip-pad))) ;; hi| (z)
+                      (unless evil-snipe--consume-match
+                        (forward-char skip-pad)))       ;; hi| (X)
+                  (unless evil-snipe--consume-match
+                    (forward-char (if fwdp (- skip-pad) skip-pad)))))
+            (goto-char orig-point)
+            (user-error "Can't find %s" string))
+        (add-hook 'pre-command-hook 'evil-snipe--pre-command)))))
 
 ;; TODO Implement evil-snipe--seek-vertical
 (defun evil-snipe--seek-vertical (count string scope-beg scope-end)
