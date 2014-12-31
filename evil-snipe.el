@@ -186,7 +186,7 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                       (setq keys (append keys `(,key)))
                       (cl-decf i))
                     (when evil-snipe-enable-incremental-highlight
-                      (evil-snipe--highlight-clear)
+                      (evil-snipe--pre-command)
                       (evil-snipe--highlight-rest (concat keys) forward-p)
                       (add-hook 'pre-command-hook 'evil-snipe--highlight-clear))))))
       keys)))
