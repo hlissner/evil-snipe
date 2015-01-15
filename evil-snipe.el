@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5 2014
-;; Modified: January 9, 2015
-;; Version: 1.5.4
+;; Modified: January 15, 2015
+;; Version: 1.5.5
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.9"))
@@ -530,14 +530,16 @@ version. No need to do `evil-nipe-enable-sS' with this."
 ;;;###autoload
 (defun turn-on-evil-snipe-mode ()
   "Enable evil-snipe-mode in the current buffer."
-  (advice-add 'evil-force-normal-state :before 'evil-snipe--pre-command)
+  (when (fboundp 'advice-remove)
+    (advice-add 'evil-force-normal-state :before 'evil-snipe--pre-command))
   (add-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map)
   (evil-snipe-mode 1))
 
 ;;;###autoload
 (defun turn-off-evil-snipe-mode ()
   "Disable evil-snipe-mode in the current buffer."
-  (advice-remove 'evil-force-normal-state :before 'evil-snipe--pre-command)
+  (when (fboundp 'advice-remove)
+    (advice-remove 'evil-force-normal-state :before 'evil-snipe--pre-command))
   (remove-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map)
   (evil-snipe-mode -1))
 
