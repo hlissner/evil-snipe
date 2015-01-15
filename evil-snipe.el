@@ -350,6 +350,8 @@ KEYS is a list of character codes or strings."
               (scope-end (cdr scope))
               (evil-snipe--this-func (or evil-snipe--this-func 'evil-snipe-s))
               (charstr (concat keys)))
+	 (when (not (fboundp 'set-transient-map))
+	     (defalias 'set-transient-map 'set-temporary-overlay-map))
          (setq evil-snipe--transient-common-map-func
                (set-transient-map evil-snipe-mode-common-map))
          (setq evil-snipe--transient-map-func
