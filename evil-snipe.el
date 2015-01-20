@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5 2014
-;; Modified: January 15, 2015
-;; Version: 1.5.5
+;; Modified: January 20, 2015
+;; Version: 1.5.6
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.9"))
@@ -164,33 +164,35 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
          (i how-many))
     (unless (or (evil-operator-state-p) (not evil-snipe-enable-half-cursor))
       (evil-half-cursor))
-    (catch 'abort
-      (while (> i 0)
-        (let* ((prompt (if evil-snipe-show-prompt (concat (number-to-string i) ">" keys) ""))
-               (key (evil-read-key prompt)))
-          (cond ((char-equal key ?\t)         ; Tab = adds more characters to search
-                 (setq i (1+ i)))
-                ((or (char-equal key ?\n)
-                     (char-equal key 13))
-                 (if (= i how-many)
-                     (throw 'abort 'repeat)
-                   (throw 'abort keys)))
-                ((or (char-equal key ?\C-\[)
-                     (char-equal key ?\C-g))  ; Escape/C-g = abort
-                 (throw 'abort 'abort))
-                (t (if (char-equal key ?\^?)
-                        (progn
-                          (when (= i how-many) (throw 'abort 'abort))
-                          (setq i (1+ i))
-                          (when (= i how-many) (pop keys)))
-                      (setq keys (append keys `(,key)))
-                      (cl-decf i))
-                    (when evil-snipe-enable-incremental-highlight
-                      (evil-snipe--pre-command)
-                      (evil-snipe--highlight-rest (concat keys) forward-p)
-                      (add-hook 'pre-command-hook 'evil-snipe--pre-command))))))
-      (evil-refresh-cursor)
-      keys)))
+    (unwind-protect
+        (catch 'abort
+          (while (> i 0)
+            (let* ((prompt (if evil-snipe-show-prompt (concat (number-to-string i) ">" keys) ""))
+                   (key (evil-read-key prompt)))
+              (cond ((char-equal key ?\t)         ; Tab = adds more characters to search
+                     (setq i (1+ i)))
+                    ((or (char-equal key ?\n)
+                         (char-equal key 13))
+                     (if (= i how-many)
+                         (throw 'abort 'repeat)
+                       (throw 'abort keys)))
+                    ((or (char-equal key ?\C-\[)
+                         (char-equal key ?\C-g))  ; Escape/C-g = abort
+                     (throw 'abort 'abort))
+                    (t (if (char-equal key ?\^?)
+                           (progn
+                             (when (= i how-many) (throw 'abort 'abort))
+                             (setq i (1+ i))
+                             (when (= i how-many) (pop keys)))
+                         (setq keys (append keys `(,key)))
+                         (cl-decf i))
+                       (when evil-snipe-enable-incremental-highlight
+                         (evil-snipe--pre-command)
+                         (evil-snipe--highlight-rest (concat keys) forward-p)
+                         (add-hook 'pre-command-hook 'evil-snipe--pre-command))))))
+
+          keys)
+      (evil-refresh-cursor))))
 
 (defun evil-snipe--bounds (&optional forward-p)
   "Returns a cons cell containing (beg . end), which represents the search scope
