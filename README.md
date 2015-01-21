@@ -30,7 +30,8 @@ Then, to enable globally, add the following to `~/.emacs`:
 
 ## Preview
 
-<-- animated screenshot here soon -->
+![Motion example](screenshots/01.gif)
+![Operator example](screenshots/02.gif)
 
 ## Features
 
