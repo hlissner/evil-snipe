@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5 2014
-;; Modified: January 20, 2015
-;; Version: 1.5.6
+;; Modified: January 30, 2015
+;; Version: 1.5.7
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.9"))
@@ -161,6 +161,7 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                            evil-snipe--match-count)
                      evil-snipe--match-count))
          (keys '())
+         (case-fold-search nil)
          (i how-many))
     (unless (or (evil-operator-state-p) (not evil-snipe-enable-half-cursor))
       (evil-half-cursor))
@@ -350,6 +351,7 @@ KEYS is a list of character codes or strings."
               (scope (evil-snipe--bounds forward-p))
               (scope-beg (car scope))
               (scope-end (cdr scope))
+              (case-fold-search nil)
               (evil-snipe--this-func (or evil-snipe--this-func 'evil-snipe-s))
               (charstr (concat keys)))
 	 (when (not (fboundp 'set-transient-map))
