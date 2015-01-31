@@ -53,7 +53,7 @@ matches. Otherwise, only highlight after you've finished skulking."
   :group 'evil-snipe
   :type 'boolean)
 
-(defcustom evil-snipe-enable-half-cursor t
+(defcustom evil-snipe-enable-half-cursor nil
   "Whether or not to activate half-cursor mode on activation of evil-snipe (for
 more visual feedback)."
   :group 'evil-snipe
