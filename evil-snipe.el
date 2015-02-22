@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5 2014
-;; Modified: January 30, 2015
-;; Version: 1.5.7
+;; Modified: February 22, 2015
+;; Version: 1.5.8
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.9"))
@@ -98,6 +98,13 @@ settings)"
   :group 'evil-snipe
   :type 'boolean)
 
+(defcustom evil-snipe-smart-case nil
+  "By default, searches are case sensitive. If `evil-snipe-smart-case' is
+  enabled, searches are case sensitive only if search contains capital
+  letters."
+  :group 'evil-snipe
+  :type 'boolean)
+
 (defvar evil-snipe-auto-disable-substitute t
   "Disables evil's native s/S functionality (substitute) if non-nil. By default
 this is t, since they are mostly redundant with other motions. s can be done
@@ -141,6 +148,12 @@ MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun evil-snipe--case-p (keystr)
+  (let ((case-fold-search nil))
+    (if evil-snipe-smart-case
+        (not (string-match-p "[A-Z]" keystr))
+      nil)))
+
 (defun evil-snipe--count ()
   (when current-prefix-arg (prefix-numeric-value current-prefix-arg)))
 
@@ -161,7 +174,6 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                            evil-snipe--match-count)
                      evil-snipe--match-count))
          (keys '())
-         (case-fold-search nil)
          (i how-many))
     (unless (or (evil-operator-state-p) (not evil-snipe-enable-half-cursor))
       (evil-half-cursor))
@@ -191,9 +203,9 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                          (evil-snipe--pre-command)
                          (evil-snipe--highlight-rest (concat keys) forward-p)
                          (add-hook 'pre-command-hook 'evil-snipe--pre-command))))))
-
           keys)
-      (evil-refresh-cursor))))
+      (when evil-snipe-enable-half-cursor
+        (evil-refresh-cursor)))))
 
 (defun evil-snipe--bounds (&optional forward-p)
   "Returns a cons cell containing (beg . end), which represents the search scope
@@ -233,6 +245,7 @@ depending on what `evil-snipe-scope' is set to."
   (let* ((bounds (evil-snipe--bounds forward-p))
          (beg (car bounds))
          (end (cdr bounds))
+         (case-fold-search (evil-snipe--case-p match))
          (string (buffer-substring-no-properties beg end))
          (beg-offset (+ (point-min) beg -1))
          (i 0))
@@ -263,6 +276,7 @@ depending on what `evil-snipe-scope' is set to."
           (orig-point (point))
           (type (evil-visual-type))
           (skip-pad (length string))
+          (case-fold-search (evil-snipe--case-p string))
           (evil-op-vs-state-p (or (evil-operator-state-p) (evil-visual-state-p))))
       ;; Adjust search starting point
       (if fwdp
@@ -346,16 +360,15 @@ KEYS is a list of character codes or strings."
     ;; if <enter>, repeat last search
     ('repeat (evil-snipe-repeat count))
     ;; Otherwise, perform the search
-    (t (let* ((count (or count (if evil-snipe--last-direction 1 -1)))
-              (forward-p (> count 0))
+    (t (setq count (or count (if evil-snipe--last-direction 1 -1)))
+       (let* ((forward-p (> count 0))
               (scope (evil-snipe--bounds forward-p))
               (scope-beg (car scope))
               (scope-end (cdr scope))
-              (case-fold-search nil)
               (evil-snipe--this-func (or evil-snipe--this-func 'evil-snipe-s))
               (charstr (concat keys)))
-	 (when (not (fboundp 'set-transient-map))
-	     (defalias 'set-transient-map 'set-temporary-overlay-map))
+         (unless (fboundp 'set-transient-map)
+           (defalias 'set-transient-map 'set-temporary-overlay-map))
          (setq evil-snipe--transient-common-map-func
                (set-transient-map evil-snipe-mode-common-map))
          (setq evil-snipe--transient-map-func

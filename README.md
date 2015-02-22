@@ -63,6 +63,8 @@ Then, to enable globally, add the following to `~/.emacs`:
   * Use `(evil-snipe-replace-evil)` to replace evil-mode's f/F/t/T/;/, with
     snipe. Snipe implements [clever-f](https://github.com/rhysd/clever-f.vim)
     functionality as well.
+  * Supports **smart case**. If `evil-snipe-smart-case` is non-nil, searches
+    will be case-insensitive unless they include capital letters.
 
 ### Planned
 
