@@ -3,28 +3,32 @@
 > This is a new (and potentially buggy) plugin and I am an elisp newb -- any
 > advice or contributions would be appreciated!
 
-Snipe is a marriage of [vim-sneak](https://github.com/justinmk/vim-sneak) and
-[vim-seek](https://github.com/goldfeld/vim-seek) but for
-[evil-mode](https://gitorious.org/evil/pages/Home) on Emacs.
+Evil-snipe marries [vim-sneak](https://github.com/justinmk/vim-sneak) and
+[vim-seek](https://github.com/goldfeld/vim-seek) with Emacs, for evil. How evil.
 
-Put simply, evil-snipe is f/F/t/T on steroids. It can be configured to accept N
-characters, but by default will accept 2.
+It offers two-character searches with `s` and `S` keys (forward and back,
+respectively), and `z`/`Z` in operator mode.
+
+Evil-snipe can be configured to accept N-characters (to possibly replace
+evil-search or acejump). Or if you prefer, it can replace evil's native f/F/t/T
+functionality.
+
+Truly evil.
 
 ## Installation
 
-Evil-snipe can be installed from MELPA, via `M-x package-install RET evil-snipe`
+Evil-snipe is on MELPA, install it with `M-x package-install RET evil-snipe`
 
-Then, to enable globally, add the following to `~/.emacs`:
+And enable it with:
 
 ```elisp
 (require 'evil-snipe)
 (global-evil-snipe-mode 1)
 
-;; Optional!
+;; OPTIONAL:
 (evil-snipe-replace-evil) ;; replaces evil-mode's f/F/t/T/;/, with snipe
-(evil-snipe-enable-nN)    ;; enable repeating with n/N (not implemented)
 
-;; not necessary if using (evil-snipe-replace-evil)
+;; Unnecessary with evil-snipe-replace-evil
 (evil-snipe-enable-sS)    ;; enable repeating with s/S
 ```
 
@@ -44,12 +48,13 @@ Then, to enable globally, add the following to `~/.emacs`:
     * `|the abacus is` => `dxab` => `|abacus is`
     * `the abacus| is` => `dXab` => `the ab| is`
   * Snipe is always literal: `s\*` jumps to a literal `\*`
-  * `s<Enter>`, `S<Enter>` (reverse), `;` and `,` (reverse) jumps to the next
-    match. Note: `;` and `,` should still work directly after sniping even if
-    you have rebound them.
-  * Repeating with `s/S` can be enabled, see `(evil-snipe-enable-sS)`.
+  * `s<Enter>` repeats, `S<Enter>` repeats in the opposite direction. `;` and
+    `,` are aliases.
+  * [Clever-f](https://github.com/rhysd/clever-f.vim) functionality: repeat
+    searchs with `s` and `S` (reverse) (see `evil-snipe-enable-sS`), and
+    `f/F/t/T` if you used `(evil-snipe-replace-evil)`.
   * Backspace to undo characters
-  * `TAB` in the snipe prompt increments N on the fly. e.g. `s<tab><tab>goal`
+  * `TAB` in the prompt increments N on the fly. e.g. `s<tab><tab>goal`
   * Highlight matches if `evil-snipe-enable-highlight`
   * Incrementally highlight (as you type) if
     `evil-snipe-enable-incremental-highlight`
@@ -59,10 +64,9 @@ Then, to enable globally, add the following to `~/.emacs`:
   * Change what the count prefix means to snipe with `evil-snipe-count-scope`
     * if nil, treat COUNT as default in vim: times-to-repeat
     * if 'letters, accept COUNT characters
-    * if 'vertical, scope is column bound (vertical scoping)
+    * if 'vertical, scope is column bound (vertical scoping) (not implemented)
   * Use `(evil-snipe-replace-evil)` to replace evil-mode's f/F/t/T/;/, with
-    snipe. Snipe implements [clever-f](https://github.com/rhysd/clever-f.vim)
-    functionality as well.
+    snipe.
   * Supports **smart case**. If `evil-snipe-smart-case` is non-nil, searches
     will be case-insensitive unless they include capital letters.
 
@@ -79,12 +83,13 @@ Then, to enable globally, add the following to `~/.emacs`:
 
 ## Configuration
 
-* Sniping in visual mode:
+* If you want sniping in visual mode:
 
   ```elisp
   (evil-define-key 'visual evil-snipe-mode-map "z" 'evil-snipe-f)
   (evil-define-key 'visual evil-snipe-mode-map "Z" 'evil-snipe-F)
   ```
+
 * Snipe disables evil-mode's substitute commands (s/S). To prevent this,
   set `evil-snipe-auto-disable-substitute` to nil (before evil-snipe is loaded).
 
