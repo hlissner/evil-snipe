@@ -110,14 +110,16 @@ settings)"
   :type 'boolean)
 
 (defcustom evil-snipe-symbol-groups '()
-  "You specify key aliases here, in the format '(KEY REGEX). An example is '(?[
-\"[[{(]\"). Any instance of KEY will be replaced with REGEX. This var is
-buffer-local, so feel free to set it on a per-buffer basis (for mode-specific
-symbol groups).
+  "You specify key aliases here, in the format '(KEY REGEX). Any instance of KEY
+will be replaced with REGEX.
 
-Add rules like so:
+Here are some examples:
 
-    (add-to-list 'evil-snipe-symbol-groups '(?] \"[]})]\"))"
+    ;; Alias [ and ] to all types of brackets
+    (add-to-list 'evil-snipe-symbol-groups '(?\\] \"[]})]\"))
+    (add-to-list 'evil-snipe-symbol-groups '(?\\[ \"[[{(]\"))
+    ;; For python style functions
+    (add-to-list 'evil-snipe-symbol-groups '(?\\: \"def .+:\"\))"
   :group 'evil-snipe
   :type 'list)
 
