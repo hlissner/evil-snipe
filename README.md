@@ -24,12 +24,6 @@ And enable it with:
 ```elisp
 (require 'evil-snipe)
 (global-evil-snipe-mode 1)
-
-;; OPTIONAL:
-(evil-snipe-replace-evil) ;; replaces evil-mode's f/F/t/T/;/, with snipe
-
-;; Unnecessary with evil-snipe-replace-evil
-(evil-snipe-enable-sS)    ;; enable repeating with s/S
 ```
 
 ## Preview
@@ -50,11 +44,13 @@ And enable it with:
   * Snipe is always literal: `s\*` jumps to a literal `\*`
   * `s<Enter>` repeats, `S<Enter>` repeats in the opposite direction. `;` and
     `,` are aliases.
-  * [Clever-f](https://github.com/rhysd/clever-f.vim) functionality: repeat
-    searchs with `s` and `S` (reverse) (see `evil-snipe-enable-sS`), and
-    `f/F/t/T` if you used `(evil-snipe-replace-evil)`.
+  * Set `evil-snipe-override-evil` to non-nil to
+  * [Clever-f](https://github.com/rhysd/clever-f.vim) functionality
+    (`evil-snipe-repeat-keys`): repeat searchs with `s` and `S` (reverse). Also
+    applies to `f/F/t/T` if you used `evil-snipe-override-evil`.
   * Backspace to undo characters
-  * `TAB` in the prompt increments N on the fly. e.g. `s<tab><tab>goal`
+  * `TAB` in the prompt increments N on the fly, and lets you type more
+    characters. e.g. `s<tab><tab>goal`
   * Highlight matches if `evil-snipe-enable-highlight`
   * Incrementally highlight (as you type) if
     `evil-snipe-enable-incremental-highlight`
@@ -65,10 +61,12 @@ And enable it with:
     * if nil, treat COUNT as default in vim: times-to-repeat
     * if 'letters, accept COUNT characters
     * if 'vertical, scope is column bound (vertical scoping) (not implemented)
-  * Use `(evil-snipe-replace-evil)` to replace evil-mode's f/F/t/T/;/, with
-    snipe.
   * Supports **smart case**. If `evil-snipe-smart-case` is non-nil, searches
     will be case-insensitive unless they include capital letters.
+  * Regex symbol groups. See `evil-snipe-symbol-groups`. You can map single
+    characters to entire regex expressions. For instance, `]` => `[])}]`
+  * Set `evil-snipe-auto-scroll` to non-nil to have window scroll with your
+    searches (keeps your selection on the same line).
 
 ### Planned
 
@@ -96,7 +94,26 @@ And enable it with:
 * To change the highlight colors, configure: `evil-snipe-first-match-face` and
   `evil-snipe-matches-face`
 
-* Disable `N>` prompt when sniping by setting `evil-snipe-show-prompt` to nil
+### Variables
+
+Use `M-x describe-variable` to get more information.
+
+  * `evil-snipe-override-evil (nil)`: Replace evil-mode's f/F/t/T/;/, with
+    snipe.
+  * `evil-snipe-repeat-keys (t)`: enable repeating searches with s/S (applies to
+    f/F/t/T if `evil-snipe-override-evil` is t).
+  * `evil-snipe-enable-highlight (t)`: highlight search matches.
+  * `evil-snipe-enable-incremental-highlight (t)`: highlight search matches as
+    you type.
+  * `evil-snipe-scope ('visible)`: control scope of searches.
+  * `evil-snipe-repeat-scope ('whole-visible')`: control scope of repeated
+    searches (accepts same as `evil-snipe-scope`).
+  * `evil-snipe-show-prompt (t)`: show `N>` prompt in minibuffer while sniping, if non-nil.
+  * `evil-snipe-smart-case (nil)`: if non-nil, searches are case sensitive only
+    when capitals are used.
+  * `evil-snipe-auto-scroll (t)`: if non-nil, window will follow your cursor as you snipe.
+  * `evil-snipe-symbol-groups ('())`: a list of `'(CHAR REGEX)`'s that map
+    specific characters to regex patterns.
 
 ### Configure like vim-seek
 
@@ -106,13 +123,12 @@ And enable it with:
 (setq evil-snipe-count-scope nil)
 (setq evil-snipe-search-highlight nil)
 (setq evil-snipe-search-incremental-highlight nil)
-(setq evil-snipe-enable-half-cursor nil)
 ```
 
 ### Configure like vim-sneak
 
 ```elisp
-(evil-snipe-enable-sS)
+(setq evil-snipe-repeat-keys t)
 
 ;; or 'buffer, 'whole-visible or 'whole-buffer
 (setq evil-snipe-scope 'visible)
@@ -121,7 +137,6 @@ And enable it with:
 (setq evil-snipe-count-scope 'vertical)  ;; not implemented yet
 (setq evil-snipe-enable-highlight t)
 (setq evil-snipe-enable-incremental-highlight t)
-(setq evil-snipe-enable-half-cursor nil)
 ```
 
 ### Compatibility
