@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5 2014
-;; Modified: February 28, 2015
-;; Version: 1.6.0
+;; Modified: March 1, 2015
+;; Version: 1.6.1
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.9"))
@@ -198,7 +198,7 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
     (unwind-protect
         (catch 'abort
           (while (> i 0)
-            (let* ((prompt (if evil-snipe-show-prompt (concat (number-to-string i) ">" keys) ""))
+            (let* ((prompt (if evil-snipe-show-prompt (concat (number-to-string i) ">" (mapconcat 'cdr data "")) ""))
                    (key (evil-read-key prompt)))
               (cond ((char-equal key ?\t)         ; Tab = adds more characters to search
                      (setq i (1+ i)))
