@@ -6,7 +6,7 @@
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5 2014
 ;; Modified: March 1, 2015
-;; Version: 1.6.1
+;; Version: 1.6.2
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.9"))
@@ -269,7 +269,9 @@ depending on what `evil-snipe-scope' is set to."
   (unless (overlays-in beg end)
     (let ((x (make-overlay beg end)))
       (overlay-put x 'face (if first-p 'evil-snipe-first-match-face 'evil-snipe-matches-face))
-      (overlay-put x 'category 'evil-snipe))))
+      (overlay-put x 'category 'evil-snipe)
+      (overlay-put x 'priority 100)
+      (overlay-put x 'window t))))
 
 (defun evil-snipe--highlight-all (count match &optional regex-p)
   "Highlight all instances of `match' ahead of the cursor, or behind it if
@@ -322,55 +324,50 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
       ('abort)
       ;; if <enter>, repeat last search
       ('repeat (evil-snipe-repeat count))
+      ;; If KEYS is empty.
+      ('() (user-error "No keys provided!"))
       ;; Otherwise, perform the search
       (t (let ((count (or count (if evil-snipe--last-direction 1 -1)))
-               (keymap (if (keymapp keymap) keymap)))
+               (keymap (if (keymapp keymap) keymap))
+               (data (if (consp (nth 0 keys)) keys (evil-snipe--process-keys keys))))
            (unless evil-snipe--last-repeat
-             (setq evil-snipe--last (list count keys keymap
+             (setq evil-snipe--last (list count data keymap
                                           evil-snipe--consume-match
                                           evil-snipe--match-count)))
            (cl-case evil-snipe-count-scope
              ('vertical
-              (evil-snipe--seek-vertical count keys))
+              (evil-snipe--seek-vertical count data))
              ('letters
-              (evil-snipe--seek (if (> count 0) 1 -1) keys))
+              (evil-snipe--seek (if (> count 0) 1 -1) data))
              (t
-              (evil-snipe--seek count keys))))))))
+              (evil-snipe--seek count data))))))))
 
-(defun evil-snipe--seek (count keys)
+(defun evil-snipe--seek (count data)
   "(INTERNAL) Perform a snipe and adjust cursor position depending on mode."
-  (when (> (length keys) 0)
+  (when (> (length data) 0)
     (let* (new-orig-point
            (orig-point (point))
            (forward-p (> count 0))
-           (string (mapconcat 'cdr keys ""))
-           (offset (length keys))
+           (string (mapconcat 'cdr data ""))
+           (offset (length data))
            (scope (evil-snipe--bounds forward-p))
-           (search-func (if (assoc t keys) 're-search-forward 'search-forward))
+           (regex-p (assoc t data))
+           (search-func (if regex-p 're-search-forward 'search-forward))
            (evil-op-vs-state-p (or (evil-operator-state-p) (evil-visual-state-p))))
       ;; Adjust search starting point
-      (if forward-p
-          (forward-char (if evil-snipe--consume-match 1 2))
-        (unless evil-snipe--consume-match (backward-char 1)))
-      (when evil-snipe-enable-highlight
-        (evil-snipe--highlight-all count string))
+      (if forward-p (forward-char))
+      (unless evil-snipe--consume-match (if forward-p (forward-char) (backward-char)))
       (unwind-protect
           (if (funcall search-func string (if forward-p (cdr scope) (car scope)) t count) ;; hi |
-              (progn
-                (when forward-p (backward-char offset))    ;; hi | => h|i
+              (let* ((beg (match-beginning 0))
+                     (end (match-end 0)))
+                (if forward-p
+                    (progn
+                      (goto-char (if evil-op-vs-state-p (1- end) beg))
+                      (unless evil-snipe--consume-match (backward-char offset)))
+                  (goto-char (if evil-snipe--consume-match beg end)))
                 (when (and (not evil-op-vs-state-p) evil-snipe-enable-highlight)
-                  (evil-snipe--highlight (point) (+ (point) offset) t))
-                ;; Adjustments for operator/visual mode
-                (if evil-op-vs-state-p                  ;; d{?}hi
-                    (if forward-p
-                        (progn
-                          (backward-char)               ;; h|i => |hi
-                          (if evil-snipe--consume-match
-                              (forward-char offset))) ;; hi| (z)
-                      (unless evil-snipe--consume-match
-                        (forward-char offset)))       ;; hi| (X)
-                  (unless evil-snipe--consume-match
-                    (forward-char (if forward-p (- offset) skip-pad))))
+                  (evil-snipe--highlight beg end t))
                 (when evil-snipe-auto-scroll
                   (setq new-orig-point (point))
                   (evil-scroll-line-down (- (line-number-at-pos) (line-number-at-pos orig-point)))
@@ -379,6 +376,8 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                   (setq evil-snipe--transient-map-func (set-transient-map keymap))))
             (goto-char orig-point)
             (user-error "Can't find %s" string))
+        (when evil-snipe-enable-highlight
+          (evil-snipe--highlight-all count string))
         (add-hook 'pre-command-hook 'evil-snipe--pre-command)))))
 
 ;; TODO Implement evil-snipe--seek-vertical
