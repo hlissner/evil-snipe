@@ -184,7 +184,7 @@ MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
   (let ((regex-p (assoc key evil-snipe-symbol-groups))
         (keystr (if (characterp key) (char-to-string key) key)))
     (cons keystr
-          (if regex-p (elt regex-p 1) keystr))))
+          (if regex-p (elt regex-p 1) (regexp-quote keystr)))))
 
 (defun evil-snipe--process-keys (keys)
   (mapcar 'evil-snipe--process-key keys))
