@@ -99,8 +99,8 @@ settings)"
 
 (defcustom evil-snipe-smart-case nil
   "By default, searches are case sensitive. If `evil-snipe-smart-case' is
-  enabled, searches are case sensitive only if search contains capital
-  letters."
+enabled, searches are case sensitive only if search contains capital
+letters."
   :group 'evil-snipe
   :type 'boolean)
 
@@ -324,7 +324,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
       ('abort)
       ;; if <enter>, repeat last search
       ('repeat (evil-snipe-repeat count))
-      ;; If KEYS is empty.
+      ;; If KEYS is empty
       ('() (user-error "No keys provided!"))
       ;; Otherwise, perform the search
       (t (let ((count (or count (if evil-snipe--last-direction 1 -1)))
@@ -361,17 +361,21 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
           (if (funcall search-func string (if forward-p (cdr scope) (car scope)) t count) ;; hi |
               (let* ((beg (match-beginning 0))
                      (end (match-end 0)))
+                ;; Set cursor position
                 (if forward-p
                     (progn
                       (goto-char (if evil-op-vs-state-p (1- end) beg))
                       (unless evil-snipe--consume-match (backward-char offset)))
                   (goto-char (if evil-snipe--consume-match beg end)))
+                ;; Highlight first result (except when in operator/visual mode)
                 (when (and (not evil-op-vs-state-p) evil-snipe-enable-highlight)
                   (evil-snipe--highlight beg end t))
+                ;; Follow the cursor
                 (when evil-snipe-auto-scroll
                   (setq new-orig-point (point))
                   (evil-scroll-line-down (- (line-number-at-pos) (line-number-at-pos orig-point)))
                   (goto-char new-orig-point))
+                ;; Activate the repeat keymap
                 (when keymap
                   (setq evil-snipe--transient-map-func (set-transient-map keymap))))
             (goto-char orig-point)
