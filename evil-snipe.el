@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5 2014
-;; Modified: March 1, 2015
-;; Version: 1.6.2
+;; Modified: March 2, 2015
+;; Version: 1.6.3
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.9"))
@@ -167,7 +167,7 @@ MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 
 (defun evil-snipe--case-p (keystr)
   (let ((case-fold-search nil)
-        (keystr (if (not (stringp keystr)) (mapconcat 'cdr keystr "") keystr)))
+        (keystr (if (not (stringp keystr)) (evil-snipe--key-patterns keystr) keystr)))
     (if evil-snipe-smart-case
         (not (string-match-p "[A-Z]" keystr))
       nil)))
@@ -180,13 +180,20 @@ MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
         (evil-snipe--match-count (or how-many 2)))
     (list (evil-snipe--collect-keys count evil-snipe--last-direction))))
 
+(defun evil-snipe--process-key (key)
+  (let ((regex-p (assoc key evil-snipe-symbol-groups))
+        (keystr (if (characterp key) (char-to-string key) key)))
+    (cons keystr
+          (if regex-p (elt regex-p 1) keystr))))
+
 (defun evil-snipe--process-keys (keys)
-  (mapcar (lambda (key)
-            (let ((regex-p (assoc key evil-snipe-symbol-groups)))
-              (list (if regex-p t nil)
-                    (if regex-p (elt regex-p 1) (char-to-string key))
-                    key)))
-            keys))
+  (mapcar 'evil-snipe--process-key keys))
+
+(defun evil-snipe--keys (data)
+  (mapconcat 'car data ""))
+
+(defun evil-snipe--key-patterns (data)
+  (mapconcat 'cdr data ""))
 
 (defun evil-snipe--collect-keys (&optional count forward-p)
   "The core of evil-snipe's N-character searching. Prompts for
@@ -208,7 +215,8 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
     (unwind-protect
         (catch 'abort
           (while (> i 0)
-            (let* ((prompt (if evil-snipe-show-prompt (concat (number-to-string i) ">" (mapconcat 'cdr data "")) ""))
+            (let* ((keystr (evil-snipe--keys data))
+                   (prompt (if evil-snipe-show-prompt (concat (number-to-string i) ">" keystr) ""))
                    (key (evil-read-key prompt)))
               (cond ((char-equal key ?\t)         ; Tab = adds more characters to search
                      (setq i (1+ i)))
@@ -226,12 +234,11 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                              (cl-incf i)
                              (when (= i how-many) (pop data)))
                          (setq regex-p (assoc key evil-snipe-symbol-groups))
-                         (setq data (append data (list (cons (if regex-p t nil)
-                                                             (if regex-p (elt regex-p 1) (char-to-string key))))))
+                         (setq data (append data (list (evil-snipe--process-key key))))
                          (cl-decf i))
                        (when evil-snipe-enable-incremental-highlight
                          (evil-snipe--pre-command)
-                         (evil-snipe--highlight-all count (mapconcat 'cdr data "") (assoc t data))
+                         (evil-snipe--highlight-all count (evil-snipe--key-patterns data))
                          (add-hook 'pre-command-hook 'evil-snipe--pre-command))))))
           data))))
 
@@ -273,7 +280,7 @@ depending on what `evil-snipe-scope' is set to."
       (overlay-put x 'priority 100)
       (overlay-put x 'window t))))
 
-(defun evil-snipe--highlight-all (count match &optional regex-p)
+(defun evil-snipe--highlight-all (count match)
   "Highlight all instances of `match' ahead of the cursor, or behind it if
 `forward-p' is nil."
   (let* ((forward-p (> count 0))
@@ -281,11 +288,11 @@ depending on what `evil-snipe-scope' is set to."
          (beg (car bounds))
          (end (cdr bounds))
          (beg-offset (+ (point-min) beg -1))
-         (case-fold-search (evil-snipe--case-p match))
          (string (buffer-substring-no-properties beg end))
+         (case-fold-search (evil-snipe--case-p match))
          (i 0))
     (while (and (< i (length string))
-                (string-match (if regex-p match (regexp-quote match)) string i))
+                (string-match match string i))
       (when (= (% i count) 0)
         ;; TODO Apply column-bound highlighting
         (evil-snipe--highlight (+ beg-offset (match-beginning 0))
@@ -348,17 +355,15 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
     (let* (new-orig-point
            (orig-point (point))
            (forward-p (> count 0))
-           (string (mapconcat 'cdr data ""))
+           (string (evil-snipe--key-patterns data))
            (offset (length data))
            (scope (evil-snipe--bounds forward-p))
-           (regex-p (assoc t data))
-           (search-func (if regex-p 're-search-forward 'search-forward))
            (evil-op-vs-state-p (or (evil-operator-state-p) (evil-visual-state-p))))
       ;; Adjust search starting point
       (if forward-p (forward-char))
       (unless evil-snipe--consume-match (if forward-p (forward-char) (backward-char)))
       (unwind-protect
-          (if (funcall search-func string (if forward-p (cdr scope) (car scope)) t count) ;; hi |
+          (if (re-search-forward string (if forward-p (cdr scope) (car scope)) t count) ;; hi |
               (let* ((beg (match-beginning 0))
                      (end (match-end 0)))
                 ;; Set cursor position
