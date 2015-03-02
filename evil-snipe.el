@@ -4,9 +4,9 @@
 ;;
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
-;; Created: December 5 2014
+;; Created: December 5, 2014
 ;; Modified: March 2, 2015
-;; Version: 1.6.3
+;; Version: 1.6.4
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.9"))
