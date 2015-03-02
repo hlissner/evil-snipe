@@ -180,6 +180,14 @@ MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
         (evil-snipe--match-count (or how-many 2)))
     (list (evil-snipe--collect-keys count evil-snipe--last-direction))))
 
+(defun evil-snipe--process-keys (keys)
+  (mapcar (lambda (key)
+            (let ((regex-p (assoc key evil-snipe-symbol-groups)))
+              (list (if regex-p t nil)
+                    (if regex-p (elt regex-p 1) (char-to-string key))
+                    key)))
+            keys))
+
 (defun evil-snipe--collect-keys (&optional count forward-p)
   "The core of evil-snipe's N-character searching. Prompts for
 `evil-snipe--match-count' characters, which can be incremented by pressing TAB.
@@ -218,10 +226,8 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                              (cl-incf i)
                              (when (= i how-many) (pop data)))
                          (setq regex-p (assoc key evil-snipe-symbol-groups))
-                         (if regex-p
-                             (setq key (elt regex-p 1))
-                           (setq key (char-to-string key)))
-                         (setq data (append data (list (cons (if regex-p t nil) key))))
+                         (setq data (append data (list (cons (if regex-p t nil)
+                                                             (if regex-p (elt regex-p 1) (char-to-string key))))))
                          (cl-decf i))
                        (when evil-snipe-enable-incremental-highlight
                          (evil-snipe--pre-command)
