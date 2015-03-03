@@ -3,6 +3,23 @@
 > This is a new (and potentially buggy) plugin and I am an elisp newb -- any
 > advice or contributions would be appreciated!
 
+## Short explanation
+
+Evil-snipe is a package that enables you to search more quickly and precisely in the buffer.
+It does so by improving on the built in `f`/`F`/`t`/`T` searches and adding another search command, namely
+`s`/`S`.
+
+### Improved f and t search behavior
+
+With evil-snipe you can define your own search scope for `f` and `t` searches which means that you won't have to jump to the correct line
+before searching with `f`/`t`/`F`/`T`. And after you have found a match, you can just press `f` or `t` again afterwards to continue the search. No need to use `;`/`,`.
+
+### New two-character search with s
+
+With the buttons `s`/`S` you can do a simple search like `f`/`t`, but instead of searching for one character, you search for two. This makes the search about 50 times more precise than regular `f`/`t` searches. While you can search forward or backwards in the buffer with `/` and `?`, `s`/`S` are much easier to reach, does not require you to press enter and is precise enough for very many common purposes. Try it and I'm sure you'll love it!
+
+## More info
+
 Evil-snipe marries [vim-sneak](https://github.com/justinmk/vim-sneak) and
 [vim-seek](https://github.com/goldfeld/vim-seek) with Emacs, for evil. How evil.
 
