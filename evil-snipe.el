@@ -104,7 +104,7 @@ letters."
   :group 'evil-snipe
   :type 'boolean)
 
-(defcustom evil-snipe-auto-scroll t
+(defcustom evil-snipe-auto-scroll nil
   "If non-nil, the window will scroll to follow the cursor."
   :group 'evil-snipe
   :type 'boolean)

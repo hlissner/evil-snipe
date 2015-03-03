@@ -111,7 +111,7 @@ Use `M-x describe-variable` to get more information.
   * `evil-snipe-show-prompt (t)`: show `N>` prompt in minibuffer while sniping, if non-nil.
   * `evil-snipe-smart-case (nil)`: if non-nil, searches are case sensitive only
     when capitals are used.
-  * `evil-snipe-auto-scroll (t)`: if non-nil, window will follow your cursor as you snipe.
+  * `evil-snipe-auto-scroll (nil)`: if non-nil, window will follow your cursor as you snipe.
   * `evil-snipe-symbol-groups ('())`: a list of `'(CHAR REGEX)`'s that map
     specific characters to regex patterns.
 
