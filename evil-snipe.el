@@ -449,7 +449,7 @@ KEYS is a list of character codes or strings."
   :jump t
   :type inclusive
   (interactive "<+c><2C>")
-  (evil-snipe-seek count keys (evil-snipe--transient-map "s" "S")))
+  (evil-snipe-seek count keys evil-snipe-mode-s-map))
 
 (evil-define-motion evil-snipe-S (count keys)
   "Performs a reverse `evil-snipe-s'"
@@ -467,7 +467,7 @@ KEYS is a list of character codes or strings."
   :type inclusive
   (interactive "<+c><2C>")
   (let ((evil-snipe--consume-match nil))
-    (evil-snipe-seek count keys (evil-snipe--transient-map "x" "X"))))
+    (evil-snipe-seek count keys evil-snipe-mode-x-map)))
 
 (evil-define-motion evil-snipe-X (count keys)
   "Performs an backwards, exclusive `evil-snipe-S'"
@@ -485,7 +485,7 @@ KEYS is a list of character codes or strings."
   :type inclusive
   (interactive "<+c><1C>")
   (let ((evil-snipe-count-scope nil))
-    (evil-snipe-seek count keys (evil-snipe--transient-map "f" "F"))))
+    (evil-snipe-seek count keys evil-snipe-mode-f-map)))
 
 (evil-define-motion evil-snipe-F (count keys)
   "Jump forward to next match of {char}"
@@ -503,7 +503,7 @@ KEYS is a list of character codes or strings."
   :type inclusive
   (interactive "<+c><1C>")
   (let ((evil-snipe--consume-match nil))
-    (evil-snipe-seek count keys (evil-snipe--transient-map "t" "T"))))
+    (evil-snipe-seek count keys evil-snipe-mode-t-map)))
 
 (evil-define-motion evil-snipe-T (count keys)
   "Jump forward to next match of {char} (exclusive)"
@@ -586,7 +586,12 @@ KEYS is a list of character codes or strings."
   (evil-normalize-keymaps)
   (when (fboundp 'advice-add)
     (advice-add 'evil-force-normal-state :before 'evil-snipe--pre-command))
-  (add-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map))
+  (add-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map)
+
+  (defvar evil-snipe-mode-s-map (evil-snipe--transient-map "s" "S"))
+  (defvar evil-snipe-mode-x-map (evil-snipe--transient-map "x" "X"))
+  (defvar evil-snipe-mode-f-map (evil-snipe--transient-map "f" "F"))
+  (defvar evil-snipe-mode-t-map (evil-snipe--transient-map "t" "T")))
 
 ;;;###autoload
 (define-minor-mode evil-snipe-override-mode
