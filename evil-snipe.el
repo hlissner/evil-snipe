@@ -365,7 +365,9 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
       (unwind-protect
           (if (re-search-forward string (if forward-p (cdr scope) (car scope)) t count) ;; hi |
               (let* ((beg (match-beginning 0))
-                     (end (match-end 0)))
+                     (end (match-end 0))
+                     (window-start (window-start))
+                     (window-end (window-end)))
                 ;; Set cursor position
                 (if forward-p
                     (progn
@@ -378,7 +380,10 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                 ;; Follow the cursor
                 (when evil-snipe-auto-scroll
                   (setq new-orig-point (point))
-                  (evil-scroll-line-down (- (line-number-at-pos) (line-number-at-pos orig-point)))
+                  (if (or (> window-start new-orig-point)
+                          (< window-end new-orig-point))
+                      (evil-scroll-line-to-center (line-number-at-pos))
+                    (evil-scroll-line-down (- (line-number-at-pos) (line-number-at-pos orig-point))))
                   (goto-char new-orig-point))
                 ;; Activate the repeat keymap
                 (when keymap
