@@ -5,11 +5,11 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: April 9, 2015
-;; Version: 1.6.5
+;; Modified: May 8, 2015
+;; Version: 1.6.6
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
-;; Package-Requires: ((evil "1.0.9"))
+;; Package-Requires: ((evil "1.1.3"))
 ;;
 ;; This file is not part of GNU Emacs.
 
@@ -253,7 +253,7 @@ depending on what `evil-snipe-scope' is set to."
          `(,(line-beginning-position) . ,(point))))
       ('visible
        (if forward-p
-           `(,point+1 . ,(window-end))
+           `(,point+1 . ,(1- (window-end)))
          `(,(window-start) . ,(point))))
       ('buffer
        (if forward-p
@@ -262,7 +262,7 @@ depending on what `evil-snipe-scope' is set to."
       ('whole-line
        `(,(line-beginning-position) . ,(line-end-position)))
       ('whole-visible
-       `(,(window-start) . ,(window-end)))
+       `(,(window-start) . ,(1- (window-end))))
       ('whole-buffer
        `(,(point-min) . ,(point-max)))
       (t
