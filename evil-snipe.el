@@ -6,7 +6,7 @@
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
 ;; Modified: May 8, 2015
-;; Version: 1.6.7
+;; Version: 1.6.8
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -350,8 +350,8 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                                           evil-snipe--consume-match
                                           evil-snipe--match-count)))
            (cl-case evil-snipe-count-scope
-             ('vertical
-              (evil-snipe--seek-vertical count data))
+             ;; ('vertical
+             ;;  (evil-snipe--seek-vertical count data))
              ('letters
               (evil-snipe--seek (if (> count 0) 1 -1) data))
              (t

@@ -1,54 +1,65 @@
 # evil-snipe
 
-> This is a new (and potentially buggy) plugin and I am an elisp newb -- any
-> advice or contributions would be appreciated!
+Evil-snipe enables you to search quicker and more precisely in the buffer. It
+improves on [evil-mode](https://gitorious.org/evil/pages/Home)'s built-in single
+character motions (`f`/`F`/`t`/`T`) by adding another key pair for 2-char
+searches: `s` and `S` -- as well as `z`/`Z` in operator mode (e.g. following a
+`d` or `c` motion).
 
-## Short explanation
+2-char searchs are 50x more accurate. You _could_ use `/` or `?`, but it saves
+you the extra keystroke of pressing enter and is harder to reach than `s` and
+`S`.
 
-Evil-snipe is a package that enables you to search more quickly and precisely in the buffer.
-It does so by improving on the built in `f`/`F`/`t`/`T` searches and adding another search command, namely
-`s`/`S`.
+## Main Features
 
-### Improved f and t search behavior
+### 2-char search with `s`/`S`
 
-With evil-snipe you can define your own search scope for `f` and `t` searches which means that you won't have to jump to the correct line
-before searching with `f`/`t`/`F`/`T`. And after you have found a match, you can just press `f` or `t` again afterwards to continue the search. No need to use `;`/`,`.
+A 2-char search can be performed with `s{char}{char}`, `S` will do the same backwards.
 
-### New two-character search with s
+### Enhanced 1-char search (`f`/`F`/`t`/`T`)
 
-With the buttons `s`/`S` you can do a simple search like `f`/`t`, but instead of searching for one character, you search for two. This makes the search about 50 times more precise than regular `f`/`t` searches. While you can search forward or backwards in the buffer with `/` and `?`, `s`/`S` are much easier to reach, does not require you to press enter and is precise enough for very many common purposes. Try it and I'm sure you'll love it!
+If `evil-snipe-override-evil` is non-nil, evil-snipe replaces evil-mode's single
+character motions with 1-char sniping; this comes with the added benefit of
+incremental highlighting and a customizable search scope.
 
-## More info
+### Customizable search scope
 
-Evil-snipe marries [vim-sneak](https://github.com/justinmk/vim-sneak) and
-[vim-seek](https://github.com/goldfeld/vim-seek) with Emacs, for evil. How evil.
+Searches are scoped depending on `evil-snipe-scope`'s value, which can be any of:
 
-It offers two-character searches with `s` and `S` keys (forward and back,
-respectively), and `z`/`Z` in operator mode.
+Value            | Description
+-----------------|------------------------------------------------------------
+buffer           | search the rest of the buffer after the cursor (`vim-sneak` behavior)
+line             | **(default)** search the current line after the cursor (`vim-seek` behavior)
+visible          | search the rest of the _visible_ buffer only
+whole-line       | same as `line`, but highlight matches on either side of cursor
+whole-buffer     | same as `buffer`, but highlight *all* matches in buffer
+whole-visible    | same as 'visible, but highlight *all* visible matches in buffer
 
-Evil-snipe can be configured to accept N-characters (to possibly replace
-evil-search or acejump). Or if you prefer, it can replace evil's native f/F/t/T
-functionality.
+Search scope while _repeating_ a previous search is independently adjustable by
+changing `evil-snipe-repeat-scope`, which accepts the same values
+`evil-snipe-scope` does.
 
-Truly evil.
+### Symbol groups
 
-## Installation
+With symbol groups you can map characters to regex patterns. To add a pattern,
+add a `'(CHAR REGEX)` list to `evil-snipe-symbol-groups`.
 
-Evil-snipe is on MELPA, install it with `M-x package-install RET evil-snipe`
+Here are some examples:
 
-And enable it with:
-
+* Mapping `[` and `]` to all brackets allows typing `sa[` to match `a[`, `a(` or
+`a{`, **or** `s].` will match '].', ').' or '}.'
 ```elisp
-(require 'evil-snipe)
-(global-evil-snipe-mode 1)
+(add-to-list 'evil-snipe-symbol-groups '(?\\[ \"[[{(]\"))
+(add-to-list 'evil-snipe-symbol-groups '(?\\] \"[)}]]\"))
 ```
 
-## Preview
+* Mapping `:` to match a python function allows you to quickly cycle through all
+function definitions in a buffer with `f:fff`
+```elisp
+(add-to-list 'evil-snipe-symbol-groups '(?\\: \"def .+:\"\))
+```
 
-![Motion example](screenshots/01.gif)
-![Operator example](screenshots/02.gif)
-
-## Features
+### Overview
 
   * `s/S`
     * `|the abacus is` => `sab`  => `the |abacus is`
@@ -58,13 +69,13 @@ And enable it with:
     * `the abacus| is` => `dZab` => `the | is`
     * `|the abacus is` => `dxab` => `|abacus is`
     * `the abacus| is` => `dXab` => `the ab| is`
-  * Snipe is always literal: `s\*` jumps to a literal `\*`
+  * Snipe is literal: `s\*` jumps to a literal `\*`
   * `s<Enter>` repeats, `S<Enter>` repeats in the opposite direction. `;` and
     `,` are aliases.
-  * Set `evil-snipe-override-evil` to non-nil to
-  * [Clever-f](https://github.com/rhysd/clever-f.vim) functionality
-    (`evil-snipe-repeat-keys`): repeat searchs with `s` and `S` (reverse). Also
-    applies to `f/F/t/T` if you used `evil-snipe-override-evil`.
+  * Set `evil-snipe-override-evil` to non-nil to replace evil-mode's 1-char
+    motions with evil-snipe's 1-char motions.
+  * Repeat searches with `s`, `S` (reverse) if `evil-snipe-repeat-keys` is
+    non-nil. Also applies to `f/F/t/T` if `evil-snipe-override-evil` is set.
   * Backspace to undo characters
   * `TAB` in the prompt increments N on the fly, and lets you type more
     characters. e.g. `s<tab><tab>goal`
@@ -77,96 +88,67 @@ And enable it with:
   * Change what the count prefix means to snipe with `evil-snipe-count-scope`
     * if nil, treat COUNT as default in vim: times-to-repeat
     * if 'letters, accept COUNT characters
-    * if 'vertical, scope is column bound (vertical scoping) (not implemented)
+    * ~~if 'vertical, scope is column bound (vertical scoping)~~ (not implemented)
   * Supports **smart case**. If `evil-snipe-smart-case` is non-nil, searches
     will be case-insensitive unless they include capital letters.
   * Regex symbol groups. See `evil-snipe-symbol-groups`. You can map single
     characters to entire regex expressions. For instance, `]` => `[])}]`
   * Set `evil-snipe-auto-scroll` to non-nil to have window scroll with your
-    searches (keeps your selection on the same line).
+    searches (keeps your selection centered).
+  * `evil-snipe-show-prompt`: whether or not to show `N>` prompt in minibuffer
+    while sniping.
 
-### Planned
+## Installation
 
-  * Vertical-scoping: `5shi` will jump to the next occurance of 'hi' that is
-    within 5 columns of the cursor on any following line.
-  * `r/R` operators for targeting remote objects (e.g. `driwhi` = delete remote inner word
-    'hi'), then return to starting point
-  * `p/P` operators that do what `r/R` does, but stays in the modified location.
-  * `r/R/p/P` text-objects, so: `dirwo` will delete the next inner word containing `wo`.
-    dorwo will target the next OUTER word.
-  * Repeating with `n/N`?
+Evil-snipe is on MELPA: `M-x package-install RET evil-snipe`
+
+Enable it with:
+```elisp
+(require 'evil-snipe)
+(global-evil-snipe-mode 1)
+```
+
+Or for specific modes:
+```elisp
+(add-hook 'prog-mode-hook 'evil-snipe-mode)
+```
 
 ## Configuration
 
 * If you want sniping in visual mode:
-
   ```elisp
   (evil-define-key 'visual evil-snipe-mode-map "z" 'evil-snipe-f)
   (evil-define-key 'visual evil-snipe-mode-map "Z" 'evil-snipe-F)
   ```
-
 * Snipe disables evil-mode's substitute commands (s/S). To prevent this,
   set `evil-snipe-auto-disable-substitute` to nil (before evil-snipe is loaded).
-
 * To change the highlight colors, configure: `evil-snipe-first-match-face` and
   `evil-snipe-matches-face`
 
-### Variables
-
-Use `M-x describe-variable` to get more information.
-
-  * `evil-snipe-override-evil (nil)`: Replace evil-mode's f/F/t/T/;/, with
-    snipe.
-  * `evil-snipe-repeat-keys (t)`: enable repeating searches with s/S (applies to
-    f/F/t/T if `evil-snipe-override-evil` is t).
-  * `evil-snipe-enable-highlight (t)`: highlight search matches.
-  * `evil-snipe-enable-incremental-highlight (t)`: highlight search matches as
-    you type.
-  * `evil-snipe-scope ('visible)`: control scope of searches.
-  * `evil-snipe-repeat-scope ('whole-visible')`: control scope of repeated
-    searches (accepts same as `evil-snipe-scope`).
-  * `evil-snipe-show-prompt (t)`: show `N>` prompt in minibuffer while sniping, if non-nil.
-  * `evil-snipe-smart-case (nil)`: if non-nil, searches are case sensitive only
-    when capitals are used.
-  * `evil-snipe-auto-scroll (nil)`: if non-nil, window will follow your cursor as you snipe.
-  * `evil-snipe-symbol-groups ('())`: a list of `'(CHAR REGEX)`'s that map
-    specific characters to regex patterns.
-
 ### Configure like vim-seek
-
-```elisp
-(setq evil-snipe-scope 'line)
-(setq evil-snipe-repeat-scope 'whole-line)
-(setq evil-snipe-count-scope nil)
-(setq evil-snipe-search-highlight nil)
-(setq evil-snipe-search-incremental-highlight nil)
-```
-
+  ```elisp
+  (setq evil-snipe-scope 'line)
+  (setq evil-snipe-repeat-scope 'whole-line)
+  (setq evil-snipe-count-scope nil)
+  (setq evil-snipe-search-highlight nil)
+  (setq evil-snipe-search-incremental-highlight nil)
+  ```
 ### Configure like vim-sneak
+  ```elisp
+  (setq evil-snipe-repeat-keys t)
 
-```elisp
-(setq evil-snipe-repeat-keys t)
+  ;; or 'buffer, 'whole-visible or 'whole-buffer
+  (setq evil-snipe-scope 'visible)
+  (setq evil-snipe-repeat-scope 'whole-visible)
+  (setq evil-snipe-enable-highlight t)
+  (setq evil-snipe-enable-incremental-highlight t)
 
-;; or 'buffer, 'whole-visible or 'whole-buffer
-(setq evil-snipe-scope 'visible)
-(setq evil-snipe-repeat-scope 'whole-visible)
-
-(setq evil-snipe-count-scope 'vertical)  ;; not implemented yet
-(setq evil-snipe-enable-highlight t)
-(setq evil-snipe-enable-incremental-highlight t)
-```
-
-### Compatibility
-
-* [evil-surround](https://github.com/timcharper/evil-surround) does not conflict
-  with evil-snipe. Surround uses `s/S` in visual mode and `s` in operator mode.
-  Snipe uses `s/S` in normal mode and `z/Z/x/X` in operator mode.
-* [evil-space](https://github.com/linktohack/evil-space) needs more investigating.
+  ;; Note: vertical scoping isn't implemented yet
+  ```
 
 ## Credits
 
 Evil-snipe was inspired by:
-
 * [vim-seek](https://github.com/goldfeld/vim-seek)
 * [vim-sneak](https://github.com/justinmk/vim-sneak)
 * [evil-sneak](https://github.com/AshleyMoni/evil-sneak)
