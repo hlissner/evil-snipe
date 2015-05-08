@@ -6,7 +6,7 @@
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
 ;; Modified: May 8, 2015
-;; Version: 1.6.6
+;; Version: 1.6.7
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -55,6 +55,12 @@ matches. Otherwise, only highlight after you've finished skulking."
 
 (defcustom evil-snipe-override-evil nil
   "If non-nil, replace evil's native f/F/t/T/;/, with evil-snipe."
+  :group 'evil-snipe
+  :type 'boolean)
+
+(defcustom evil-snipe-override-evil-repeat-keys t
+  "If non-nil (while `evil-snipe-override-evil' is non-nil) evil-snipe will
+override evil's ; and , repeat keys in favor of its own."
   :group 'evil-snipe
   :type 'boolean)
 
@@ -436,11 +442,6 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
 (evil-define-interactive-code "<2C>"
   (evil-snipe--interactive 2))
 
-;; (evil-define-interactive-code "<NC>"
-;;   (let ((count (evil-snipe--count))
-;;         (evil-snipe--match-count (or evil-snipe--match-count 2)))
-;;     (list (evil-snipe--collect-keys count evil-snipe--last-direction))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; s/S
 
@@ -517,30 +518,6 @@ KEYS is a list of character codes or strings."
   (interactive "<-c><1C>")
   (evil-snipe-t count keys))
 
-;; TODO Write evil-snipe-p
-;; (evil-define-operator evil-snipe-p (count keys))
-
-;; TODO Write evil-snipe-P
-;; (evil-define-operator evil-snipe-P (count keys))
-
-;; TODO Write evil-snipe-r
-;; (evil-define-operator evil-snipe-r (count keys))
-
-;; TODO Write evil-snipe-R
-;; (evil-define-operator evil-snipe-R (count keys))
-
-;; TODO Write evil-snipe-p-inner
-;; (evil-define-text-object evil-snipe-p-inner (count keys))
-
-;; TODO Write evil-snipe-P-inner
-;; (evil-define-text-object evil-snipe-P-inner (count keys))
-
-;; TODO Write evil-snipe-r-outer
-;; (evil-define-text-object evil-snipe-r-outer (count keys))
-
-;; TODO Write evil-snipe-R-outer
-;; (evil-define-text-object evil-snipe-R-outer (count keys))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar evil-snipe-mode-map
@@ -551,16 +528,6 @@ KEYS is a list of character codes or strings."
     (evil-define-key 'operator map "Z" 'evil-snipe-S)
     (evil-define-key 'operator map "x" 'evil-snipe-x)
     (evil-define-key 'operator map "X" 'evil-snipe-X)
-
-    ;; TODO Enable evil-snipe-r/R/p/P mappings
-    ;; (evil-define-key 'operator map "r" 'evil-snipe-r)
-    ;; (evil-define-key 'operator map "R" 'evil-snipe-R)
-    ;; (evil-define-key 'operator map "p" 'evil-snipe-p)
-    ;; (evil-define-key 'operator map "P" 'evil-snipe-P)
-    ;; (define-key evil-outer-text-objects-map "r" 'evil-snipe-r-outer)
-    ;; (define-key evil-inner-text-objects-map "r" 'evil-snipe-r-inner)
-    ;; (define-key evil-outer-text-objects-map "p" 'evil-snipe-p-outer)
-    ;; (define-key evil-inner-text-objects-map "p" 'evil-snipe-p-inner)
 
     (when evil-snipe-auto-disable-substitute
       ;; Disable s/S (substitute)
@@ -575,12 +542,18 @@ KEYS is a list of character codes or strings."
     (evil-define-key 'motion map "t" 'evil-snipe-t)
     (evil-define-key 'motion map "T" 'evil-snipe-T)
 
-    (evil-define-key 'motion map ";" 'evil-snipe-repeat)
-    (evil-define-key 'motion map "," 'evil-snipe-repeat-reverse)
+    (when evil-snipe-override-evil-repeat-keys
+      (evil-define-key 'motion map ";" 'evil-snipe-repeat)
+      (evil-define-key 'motion map "," 'evil-snipe-repeat-reverse))
   map))
 
 (unless (fboundp 'set-transient-map)
   (defalias 'set-transient-map 'set-temporary-overlay-map))
+
+(defvar evil-snipe-mode-s-map (evil-snipe--transient-map "s" "S"))
+(defvar evil-snipe-mode-x-map (evil-snipe--transient-map "x" "X"))
+(defvar evil-snipe-mode-f-map (evil-snipe--transient-map "f" "F"))
+(defvar evil-snipe-mode-t-map (evil-snipe--transient-map "t" "T"))
 
 ;;;###autoload
 (define-minor-mode evil-snipe-mode
@@ -588,15 +561,9 @@ KEYS is a list of character codes or strings."
   :lighter " snipe"
   :keymap evil-snipe-mode-map
   :group evil-snipe
-  (evil-normalize-keymaps)
-  (when (fboundp 'advice-add)
-    (advice-add 'evil-force-normal-state :before 'evil-snipe--pre-command))
-  (add-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map)
-
-  (defvar evil-snipe-mode-s-map (evil-snipe--transient-map "s" "S"))
-  (defvar evil-snipe-mode-x-map (evil-snipe--transient-map "x" "X"))
-  (defvar evil-snipe-mode-f-map (evil-snipe--transient-map "f" "F"))
-  (defvar evil-snipe-mode-t-map (evil-snipe--transient-map "t" "T")))
+  (if evil-snipe-mode
+      (turn-on-evil-snipe-mode t)
+    (turn-off-evil-snipe-mode t)))
 
 ;;;###autoload
 (define-minor-mode evil-snipe-override-mode
@@ -605,20 +572,26 @@ KEYS is a list of character codes or strings."
   :group evil-snipe)
 
 ;;;###autoload
-(defun turn-on-evil-snipe-mode ()
+(defun turn-on-evil-snipe-mode (&optional internal)
   "Enable evil-snipe-mode in the current buffer."
-  (evil-snipe-mode 1)
+  (unless internal
+    (evil-snipe-mode 1))
   (when evil-snipe-override-evil
-    (evil-snipe-override-mode 1)))
+    (evil-snipe-override-mode 1))
+  (when (fboundp 'advice-add)
+    (advice-add 'evil-force-normal-state :before 'evil-snipe--pre-command))
+  (add-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map))
 
 ;;;###autoload
-(defun turn-off-evil-snipe-mode ()
+(defun turn-off-evil-snipe-mode (&optional internal)
   "Disable evil-snipe-mode in the current buffer."
   (when (fboundp 'advice-remove)
     (advice-remove 'evil-force-normal-state :before 'evil-snipe--pre-command))
   (remove-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map)
-  (evil-snipe-mode -1)
-  (evil-snipe-override-mode -1))
+  (unless internal
+    (evil-snipe-mode -1)
+    (when evil-snipe-override-evil
+      (evil-snipe-override-mode -1))))
 
 ;;;###autoload
 (define-globalized-minor-mode global-evil-snipe-mode
