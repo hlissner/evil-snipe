@@ -199,7 +199,9 @@ MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
   (mapconcat 'car data ""))
 
 (defun evil-snipe--key-patterns (data)
-  (mapconcat 'cdr data ""))
+  (if (symbolp data)
+      ""
+    (mapconcat 'cdr data "")))
 
 (defun evil-snipe--collect-keys (&optional count forward-p)
   "The core of evil-snipe's N-character searching. Prompts for
