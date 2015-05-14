@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: May 8, 2015
-;; Version: 1.6.8
+;; Modified: May 14, 2015
+;; Version: 1.6.9
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -588,7 +588,7 @@ KEYS is a list of character codes or strings."
 (defun turn-off-evil-snipe-mode (&optional internal)
   "Disable evil-snipe-mode in the current buffer."
   (when (fboundp 'advice-remove)
-    (advice-remove 'evil-force-normal-state :before 'evil-snipe--pre-command))
+    (advice-remove 'evil-force-normal-state 'evil-snipe--pre-command))
   (remove-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map)
   (unless internal
     (evil-snipe-mode -1)
