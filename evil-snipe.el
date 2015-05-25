@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: May 14, 2015
-;; Version: 1.6.9
+;; Modified: May 24, 2015
+;; Version: 1.7.0
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -281,12 +281,9 @@ depending on what `evil-snipe-scope' is set to."
 `evil-snipe-first-p-match-face'"
   (if (and first-p (overlays-in beg end))
       (remove-overlays beg end 'category 'evil-snipe))
-  (unless (overlays-in beg end)
-    (let ((x (make-overlay beg end)))
-      (overlay-put x 'face (if first-p 'evil-snipe-first-match-face 'evil-snipe-matches-face))
-      (overlay-put x 'category 'evil-snipe)
-      (overlay-put x 'priority 100)
-      (overlay-put x 'window t))))
+  (let ((overlay (make-overlay beg end nil nil nil)))
+    (overlay-put overlay 'face (if first-p 'evil-snipe-first-match-face 'evil-snipe-matches-face))
+    (overlay-put overlay 'category 'evil-snipe)))
 
 (defun evil-snipe--highlight-all (count match)
   "Highlight all instances of `match' ahead of the cursor, or behind it if
