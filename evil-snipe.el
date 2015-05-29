@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: May 24, 2015
-;; Version: 1.7.0
+;; Modified: May 29, 2015
+;; Version: 1.7.1
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -412,7 +412,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
             (evil-snipe-scope (or evil-snipe-repeat-scope evil-snipe-scope))
             (evil-snipe--consume-match (nth 3 evil-snipe--last))
             (evil-snipe--match-count (nth 4 evil-snipe--last)))
-        (evil-snipe-seek (* count (nth 0 evil-snipe--last))  ;;count
+        (evil-snipe-seek (* count (nth 0 evil-snipe--last) (if evil-snipe--last-direction 1 -1))   ;;count
                         (nth 1 evil-snipe--last)
                         (nth 2 evil-snipe--last)))          ;;keys
     (user-error "Nothing to repeat")))
