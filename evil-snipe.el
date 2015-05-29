@@ -6,7 +6,7 @@
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
 ;; Modified: May 29, 2015
-;; Version: 1.7.1
+;; Version: 1.7.2
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -334,6 +334,25 @@ depending on what `evil-snipe-scope' is set to."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(evil-define-interactive-code "<+c>"
+  "Regular count"
+  (setq evil-snipe--last-direction t)
+  (list (evil-snipe--count)))
+
+(evil-define-interactive-code "<-c>"
+  "Inverted count"
+  (setq evil-snipe--last-direction nil)
+  (let ((count (evil-snipe--count)))
+    (list (if count (- count)))))
+
+(evil-define-interactive-code "<1C>"
+  (evil-snipe--interactive 1))
+
+(evil-define-interactive-code "<2C>"
+  (evil-snipe--interactive 2))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun evil-snipe-seek (count keys &optional keymap)
   "Perform a snipe. KEYS is a list of characters provided by <-c> and <+c>
 interactive codes. KEYMAP is the transient map to activate afterwards."
@@ -341,11 +360,13 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
     (cl-case keys
       ('abort)
       ;; if <enter>, repeat last search
-      ('repeat (evil-snipe-repeat count))
+      ('repeat (if evil-snipe--last-direction
+                   (evil-snipe-repeat count)
+                 (evil-snipe-repeat-reverse count)))
       ;; If KEYS is empty
       ('() (user-error "No keys provided!"))
       ;; Otherwise, perform the search
-      (t (let ((count (or count (if evil-snipe--last-direction 1 -1)))
+      (t (let ((count (or count (if evil-snipe--last (if evil-snipe--last-direction 1 -1) 1)))
                (keymap (if (keymapp keymap) keymap))
                (data (if (consp (nth 0 keys)) keys (evil-snipe--process-keys keys))))
            (unless evil-snipe--last-repeat
@@ -411,41 +432,22 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
 
 (evil-define-command evil-snipe-repeat (count)
   "Repeat the last evil-snipe `count' times"
-  (interactive "<c>")
+  (interactive "<+c>")
   (if (listp evil-snipe--last)
       (let ((evil-snipe--last-repeat t)
             (count (or count 1))
             (evil-snipe-scope (or evil-snipe-repeat-scope evil-snipe-scope))
             (evil-snipe--consume-match (nth 3 evil-snipe--last))
             (evil-snipe--match-count (nth 4 evil-snipe--last)))
-        (evil-snipe-seek (* count (nth 0 evil-snipe--last) (if evil-snipe--last-direction 1 -1))   ;;count
+        (evil-snipe-seek (* count (nth 0 evil-snipe--last))   ;;count
                         (nth 1 evil-snipe--last)
                         (nth 2 evil-snipe--last)))          ;;keys
     (user-error "Nothing to repeat")))
 
 (evil-define-command evil-snipe-repeat-reverse (count)
   "Repeat the inverse of the last evil-snipe `count' times"
-  (interactive "<c>")
-  (evil-snipe-repeat (if count (- count) -1)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(evil-define-interactive-code "<+c>"
-  "Regular count"
-  (setq evil-snipe--last-direction t)
-  (list (evil-snipe--count)))
-
-(evil-define-interactive-code "<-c>"
-  "Inverted count"
-  (setq evil-snipe--last-direction nil)
-  (let ((count (evil-snipe--count)))
-    (list (if count (- count)))))
-
-(evil-define-interactive-code "<1C>"
-  (evil-snipe--interactive 1))
-
-(evil-define-interactive-code "<2C>"
-  (evil-snipe--interactive 2))
+  (interactive "<-c>")
+  (evil-snipe-repeat (or count -1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; s/S
