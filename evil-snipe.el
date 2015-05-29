@@ -217,6 +217,8 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                      evil-snipe--match-count))
          (data '())
          (i how-many)
+         ;; disable this to suppress keys messing with the prompt
+         (echo-keystrokes 0)
          regex-p)
     (unless forward-p
       (setq count (* -1 count)))
@@ -225,22 +227,26 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
           (while (> i 0)
             (let* ((keystr (evil-snipe--keys data))
                    (prompt (if evil-snipe-show-prompt (concat (number-to-string i) ">" keystr) ""))
-                   (key (evil-read-key prompt)))
-              (cond ((char-equal key ?\t)         ; Tab = adds more characters to search
+                   (key (read-key-sequence prompt)))
+              (cond ((equal key [tab])               ; Tab = adds more characters to search
                      (setq i (1+ i)))
-                    ((or (char-equal key ?\n)     ; Premature search
-                         (char-equal key 13))
-                     (if (= i how-many)
+                    ((string-equal key "\^M")        ; Enter = search with
+                     (if (= i how-many)              ;         current characters
                          (throw 'abort 'repeat)
                        (throw 'abort data)))
-                    ((or (char-equal key ?\C-\[)
-                         (char-equal key ?\C-g))  ; Escape/C-g = abort
+                    ((or (string-equal key "\^G")
+                         (equal key [escape]))       ; Escape/C-g = abort
                      (throw 'abort 'abort))
-                    (t (if (char-equal key ?\^?)  ; Otherwise, process key
+                    ;; Otherwise, process key
+                    (t (if (string-equal key "\^?")  ; if backspace, delete a character
                            (progn
-                             (when (= i how-many) (throw 'abort 'abort))
                              (cl-incf i)
-                             (when (= i how-many) (pop data)))
+                             (let ((data-len (length data)))
+                               (if (<= (length data) 1)
+                                   (progn (evil-snipe--pre-command)
+                                          (throw 'abort 'abort))
+                                 (nbutlast data))))
+                         ;; Otherwise add it
                          (setq regex-p (assoc key evil-snipe-symbol-groups))
                          (setq data (append data (list (evil-snipe--process-key key))))
                          (cl-decf i))
