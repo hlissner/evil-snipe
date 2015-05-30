@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: May 29, 2015
-;; Version: 1.7.2
+;; Modified: May 30, 2015
+;; Version: 1.7.3
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -227,18 +227,18 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
           (while (> i 0)
             (let* ((keystr (evil-snipe--keys data))
                    (prompt (if evil-snipe-show-prompt (concat (number-to-string i) ">" keystr) ""))
-                   (key (read-key-sequence prompt)))
-              (cond ((equal key [tab])               ; Tab = adds more characters to search
+                   (key (read-event prompt)))
+              (cond ((eq key 'tab)                  ; Tab = adds more characters to search
                      (setq i (1+ i)))
-                    ((string-equal key "\^M")        ; Enter = search with
-                     (if (= i how-many)              ;         current characters
+                    ((eq key 'return)               ; Enter = search with
+                     (if (= i how-many)             ;         current characters
                          (throw 'abort 'repeat)
                        (throw 'abort data)))
-                    ((or (string-equal key "\^G")
-                         (equal key [escape]))       ; Escape/C-g = abort
+                    ((eq key 'escape)               ; Escape/C-g = abort
+                     (evil-snipe--pre-command)
                      (throw 'abort 'abort))
                     ;; Otherwise, process key
-                    (t (if (string-equal key "\^?")  ; if backspace, delete a character
+                    (t (if (eq key 'backspace)      ; if backspace, delete a character
                            (progn
                              (cl-incf i)
                              (let ((data-len (length data)))
