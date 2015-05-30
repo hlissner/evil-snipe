@@ -259,28 +259,32 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
 (defun evil-snipe--bounds (&optional forward-p)
   "Returns a cons cell containing (beg . end), which represents the search scope
 depending on what `evil-snipe-scope' is set to."
-  (let ((point+1 (1+ (point))))
-    (cl-case evil-snipe-scope
-      ('line
-       (if forward-p
-           `(,point+1 . ,(line-end-position))
-         `(,(line-beginning-position) . ,(point))))
-      ('visible
-       (if forward-p
-           `(,point+1 . ,(1- (window-end)))
-         `(,(window-start) . ,(point))))
-      ('buffer
-       (if forward-p
-           `(,point+1 . ,(point-max))
-         `(,(point-min) . ,(point))))
-      ('whole-line
-       `(,(line-beginning-position) . ,(line-end-position)))
-      ('whole-visible
-       `(,(window-start) . ,(1- (window-end))))
-      ('whole-buffer
-       `(,(point-min) . ,(point-max)))
-      (t
-       (error "Invalid scope: %s" evil-snipe-scope)))))
+  (let* ((point+1 (1+ (point)))
+         (bounds (cl-case evil-snipe-scope
+                   ('line
+                    (if forward-p
+                        `(,point+1 . ,(line-end-position))
+                      `(,(line-beginning-position) . ,(point))))
+                   ('visible
+                    (if forward-p
+                        `(,point+1 . ,(1- (window-end)))
+                      `(,(window-start) . ,(point))))
+                   ('buffer
+                    (if forward-p
+                        `(,point+1 . ,(point-max))
+                      `(,(point-min) . ,(point))))
+                   ('whole-line
+                    `(,(line-beginning-position) . ,(line-end-position)))
+                   ('whole-visible
+                    `(,(window-start) . ,(1- (window-end))))
+                   ('whole-buffer
+                    `(,(point-min) . ,(point-max)))
+                   (t
+                    (error "Invalid scope: %s" evil-snipe-scope))))
+         (end (cdr bounds)))
+    (when (> (car bounds) end)
+      (setq bounds `(,end . ,end)))
+    bounds))
 
 (defun evil-snipe--highlight (beg end &optional first-p)
   "Highlights region between beg and end. If first-p is t, then use
