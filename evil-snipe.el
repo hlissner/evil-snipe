@@ -6,7 +6,7 @@
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
 ;; Modified: May 30, 2015
-;; Version: 1.7.3
+;; Version: 1.7.4
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -91,6 +91,16 @@ settings)"
     'vertical    ;; find first match within N (visible) columns"
   :group 'evil-snipe
   :type 'symbol)
+
+(defcustom evil-snipe-spillover-scope nil
+  "Takes any value `evil-snipe-scope' accepts. If nil, a failed search will
+simply fail. If non-nil, snipe will search for more matches within this scope.
+It is useful only if set to a broader scope than `evil-snipe-scope'.
+
+This also applies to N>1 COUNT prefixes. E.g. if 3sab fails, it will extend the
+scope to `evil-snipe-spillover-scope''s to find a 3rd match."
+  :group 'evil-snipe
+  :type 'boolean)
 
 (defcustom evil-snipe-repeat-keys t
   "If non-nil, pressing s/S after a search will repeat it. If
@@ -256,10 +266,11 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                          (add-hook 'pre-command-hook 'evil-snipe--pre-command))))))
           data))))
 
-(defun evil-snipe--bounds (&optional forward-p)
+(defun evil-snipe--bounds (&optional forward-p count)
   "Returns a cons cell containing (beg . end), which represents the search scope
 depending on what `evil-snipe-scope' is set to."
   (let* ((point+1 (1+ (point)))
+         (evil-snipe-scope (or (if (and count (> (abs count) 1)) evil-snipe-spillover-scope) evil-snipe-scope))
          (bounds (cl-case evil-snipe-scope
                    ('line
                     (if forward-p
@@ -393,7 +404,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
            (forward-p (> count 0))
            (string (evil-snipe--key-patterns data))
            (offset (length data))
-           (scope (evil-snipe--bounds forward-p))
+           (scope (evil-snipe--bounds forward-p count))
            (evil-op-vs-state-p (or (evil-operator-state-p) (evil-visual-state-p))))
       ;; Adjust search starting point
       (if forward-p (forward-char))
