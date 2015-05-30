@@ -425,7 +425,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                 (when keymap
                   (setq evil-snipe--transient-map-func (set-transient-map keymap))))
             (goto-char orig-point)
-            (user-error "Can't find %s" string))
+            (user-error "Can't find %s" (evil-snipe--keys data)))
         (when evil-snipe-enable-highlight
           (evil-snipe--highlight-all count string))
         (add-hook 'pre-command-hook 'evil-snipe--pre-command)))))
