@@ -370,7 +370,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
       ;; If KEYS is empty
       ('() (user-error "No keys provided!"))
       ;; Otherwise, perform the search
-      (t (let ((count (or count (if evil-snipe--last (if evil-snipe--last-direction 1 -1) 1)))
+      (t (let ((count (or count (if evil-snipe--last-direction 1 -1)))
                (keymap (if (keymapp keymap) keymap))
                (data (if (consp (nth 0 keys)) keys (evil-snipe--process-keys keys))))
            (unless evil-snipe--last-repeat
