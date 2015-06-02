@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: May 30, 2015
-;; Version: 1.7.4
+;; Modified: June 1, 2015
+;; Version: 1.7.5
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -24,11 +24,11 @@
 ;; To enable globally, add the following lines to ~/.emacs:
 ;;
 ;;     (require 'evil-snipe)
-;;     (global-evil-snipe-mode 1)
+;;     (evil-snipe-mode 1)
 ;;
 ;; To replace evil-mode's f/F/t/T functionality with (1-character) snipe, use:
 ;;
-;;     (evil-snipe-replace-evil)
+;;     (evil-snipe-override-mode 1)
 ;;
 ;;; Code:
 
@@ -580,9 +580,10 @@ KEYS is a list of character codes or strings."
 ;;;###autoload
 (define-minor-mode evil-snipe-mode
   "evil-snipe minor mode."
+  :global t
   :lighter " snipe"
   :keymap evil-snipe-mode-map
-  :group evil-snipe
+  :group 'evil-snipe
   (if evil-snipe-mode
       (turn-on-evil-snipe-mode t)
     (turn-off-evil-snipe-mode t)))
@@ -590,8 +591,9 @@ KEYS is a list of character codes or strings."
 ;;;###autoload
 (define-minor-mode evil-snipe-override-mode
   "evil-snipe minor mode that overrides evil-mode f/F/t/T/;/, bindings."
+  :global t
   :keymap evil-snipe-override-mode-map
-  :group evil-snipe)
+  :group 'evil-snipe)
 
 ;;;###autoload
 (defun turn-on-evil-snipe-mode (&optional internal)
@@ -614,11 +616,6 @@ KEYS is a list of character codes or strings."
     (evil-snipe-mode -1)
     (when evil-snipe-override-evil
       (evil-snipe-override-mode -1))))
-
-;;;###autoload
-(define-globalized-minor-mode global-evil-snipe-mode
-  evil-snipe-mode turn-on-evil-snipe-mode
-  "Global minor mode to emulate surround.vim.")
 
 
 (provide 'evil-snipe)

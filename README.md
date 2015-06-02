@@ -105,7 +105,7 @@ Evil-snipe is on MELPA: `M-x package-install RET evil-snipe`
 Enable it with:
 ```elisp
 (require 'evil-snipe)
-(global-evil-snipe-mode 1)
+(evil-snipe-mode 1)
 ```
 
 Or for specific modes:
