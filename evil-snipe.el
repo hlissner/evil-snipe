@@ -53,11 +53,6 @@ matches. Otherwise, only highlight after you've finished skulking."
   :group 'evil-snipe
   :type 'boolean)
 
-(defcustom evil-snipe-override-evil nil
-  "If non-nil, replace evil's native f/F/t/T/;/, with evil-snipe."
-  :group 'evil-snipe
-  :type 'boolean)
-
 (defcustom evil-snipe-override-evil-repeat-keys t
   "If non-nil (while `evil-snipe-override-evil' is non-nil) evil-snipe will
 override evil's ; and , repeat keys in favor of its own."
@@ -598,10 +593,7 @@ KEYS is a list of character codes or strings."
 ;;;###autoload
 (defun turn-on-evil-snipe-mode (&optional internal)
   "Enable evil-snipe-mode in the current buffer."
-  (unless internal
-    (evil-snipe-mode 1))
-  (when evil-snipe-override-evil
-    (evil-snipe-override-mode 1))
+  (unless internal (evil-snipe-mode 1))
   (when (fboundp 'advice-add)
     (advice-add 'evil-force-normal-state :before 'evil-snipe--pre-command))
   (add-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map))
@@ -612,10 +604,8 @@ KEYS is a list of character codes or strings."
   (when (fboundp 'advice-remove)
     (advice-remove 'evil-force-normal-state 'evil-snipe--pre-command))
   (remove-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map)
-  (unless internal
-    (evil-snipe-mode -1)
-    (when evil-snipe-override-evil
-      (evil-snipe-override-mode -1))))
+  (unless internal (evil-snipe-mode -1))
+  (evil-snipe-override-mode -1))
 
 
 (provide 'evil-snipe)
