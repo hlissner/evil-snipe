@@ -537,6 +537,10 @@ KEYS is a list of character codes or strings."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun evil-snipe-add-alias (char pattern)
+  "Set a character alias for sniping. See `evil-snipe-symbol-groups'."
+  (add-to-list 'evil-snipe-symbol-groups `(,char ,pattern)))
+
 (defvar evil-snipe-mode-map
   (let ((map (make-sparse-keymap)))
     (evil-define-key 'motion map "s" 'evil-snipe-s)
