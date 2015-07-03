@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: June 6, 2015
-;; Version: 1.7.6
+;; Modified: July 3, 2015
+;; Version: 1.7.7
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -428,7 +428,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                     (evil-scroll-line-down (- (line-number-at-pos) (line-number-at-pos orig-point))))
                   (goto-char new-orig-point))
                 ;; Activate the repeat keymap
-                (when keymap
+                (when (and keymap (not (evil-operator-state-p)))
                   (setq evil-snipe--transient-map-func (set-transient-map keymap))))
             (goto-char orig-point)
             (user-error "Can't find %s" (evil-snipe--keys data)))
