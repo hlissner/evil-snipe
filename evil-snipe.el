@@ -443,7 +443,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
 (evil-define-motion evil-snipe-repeat (count)
   "Repeat the last evil-snipe `count' times"
   :jump t
-  :type interactive
+  :type inclusive
   (interactive "<+c>")
   (if (listp evil-snipe--last)
       (let ((evil-snipe--last-repeat t)
@@ -458,7 +458,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
 
 (evil-define-motion evil-snipe-repeat-reverse (count)
   :jump t
-  :type interactive
+  :type inclusive
   "Repeat the inverse of the last evil-snipe `count' times"
   (interactive "<-c>")
   (evil-snipe-repeat (or count -1)))
