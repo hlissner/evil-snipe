@@ -141,6 +141,12 @@ via cl and S with cc (or C).
 
 MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 
+(defcustom evil-snipe-skip-leading-whitespace t
+  "If non-nil, single char sniping (f/F/t/T) will skip over leading whitespaces
+in a line (when you snipe for whitespace, e.g. f<space> or f<tab>)."
+  :group 'evil-snipe
+  :type 'boolean)
+
 (defcustom evil-snipe-tab-increment nil
   "If non-nil, pressing TAB while sniping will add another character to your
 current search. For example, typing sab will search for 'ab'. In order to search
@@ -332,7 +338,6 @@ depending on what `evil-snipe-scope' is set to."
     (while (and (< i (length string))
                 (string-match match string i))
       (when (= (% i count) 0)
-        ;; TODO Apply column-bound highlighting
         (evil-snipe--highlight (+ beg-offset (match-beginning 0))
                                (+ beg-offset (match-end 0))))
       (setq i (1+ (match-beginning 0))))))
@@ -422,6 +427,12 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
       (if forward-p (forward-char))
       (unless evil-snipe--consume-match (if forward-p (forward-char) (backward-char)))
       (unwind-protect
+          (when (and evil-snipe-skip-leading-whitespace
+                     (= (length string) 1)
+                     (<= orig-point (save-excursion (back-to-indentation) (point))))
+            (if forward-p
+                (evil-first-non-blank)
+              (evil-beginning-of-line)))
           (if (re-search-forward string (if forward-p (cdr scope) (car scope)) t count) ;; hi |
               (let* ((beg (match-beginning 0))
                      (end (match-end 0))
