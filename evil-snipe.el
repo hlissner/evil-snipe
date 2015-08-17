@@ -153,9 +153,7 @@ in a line (when you snipe for whitespace, e.g. f<space> or f<tab>)."
 current search. For example, typing sab will search for 'ab'. In order to search
 for 'abcd', you do sa<tab><tab>bcd.
 
-However, this interferes with sniping for literal tab characters.
-
-By default, this is set to (not `indent-tabs-mode')."
+If nil, TAB will search for literal tab characters."
   :group 'evil-snipe
   :type 'boolean)
 
