@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: July 3, 2015
-;; Version: 1.7.7
+;; Modified: August 16, 2015
+;; Version: 1.8.0
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -26,7 +26,8 @@
 ;;     (require 'evil-snipe)
 ;;     (evil-snipe-mode 1)
 ;;
-;; To replace evil-mode's f/F/t/T functionality with (1-character) snipe, use:
+;; To replace evil-mode's f/F/t/T functionality with (1-character) sniping, you
+;; also need:
 ;;
 ;;     (evil-snipe-override-mode 1)
 ;;
@@ -482,8 +483,8 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
             (evil-snipe--consume-match (nth 3 evil-snipe--last))
             (evil-snipe--match-count (nth 4 evil-snipe--last)))
         (evil-snipe-seek (* count (nth 0 evil-snipe--last))   ;;count
-                        (nth 1 evil-snipe--last)
-                        (nth 2 evil-snipe--last)))          ;;keys
+                         (nth 1 evil-snipe--last)
+                         (nth 2 evil-snipe--last)))          ;;keys
     (user-error "Nothing to repeat")))
 
 (evil-define-motion evil-snipe-repeat-reverse (count)

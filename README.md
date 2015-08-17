@@ -49,13 +49,13 @@ pattern, add a `'(CHAR REGEX)` list to `evil-snipe-symbol-groups`.
 Here are some examples:
 
 ```elisp
-(evil-snipe-set-alias ?[ "[[{(]")
+(evil-snipe-add-alias ?[ "[[{(]")
 ```
 * Map `[` to all opening parenthesis and brackets. Therefore: `sa[` matches `a[`,
 `a(` or `a{`.
 
 ```elisp
-(evil-snipe-set-alias ?: "def .+:")
+(evil-snipe-add-alias ?: "def .+:")
 ```
 * For python users, this maps `:` to python function defs so you can cycle through
 function definitions with `f:fff`.
@@ -65,13 +65,12 @@ function definitions with `f:fff`.
 Evil-snipe is on MELPA: `M-x package-install RET evil-snipe`
 
 Enable it globally with:
+
 ```elisp
 (require 'evil-snipe)
 (evil-snipe-mode 1)
-```
 
-To replace evil-mode's f/F/t/T motions with [1-char] snipe, use:
-```elisp
+;; OPTIONAL: Replaces evil-mode's f/F/t/T motions with evil-snipe
 (evil-snipe-override-mode 1)
 ```
 
@@ -102,8 +101,6 @@ To replace evil-mode's f/F/t/T motions with [1-char] snipe, use:
   (setq evil-snipe-repeat-scope 'whole-visible)
   (setq evil-snipe-enable-highlight t)
   (setq evil-snipe-enable-incremental-highlight t)
-
-  ;; Note: vertical scoping isn't implemented yet
   ```
 
 ## Credits
