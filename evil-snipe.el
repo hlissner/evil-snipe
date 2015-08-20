@@ -625,7 +625,10 @@ KEYS is a list of character codes or strings."
   "evil-snipe minor mode that overrides evil-mode f/F/t/T/;/, bindings."
   :global t
   :keymap evil-snipe-override-mode-map
-  :group 'evil-snipe)
+  :group 'evil-snipe
+  (if evil-snipe-override-mode
+      (unless evil-snipe-mode
+        (evil-snipe-mode 1))))
 
 ;;;###autoload
 (defun turn-on-evil-snipe-mode (&optional internal)
