@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: September 28, 2015
-;; Version: 1.8.1
+;; Modified: October 14, 2015
+;; Version: 1.8.2
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -15,19 +15,19 @@
 
 ;;; Commentary:
 ;;
-;; Snipe is f/F/t/T on steroids. It emulates vim-sneak and vim-seek for
-;; evil-mode by default, bound to s/S in normal mode and z/Z/x/X in visual or
-;; operator mode. With its N-character searching, it can also be adapted to
-;; replace evil-mode's f/F/t/T funcitonality. See the readme for more
-;; information.
+;; Evil-snipe emulates [vim-seek](https://github.com/goldfeld/vim-seek) and/or
+;; vim-sneak in evil-mode.
 ;;
-;; To enable globally, add the following lines to ~/.emacs:
+;; It provides 2-character motions for quickly (and more accurately) jumping around
+;; text, compared to evil's built-in f/F/t/T motions, incrementally highlighting
+;; candidate targets as you type.
+;;
+;; To enable globally:
 ;;
 ;;     (require 'evil-snipe)
 ;;     (evil-snipe-mode 1)
 ;;
-;; To replace evil-mode's f/F/t/T functionality with (1-character) sniping, you
-;; also need:
+;; To replace evil-mode's f/F/t/T functionality with (1-character) sniping:
 ;;
 ;;     (evil-snipe-override-mode 1)
 ;;
@@ -83,8 +83,7 @@ settings)"
   "Dictates the scope of searches, which can be one of:
 
     nil          ;; default; treat count as repeat count
-    'letters     ;; count = how many characters to expect and search for
-    'vertical    ;; find first match within N (visible) columns"
+    'letters     ;; count = how many characters to expect and search for"
   :group 'evil-snipe
   :type 'symbol)
 
@@ -121,19 +120,9 @@ letters."
   :group 'evil-snipe
   :type 'boolean)
 
-(defcustom evil-snipe-symbol-groups '()
+(defvar evil-snipe-symbol-groups '()
   "You specify key aliases here, in the format '(KEY REGEX). Any instance of KEY
-will be replaced with REGEX.
-
-Here are some examples:
-
-    ;; Alias [ and ] to all types of brackets
-    (add-to-list 'evil-snipe-symbol-groups '(?\\] \"[]})]\"))
-    (add-to-list 'evil-snipe-symbol-groups '(?\\[ \"[[{(]\"))
-    ;; For python style functions
-    (add-to-list 'evil-snipe-symbol-groups '(?\\: \"def .+:\"\))"
-  :group 'evil-snipe
-  :type 'list)
+will be replaced with REGEX. Use `evil-snipe-add-alias' to modify this.")
 
 (defvar evil-snipe-auto-disable-substitute t
   "Disables evil's native s/S functionality (substitute) if non-nil. By default
