@@ -88,12 +88,11 @@ settings)"
   :type 'symbol)
 
 (defcustom evil-snipe-spillover-scope nil
-  "Takes any value `evil-snipe-scope' accepts. If nil, a failed search will
-simply fail. If non-nil, snipe will search for more matches within this scope.
-It is useful only if set to a broader scope than `evil-snipe-scope'.
+  "If non-nil, snipe will expand the search scope to this when a snipe fails,
+and continue the search (until it finds something or even this scope fails).
 
-This also applies to N>1 COUNT searches. E.g. if 3sab fails, it will extend the
-scope to `evil-snipe-spillover-scope''s to find a 3rd match."
+Accepts the same values as `evil-snipe-scope' and `evil-snipe-repeat-scope'.
+Is only useful if set to the same or broader scope than either."
   :group 'evil-snipe
   :type 'boolean)
 
