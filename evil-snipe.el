@@ -92,7 +92,7 @@ settings)"
 simply fail. If non-nil, snipe will search for more matches within this scope.
 It is useful only if set to a broader scope than `evil-snipe-scope'.
 
-This also applies to N>1 COUNT prefixes. E.g. if 3sab fails, it will extend the
+This also applies to N>1 COUNT searches. E.g. if 3sab fails, it will extend the
 scope to `evil-snipe-spillover-scope''s to find a 3rd match."
   :group 'evil-snipe
   :type 'boolean)
@@ -446,10 +446,14 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                 ;; Activate the repeat keymap
                 (when (and keymap (not (evil-operator-state-p)))
                   (setq evil-snipe--transient-map-func (set-transient-map keymap))))
+            (if evil-snipe-spillover-scope
+                (let ((evil-snipe-scope evil-snipe-spillover-scope)
+                      evil-snipe-spillover-scope)
+                  (evil-snipe--seek count data))
             (goto-char orig-point)
             (user-error "Can't find %s" ;; show invisible keys
                         (replace-regexp-in-string "\t" "<TAB>"
-                        (replace-regexp-in-string "\s" "<SPC>" (evil-snipe--keys data)))))
+                        (replace-regexp-in-string "\s" "<SPC>" (evil-snipe--keys data))))))
           (when evil-snipe-enable-highlight
             (evil-snipe--highlight-all count string))
           (add-hook 'pre-command-hook 'evil-snipe--pre-command)))))
