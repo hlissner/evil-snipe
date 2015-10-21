@@ -6,7 +6,7 @@ character motions (`f`/`F`/`t`/`T`) by adding another key pair for 2-char
 searches: `s` and `S` -- as well as `z`/`Z` in operator mode (e.g. following a
 `d` or `c` motion).
 
-2-char searchs are 50x more accurate. You _could_ use `/` or `?`, but it saves
+2-char search are 50x more accurate. You _could_ use `/` or `?`, but it saves
 you the extra keystroke of pressing enter and is harder to reach than `s` and
 `S`.
 
