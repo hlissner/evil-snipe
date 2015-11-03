@@ -29,7 +29,9 @@
 ;; To replace evil-mode's f/F/t/T functionality with (1-character) sniping, you
 ;; also need:
 ;;
-;;     (evil-snipe-override-mode 1)
+;;     (setq evil-snipe-override-f-t t)
+;;     (require 'evil-snipe)
+;;     (evil-snipe-mode 1)
 ;;
 ;;; Code:
 
@@ -54,7 +56,13 @@ matches. Otherwise, only highlight after you've finished skulking."
   :group 'evil-snipe
   :type 'boolean)
 
-(defcustom evil-snipe-override-evil-repeat-keys t
+(defcustom evil-snipe-override-evil-f-t nil
+  "If non-nil evil-snipe will override evil's f/F/t/T keys in
+favor of its own."
+  :group 'evil-snipe
+  :type 'boolean)
+
+(defcustom evil-snipe-override-evil-repeat-keys evil-snipe-override-evil-f-t
   "If non-nil (while `evil-snipe-override-evil' is non-nil) evil-snipe will
 override evil's ; and , repeat keys in favor of its own."
   :group 'evil-snipe
@@ -349,7 +357,8 @@ depending on what `evil-snipe-scope' is set to."
 
 (defun evil-snipe--disable-transient-map ()
   "Disable lingering transient map, if necessary."
-  (when (and evil-snipe-local-mode (functionp evil-snipe--transient-map-func))
+  (when (and evil-snipe-local-mode
+             (functionp evil-snipe--transient-map-func))
     (funcall evil-snipe--transient-map-func)
     (setq evil-snipe--transient-map-func nil)))
 
@@ -587,19 +596,17 @@ KEYS is a list of character codes or strings."
       ;; Disable s/S (substitute)
       (define-key evil-normal-state-map "s" nil)
       (define-key evil-normal-state-map "S" nil))
-    map))
 
-(defvar evil-snipe-override-local-mode-map
-  (let ((map (make-sparse-keymap)))
-    (evil-define-key 'motion map "f" 'evil-snipe-f)
-    (evil-define-key 'motion map "F" 'evil-snipe-F)
-    (evil-define-key 'motion map "t" 'evil-snipe-t)
-    (evil-define-key 'motion map "T" 'evil-snipe-T)
+    (when evil-snipe-override-evil-f-t
+      (evil-define-key 'motion map "f" 'evil-snipe-f)
+      (evil-define-key 'motion map "F" 'evil-snipe-F)
+      (evil-define-key 'motion map "t" 'evil-snipe-t)
+      (evil-define-key 'motion map "T" 'evil-snipe-T))
 
     (when evil-snipe-override-evil-repeat-keys
       (evil-define-key 'motion map ";" 'evil-snipe-repeat)
       (evil-define-key 'motion map "," 'evil-snipe-repeat-reverse))
-  map))
+    map))
 
 (unless (fboundp 'set-transient-map)
   (defalias 'set-transient-map 'set-temporary-overlay-map))
@@ -612,10 +619,6 @@ KEYS is a list of character codes or strings."
 ;;;###autoload
 (define-globalized-minor-mode evil-snipe-mode
   evil-snipe-local-mode turn-on-evil-snipe-mode)
-
-;;;###autoload
-(define-globalized-minor-mode evil-snipe-override-mode
-  evil-snipe-override-local-mode turn-on-evil-snipe-override-mode)
 
 ;;;###autoload
 (define-minor-mode evil-snipe-local-mode
@@ -633,31 +636,14 @@ KEYS is a list of character codes or strings."
     (remove-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map t)))
 
 ;;;###autoload
-(define-minor-mode evil-snipe-override-local-mode
-  "evil-snipe minor mode that overrides evil-mode f/F/t/T/;/, bindings."
-  :keymap evil-snipe-override-local-mode-map
-  :group 'evil-snipe
-  (if evil-snipe-override-local-mode
-      (unless evil-snipe-local-mode
-        (evil-snipe-local-mode 1))
-    (evil-snipe-local-mode -1)))
-
-;;;###autoload
 (defun turn-on-evil-snipe-mode ()
   "Enable evil-snipe-mode in the current buffer."
   (evil-snipe-local-mode 1))
 
 ;;;###autoload
-(defun turn-on-evil-snipe-override-mode ()
-  "Enable evil-snipe-mode in the current buffer."
-  (evil-snipe-override-local-mode 1))
-
-;;;###autoload
 (defun turn-off-evil-snipe-mode ()
   "Disable evil-snipe-mode in the current buffer."
-  (if evil-snipe-override-local-mode
-      (evil-snipe-override-local-mode -1)
-    (evil-snipe-local-mode -1)))
+  (evil-snipe-local-mode -1))
 
 (provide 'evil-snipe)
 ;;; evil-snipe.el ends here
