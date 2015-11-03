@@ -655,9 +655,12 @@ KEYS is a list of character codes or strings."
 ;;;###autoload
 (defun turn-off-evil-snipe-mode ()
   "Disable evil-snipe-mode in the current buffer."
-  (if evil-snipe-override-local-mode
-      (evil-snipe-override-local-mode -1)
-    (evil-snipe-local-mode -1)))
+  (evil-snipe-local-mode -1))
+
+;;;###autoload
+(defun turn-off-evil-snipe-override-mode ()
+  "Disable evil-snipe-override-mode in the current buffer."
+  (evil-snipe-override-local-mode -1))
 
 (provide 'evil-snipe)
 ;;; evil-snipe.el ends here
