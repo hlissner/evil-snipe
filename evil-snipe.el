@@ -331,13 +331,13 @@ depending on what `evil-snipe-scope' is set to."
 
 (defun evil-snipe--pre-command ()
   "Disables overlays and cleans up after evil-snipe."
-  (when evil-snipe-mode
+  (when evil-snipe-local-mode
     (remove-overlays nil nil 'category 'evil-snipe))
   (remove-hook 'pre-command-hook 'evil-snipe--pre-command))
 
 (defun evil-snipe--disable-transient-map ()
   "Disable lingering transient map, if necessary."
-  (when (and evil-snipe-mode (functionp evil-snipe--transient-map-func))
+  (when (and evil-snipe-local-mode (functionp evil-snipe--transient-map-func))
     (funcall evil-snipe--transient-map-func)
     (setq evil-snipe--transient-map-func nil)))
 
@@ -564,7 +564,7 @@ KEYS is a list of character codes or strings."
   "Set a character alias for sniping. See `evil-snipe-symbol-groups'."
   (add-to-list 'evil-snipe-symbol-groups `(,char ,pattern)))
 
-(defvar evil-snipe-mode-map
+(defvar evil-snipe-local-mode-map
   (let ((map (make-sparse-keymap)))
     (evil-define-key 'motion map "s" 'evil-snipe-s)
     (evil-define-key 'motion map "S" 'evil-snipe-S)
@@ -579,7 +579,7 @@ KEYS is a list of character codes or strings."
       (define-key evil-normal-state-map "S" nil))
     map))
 
-(defvar evil-snipe-override-mode-map
+(defvar evil-snipe-override-local-mode-map
   (let ((map (make-sparse-keymap)))
     (evil-define-key 'motion map "f" 'evil-snipe-f)
     (evil-define-key 'motion map "F" 'evil-snipe-F)
@@ -600,43 +600,57 @@ KEYS is a list of character codes or strings."
 (defvar evil-snipe-mode-t-map (evil-snipe--transient-map "t" "T"))
 
 ;;;###autoload
-(define-minor-mode evil-snipe-mode
+(define-globalized-minor-mode evil-snipe-mode
+  evil-snipe-local-mode turn-on-evil-snipe-mode)
+
+;;;###autoload
+(define-globalized-minor-mode evil-snipe-override-mode
+  evil-snipe-override-local-mode turn-on-evil-snipe-override-mode)
+
+;;;###autoload
+(define-minor-mode evil-snipe-local-mode
   "evil-snipe minor mode."
-  :global t
   :lighter " snipe"
-  :keymap evil-snipe-mode-map
+  :keymap evil-snipe-local-mode-map
   :group 'evil-snipe
-  (if evil-snipe-mode
-      (turn-on-evil-snipe-mode t)
-    (turn-off-evil-snipe-mode t)))
+  (if evil-snipe-local-mode
+      (progn
+        (when (fboundp 'advice-add)
+          (advice-add 'evil-force-normal-state :before 'evil-snipe--pre-command))
+        (add-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map nil t))
+    (when (fboundp 'advice-remove)
+      (advice-remove 'evil-force-normal-state 'evil-snipe--pre-command))
+    (remove-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map t)))
 
 ;;;###autoload
-(define-minor-mode evil-snipe-override-mode
+(define-minor-mode evil-snipe-override-local-mode
   "evil-snipe minor mode that overrides evil-mode f/F/t/T/;/, bindings."
-  :global t
-  :keymap evil-snipe-override-mode-map
+  :keymap evil-snipe-override-local-mode-map
   :group 'evil-snipe
-  (if evil-snipe-override-mode
-      (unless evil-snipe-mode
-        (evil-snipe-mode 1))))
+  (if evil-snipe-override-local-mode
+      (unless evil-snipe-local-mode
+        (evil-snipe-local-mode 1))
+    (evil-snipe-local-mode -1)))
 
 ;;;###autoload
-(defun turn-on-evil-snipe-mode (&optional internal)
+(defun turn-on-evil-snipe-mode ()
   "Enable evil-snipe-mode in the current buffer."
-  (unless internal (evil-snipe-mode 1))
-  (when (fboundp 'advice-add)
-    (advice-add 'evil-force-normal-state :before 'evil-snipe--pre-command))
-  (add-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map))
+  (evil-snipe-local-mode 1))
 
 ;;;###autoload
-(defun turn-off-evil-snipe-mode (&optional internal)
-  "Disable evil-snipe-mode in the current buffer."
-  (when (fboundp 'advice-remove)
-    (advice-remove 'evil-force-normal-state 'evil-snipe--pre-command))
-  (remove-hook 'evil-insert-state-entry-hook 'evil-snipe--disable-transient-map)
-  (unless internal (evil-snipe-mode -1))
-  (evil-snipe-override-mode -1))
+(defun turn-on-evil-snipe-override-mode ()
+  "Enable evil-snipe-mode in the current buffer."
+  (evil-snipe-override-local-mode 1))
 
+;;;###autoload
+(defun turn-off-evil-snipe-mode ()
+  "Disable evil-snipe-mode in the current buffer."
+  (evil-snipe-local-mode -1))
+
+;;;###autoload
+(defun turn-off-evil-snipe-override-mode ()
+  "Disable evil-snipe-override-mode in the current buffer."
+  (evil-snipe-override-local-mode -1))
 
 (provide 'evil-snipe)
 ;;; evil-snipe.el ends here
