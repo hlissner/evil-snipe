@@ -66,8 +66,7 @@ highlighter):
 * `evil-snipe-repeat-scope` (default: `whole-line`) Scope while _repeating_
   searches with `evil-snipe-repeat` or `evil-snipe-repeat-reverse`.
 * `evil-snipe-spillover-scope` (default: `nil`) Scope to expand to when a snipe
-  fails. Only useful if set to the same or broader scope than
-  `evil-snipe-scope`.
+  fails. Only useful if set to a broader scope than `evil-snipe-scope`.
 
 These are the possible settings:
 

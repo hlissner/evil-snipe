@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: November 3, 2015
-;; Version: 1.8.3
+;; Modified: November 6, 2015
+;; Version: 1.8.4
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.1.3"))
@@ -15,8 +15,7 @@
 
 ;;; Commentary:
 ;;
-;; Evil-snipe emulates [vim-seek](https://github.com/goldfeld/vim-seek) and/or
-;; vim-sneak in evil-mode.
+;; Evil-snipe emulates vim-seek and/or vim-sneak in evil-mode.
 ;;
 ;; It provides 2-character motions for quickly (and more accurately) jumping around
 ;; text, compared to evil's built-in f/F/t/T motions, incrementally highlighting
@@ -30,6 +29,8 @@
 ;; To replace evil-mode's f/F/t/T functionality with (1-character) sniping:
 ;;
 ;;     (evil-snipe-override-mode 1)
+;;
+;; See included README.md for more information.
 ;;
 ;;; Code:
 
@@ -122,6 +123,7 @@ letters."
 (defvar evil-snipe-symbol-groups '()
   "You specify key aliases here, in the format '(KEY REGEX). Any instance of KEY
 will be replaced with REGEX. Use `evil-snipe-add-alias' to modify this.")
+(make-variable-buffer-local 'evil-snipe-symbol-groups)
 
 (defvar evil-snipe-auto-disable-substitute t
   "Disables evil's native s/S functionality (substitute) if non-nil. By default
