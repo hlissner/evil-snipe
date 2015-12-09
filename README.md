@@ -1,4 +1,5 @@
 # evil-snipe
+[![MELPA](http://melpa.org/packages/evil-snipe-badge.svg)](http://melpa.org/#/evil-snipe)
 
 Evil-snipe emulates [vim-seek](https://github.com/goldfeld/vim-seek) and/or
 [vim-sneak](https://github.com/justinmk/vim-sneak) in
