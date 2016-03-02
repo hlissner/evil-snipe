@@ -379,7 +379,7 @@ depending on what `evil-snipe-scope' is set to."
 interactive codes. KEYMAP is the transient map to activate afterwards."
   (let ((case-fold-search (evil-snipe--case-p keys)))
     (cl-case keys
-      ('abort)
+      ('abort (setq evil-inhibit-operator t))
       ;; if <enter>, repeat last search
       ('repeat (if evil-snipe--last-direction
                    (evil-snipe-repeat count)
