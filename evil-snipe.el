@@ -429,7 +429,8 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                 (if forward-p
                     (progn
                       (goto-char (if evil-op-vs-state-p (1- end) beg))
-                      (unless evil-snipe--consume-match (backward-char offset)))
+                      (unless evil-snipe--consume-match
+                        (backward-char (if (> offset 1) (1- offset) offset))))
                   (goto-char (if evil-snipe--consume-match beg end)))
                 ;; Highlight first result (except when in operator/visual mode)
                 (when (and (not evil-op-vs-state-p) evil-snipe-enable-highlight)
