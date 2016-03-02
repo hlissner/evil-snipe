@@ -169,7 +169,7 @@ If nil, TAB will search for literal tab characters."
   "Direction of the last search.")
 
 (defvar evil-snipe--consume-match t
-  "Whether the search should consume the match or not.")
+  "Whether the search should be inclusive of the match or not.")
 
 (defvar evil-snipe--match-count 2
   "Number of characters to match. Can be let-bound to create motions that search
