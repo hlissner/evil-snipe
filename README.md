@@ -1,6 +1,7 @@
 # evil-snipe
 [![MIT](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 [![MELPA](http://melpa.org/packages/evil-snipe-badge.svg)](http://melpa.org/#/evil-snipe)
+[![MELPA Stable](http://stable.melpa.org/packages/evil-snipe-badge.svg)](http://stable.melpa.org/#/evil-snipe)
 [![Build Status](https://travis-ci.org/hlissner/evil-snipe.png?branch=master)](https://travis-ci.org/hlissner/evil-snipe)
 
 Evil-snipe emulates [vim-seek](https://github.com/goldfeld/vim-seek) and/or
