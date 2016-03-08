@@ -4,6 +4,8 @@
 [![MELPA Stable](http://stable.melpa.org/packages/evil-snipe-badge.svg)](http://stable.melpa.org/#/evil-snipe)
 [![Build Status](https://travis-ci.org/hlissner/evil-snipe.png?branch=master)](https://travis-ci.org/hlissner/evil-snipe)
 
+![Sniper!](../screenshots/cover.jpg)
+
 Evil-snipe emulates [vim-seek](https://github.com/goldfeld/vim-seek) and/or
 [vim-sneak](https://github.com/justinmk/vim-sneak) in
 [evil-mode](https://gitorious.org/evil/pages/Home).
