@@ -5,11 +5,11 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: March 2, 2016
-;; Version: 1.8.5
+;; Modified: March 7, 2016
+;; Version: 1.8.6
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
-;; Package-Requires: ((evil "1.1.3") (cl-lib "0.5"))
+;; Package-Requires: ((evil "1.0.8") (cl-lib "0.5"))
 ;;
 ;; This file is not part of GNU Emacs.
 
@@ -121,9 +121,16 @@ letters."
   :type 'boolean)
 
 (defvar evil-snipe-symbol-groups '()
-  "You specify key aliases here, in the format '(KEY REGEX). Any instance of KEY
-will be replaced with REGEX. Use `evil-snipe-add-alias' to modify this.")
-(make-variable-buffer-local 'evil-snipe-symbol-groups)
+  "A list of characters mapped to regexps '(CHAR REGEX). If CHAR is used in a snipe, it
+will be replaced with REGEX. These aliases apply globally. To set an alias for a specific
+mode use:
+
+    (add-hook 'c++-mode-hook
+      (lambda ()
+        (make-variable-buffer-local 'evil-snipe-aliases)
+        (push '(?\[ \"[[{(]\") evil-snipe-aliases)))
+")
+(defalias 'evil-snipe-aliases 'evil-snipe-symbol-groups)
 
 (defvar evil-snipe-auto-disable-substitute t
   "Disables evil's native s/S functionality (substitute) if non-nil. By default
@@ -562,10 +569,6 @@ KEYS is a list of character codes or strings."
   (evil-snipe-t count keys))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun evil-snipe-add-alias (char pattern)
-  "Set a character alias for sniping. See `evil-snipe-symbol-groups'."
-  (add-to-list 'evil-snipe-symbol-groups `(,char ,pattern)))
 
 (defvar evil-snipe-local-mode-map
   (let ((map (make-sparse-keymap)))

@@ -85,23 +85,25 @@ Value            | Description
 
 ### Character aliases
 
-Specific characters can be aliased to regex patterns using
-`(evil-snipe-add-alias CHAR PATTERN)`.
+Specific characters can be aliased to regex patterns by modifying `evil-snipe-aliases`.
 
 #### Examples
 
-* To map <kbd>[</kbd> to any opening parentheses or bracket:
+* To map <kbd>[</kbd> to any opening parentheses or bracket **in all modes**:
 
   ```elisp
-  (evil-snipe-add-alias ?[ "[[{(]")
+  (push '(?[ "[[{(]") evil-snipe-aliases)
   ```
 
   Therefore, <kbd>s</kbd><kbd>a</kbd><kbd>[</kbd> will match `a[`, `a{` or `a(`
 
-* Or <kbd>:</kbd> to a python function:
+* To map <kbd>:</kbd> to a python function (but only in `python-mode`):
 
   ```elisp
-  (evil-snipe-add-alias ?: "def .+:")
+  (add-hook 'python-mode-hook
+    (lambda ()
+      (make-variable-buffer-local 'evil-snipe-aliases)
+      (push '(?: "def .+:") evil-snipe-aliases)))
   ```
 
 ### N-Char search
@@ -169,7 +171,6 @@ It seems `evil-snipe-override-mode` causes problems in Magit buffers, to fix thi
 * `evil-snipe-x` / `evil-snipe-X`: exclusive 2-char sniping
 * `evil-snipe-f` / `evil-snipe-F`: inclusive 1-char sniping
 * `evil-snipe-t` / `evil-snipe-T`: exclusive 1-char sniping
-* `evil-snipe-add-alias`
 
 ### Default keybindings
 

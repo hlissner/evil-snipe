@@ -1,10 +1,5 @@
 ;;; evil-snipe-aliases-test.el
 
-(ert-deftest evil-snipe-add-aliases-test ()
-  (let ((evil-snipe-symbol-groups '()))
-    (evil-snipe-add-alias ?\; "[;:]")
-    (should (equal '((?\; "[;:]")) evil-snipe-symbol-groups))))
-
 (ert-deftest evil-snipe-aliases-test ()
   (with! "They're:coming{;to:take(;me:away[:he he;ho ho"
     (let ((evil-snipe-symbol-groups '((?\; "[;:]"))))
