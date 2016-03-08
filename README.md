@@ -94,7 +94,7 @@ Specific characters can be aliased to regex patterns by modifying `evil-snipe-al
 * To map <kbd>[</kbd> to any opening parentheses or bracket **in all modes**:
 
   ```elisp
-  (push '(?[ "[[{(]") evil-snipe-aliases)
+  (push '(?\[ "[[{(]") evil-snipe-aliases)
   ```
 
   Therefore, <kbd>s</kbd><kbd>a</kbd><kbd>[</kbd> will match `a[`, `a{` or `a(`
