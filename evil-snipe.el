@@ -402,8 +402,6 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                                           evil-snipe--consume-match
                                           evil-snipe--match-count)))
            (cl-case evil-snipe-count-scope
-             ;; ('vertical
-             ;;  (evil-snipe--seek-vertical count data))
              ('letters
               (evil-snipe--seek (if (> count 0) 1 -1) data))
              (t
@@ -464,10 +462,6 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
           (when evil-snipe-enable-highlight
             (evil-snipe--highlight-all count string))
           (add-hook 'pre-command-hook 'evil-snipe--pre-command)))))
-
-;; TODO Implement evil-snipe--seek-vertical
-(defun evil-snipe--seek-vertical (count keys)
-  (error "Not implemented!"))
 
 (evil-define-motion evil-snipe-repeat (count)
   "Repeat the last evil-snipe `count' times"
