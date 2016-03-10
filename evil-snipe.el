@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: March 7, 2016
-;; Version: 1.8.6
+;; Modified: March 9, 2016
+;; Version: 1.9.0
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.8") (cl-lib "0.5"))
@@ -272,12 +272,9 @@ If `evil-snipe-count-scope' is 'letters, N = `count', so 5s will prompt you for
                             (setq data (append data (list (evil-snipe--process-key key))))
                             (cl-decf i)))
                      (when evil-snipe-enable-incremental-highlight
-                       (save-excursion
-                         (when evil-snipe-skip-leading-whitespace
-                           (evil-first-non-blank))
-                         (evil-snipe--pre-command)
-                         (evil-snipe--highlight-all count (evil-snipe--key-patterns data))
-                         (add-hook 'pre-command-hook 'evil-snipe--pre-command)))))))
+                       (evil-snipe--pre-command)
+                       (evil-snipe--highlight-all count (evil-snipe--key-patterns data))
+                       (add-hook 'pre-command-hook 'evil-snipe--pre-command))))))
           data))))
 
 (defun evil-snipe--bounds (&optional forward-p count)
@@ -327,16 +324,20 @@ depending on what `evil-snipe-scope' is set to."
          (bounds (evil-snipe--bounds forward-p))
          (beg (car bounds))
          (end (cdr bounds))
-         (beg-offset (+ (point-min) beg -1))
-         (string (buffer-substring-no-properties beg end))
+         (orig-pt (point))
          (case-fold-search (evil-snipe--case-p match))
          (i 0))
-    (while (and (< i (length string))
-                (string-match match string i))
-      (when (= (% i count) 0)
-        (evil-snipe--highlight (+ beg-offset (match-beginning 0))
-                               (+ beg-offset (match-end 0))))
-      (setq i (1+ (match-beginning 0))))))
+    (save-excursion
+      (goto-char beg)
+      (while (search-forward match end t 1)
+        (let ((hl-beg (match-beginning 0))
+              (hl-end (match-end 0)))
+          (if (and evil-snipe-skip-leading-whitespace
+                   (looking-at-p "[ \t][ \t]+"))
+              (progn
+                (re-search-forward-lax-whitespace " ")
+                (backward-char (- hl-end hl-beg)))
+            (evil-snipe--highlight hl-beg hl-end)))))))
 
 (defun evil-snipe--pre-command ()
   "Disables overlays and cleans up after evil-snipe."
@@ -417,19 +418,23 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
            (offset (length data))
            (scope (evil-snipe--bounds forward-p count))
            (evil-op-vs-state-p (or (evil-operator-state-p) (evil-visual-state-p))))
+      ;; Skip over leading whitespace
+      (when (and evil-snipe-skip-leading-whitespace
+                 (string-match-p "^[ \t]+$" string))
+        (let ((at-indent (- (save-excursion (back-to-indentation) (point))
+                            (length string))))
+          (when (funcall (if forward-p '< '<=) orig-point at-indent)
+            (if forward-p
+                (goto-char (max 1 (1- at-indent)))
+              (evil-beginning-of-line)))))
       ;; Adjust search starting point
       (if forward-p (forward-char))
       (unless evil-snipe--consume-match (if forward-p (forward-char) (backward-char)))
       (unwind-protect
-          (when (and evil-snipe-skip-leading-whitespace
-                     (= (length string) 1)
-                     (< orig-point (save-excursion (back-to-indentation) (point))))
-            (if forward-p
-                (evil-first-non-blank)
-              (evil-beginning-of-line)))
           (if (re-search-forward string (if forward-p (cdr scope) (car scope)) t count) ;; hi |
               (let* ((beg (match-beginning 0))
-                     (end (match-end 0)))
+                     (end (match-end 0))
+                     (len (- end beg)))
                 ;; Set cursor position
                 (if forward-p
                     (progn
@@ -437,9 +442,6 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                       (unless evil-snipe--consume-match
                         (backward-char (if (> offset 1) (1- offset) offset))))
                   (goto-char (if evil-snipe--consume-match beg end)))
-                ;; Highlight first result (except when in operator/visual mode)
-                (when (and (not evil-op-vs-state-p) evil-snipe-enable-highlight)
-                  (evil-snipe--highlight beg end t))
                 ;; Follow the cursor
                 (when evil-snipe-auto-scroll
                   (setq new-orig-point (point))
@@ -448,6 +450,15 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                       (evil-scroll-line-to-center (line-number-at-pos))
                     (evil-scroll-line-down (- (line-number-at-pos) (line-number-at-pos orig-point))))
                   (goto-char new-orig-point))
+                ;; Skip over leading whitespace after the search
+                (when (and forward-p
+                           evil-snipe-skip-leading-whitespace
+                           (looking-at-p "[ \t][ \t]+"))
+                  (re-search-forward-lax-whitespace " ")
+                  (backward-char len))
+                ;; Highlight first result (except when in operator/visual mode)
+                (when (and (not evil-op-vs-state-p) evil-snipe-enable-highlight)
+                  (evil-snipe--highlight (point) (+ (point) len) t))
                 ;; Activate the repeat keymap
                 (when (and keymap (not (evil-operator-state-p)))
                   (setq evil-snipe--transient-map-func (set-transient-map keymap))))
@@ -455,10 +466,10 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                 (let ((evil-snipe-scope evil-snipe-spillover-scope)
                       evil-snipe-spillover-scope)
                   (evil-snipe--seek count data))
-            (goto-char orig-point)
-            (user-error "Can't find %s" ;; show invisible keys
-                        (replace-regexp-in-string "\t" "<TAB>"
-                        (replace-regexp-in-string "\s" "<SPC>" (evil-snipe--keys data))))))
+              (goto-char orig-point)
+              (user-error "Can't find %s" ;; show invisible keys
+                          (replace-regexp-in-string "\t" "<TAB>"
+                          (replace-regexp-in-string "\s" "<SPC>" (evil-snipe--keys data))))))
           (when evil-snipe-enable-highlight
             (evil-snipe--highlight-all count string))
           (add-hook 'pre-command-hook 'evil-snipe--pre-command)))))
