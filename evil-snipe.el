@@ -266,13 +266,14 @@ depending on what `evil-snipe-scope' is set to."
 (defun evil-snipe--highlight (beg end &optional first-p)
   "Highlights region between beg and end. If first-p is t, then use
 `evil-snipe-first-p-match-face'"
-  (if (and first-p (overlays-in beg end))
-      (remove-overlays beg end 'category 'evil-snipe))
+  (when (and first-p (overlays-in beg end))
+    (remove-overlays beg end 'category 'evil-snipe))
   (let ((overlay (make-overlay beg end nil nil nil)))
     (overlay-put overlay 'category 'evil-snipe)
     (overlay-put overlay 'face (if first-p
                                    'evil-snipe-first-match-face
-                                 'evil-snipe-matches-face))))
+                                 'evil-snipe-matches-face))
+    overlay))
 
 (defun evil-snipe--highlight-all (count keys)
   "Highlight all instances of `keys' ahead of the cursor, or behind it if
@@ -282,7 +283,8 @@ depending on what `evil-snipe-scope' is set to."
          (forward-p (> count 0))
          (bounds (evil-snipe--bounds forward-p))
          (orig-pt (point))
-         (i 0))
+         (i 0)
+         overlays)
     (save-excursion
       (goto-char (car bounds))
       (while (search-forward match (cdr bounds) t 1)
@@ -293,7 +295,8 @@ depending on what `evil-snipe-scope' is set to."
               (progn
                 (re-search-forward-lax-whitespace " ")
                 (backward-char (- hl-end hl-beg)))
-            (evil-snipe--highlight hl-beg hl-end)))))))
+            (push (evil-snipe--highlight hl-beg hl-end) overlays)))))
+    overlays))
 
 (defun evil-snipe--cleanup ()
   "Disables overlays and cleans up after evil-snipe."
