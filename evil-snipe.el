@@ -112,7 +112,7 @@ letters."
   :group 'evil-snipe
   :type 'boolean)
 
-(defvar evil-snipe-symbol-groups '()
+(defvar evil-snipe-aliases '()
   "A list of characters mapped to regexps '(CHAR REGEX). If CHAR is used in a snipe, it
 will be replaced with REGEX. These aliases apply globally. To set an alias for a specific
 mode use:
@@ -122,7 +122,7 @@ mode use:
         (make-variable-buffer-local 'evil-snipe-aliases)
         (push '(?\[ \"[[{(]\") evil-snipe-aliases)))
 ")
-(defalias 'evil-snipe-aliases 'evil-snipe-symbol-groups)
+(define-obsolete-variable-alias 'evil-snipe-symbol-groups 'evil-snipe-aliases "v2.0.0")
 
 (defvar evil-snipe-auto-disable-substitute t
   "Disables evil's native s/S functionality (substitute) if non-nil. By default
