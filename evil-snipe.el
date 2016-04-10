@@ -76,15 +76,7 @@ override evil's ; and , repeat keys in favor of its own."
 
 (defcustom evil-snipe-repeat-scope nil
   "Dictates the scope of repeat searches (see `evil-snipe-scope' for possible
-settings)"
-  :group 'evil-snipe
-  :type 'symbol)
-
-(defcustom evil-snipe-count-scope nil
-  "Dictates the scope of searches, which can be one of:
-
-    nil          ;; default; treat count as repeat count
-    'letters     ;; count = how many characters to expect and search for"
+settings). When nil, defaults to `evil-snipe-scope'."
   :group 'evil-snipe
   :type 'symbol)
 
@@ -400,11 +392,8 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
              (setq evil-snipe--last (list count data keymap
                                           evil-snipe--consume-match
                                           evil-snipe--match-count)))
-           (cl-case evil-snipe-count-scope
-             ('letters
-              (evil-snipe--seek (if (> count 0) 1 -1) data))
-             (t
-              (evil-snipe--seek count data))))))))
+           (evil-snipe--seek count data)
+           (point))))))
 
 (defun evil-snipe--seek (count data)
   "(INTERNAL) Perform a snipe and adjust cursor position depending on mode."
