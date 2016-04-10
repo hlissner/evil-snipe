@@ -24,12 +24,13 @@
      (goto-char ,point)
      ,@forms))
 
-(defmacro evil-snipe! (count &rest keys)
-  `(evil-snipe-seek ,count (evil-snipe--process-keys (list ,@keys))))
+(defun exec! (keys)
+  (ignore-errors (execute-kbd-macro keys) (point)))
 
+(setq evil-snipe-show-prompt nil)
 
 ;;
-(evil-define-key 'motion evil-snipe-local-mode-map "gs" 'evil-snipe-x)
-(evil-define-key 'motion evil-snipe-local-mode-map "gS" 'evil-snipe-X)
+(evil-define-key 'motion evil-snipe-mode-map "gs" 'evil-snipe-x)
+(evil-define-key 'motion evil-snipe-mode-map "gS" 'evil-snipe-X)
 
 (provide 'test-helper)

@@ -4,70 +4,68 @@
   (with! "The quick Brown fox jumps over the /*lazy*/ dog."
     ;; Standard
     (should (from! (point-min)
-              (evil-snipe! 1 ?o ?x)
+              (evil-snipe-s 1 [?o ?x])
               (looking-at-p "ox jumps")))
     (should (from! (point-max)
-              (evil-snipe! -1 ?o ?x)
+              (evil-snipe-S 1 [?o ?x])
               (looking-at-p "ox jumps")))
+
     ;; Should ignore match under point
-    (should-error (from! 5 (evil-snipe! 1 ?q ?u)))
+    (should-error (from! 5 (evil-snipe-s 1 [?q ?u])))
     ;; No matches
-    (should-error (from! (point-min) (evil-snipe! 1 ?g ?z)))))
+    (should-error (from! (point-min) (evil-snipe-s 1 [?g ?z])))))
 
 (ert-deftest evil-snipe-1char-test ()
   (with! "The quick Brown fox jumps over the /*lazy*/ dog."
     ;; Standard
     (should (from! (point-min)
-              (evil-snipe! 1 ?o)
+              (evil-snipe-f 1 [?o])
               (looking-at-p "own fox")))
     (should (from! (point-max)
-              (evil-snipe! -1 ?o)
+              (evil-snipe-F 1 [?o])
               (looking-at-p "og\\.")))
     ;; Should ignore match under point
-    (should-error (from! 5 (evil-snipe! 1 ?q)))
+    (should-error (from! 5 (evil-snipe-f 1 [?q])))
     ;; No matches
-    (should-error (from! (point-min) (evil-snipe! 1 ?=)))))
+    (should-error (from! (point-min) (evil-snipe-f 1 [?=])))))
 
 (ert-deftest evil-snipe-literal-matching-test ()
   (with! "The quick Brown fox jumps over the /*lazy*/ dog."
     (should (from! (point-min)
-              (evil-snipe! 1 ?/ ?*)
+              (evil-snipe-s 1 [?/ ?*])
               (looking-at-p "/\\*lazy")))
     (should (from! (point-max)
-              (evil-snipe! -1 ?*)
+              (evil-snipe-S 1 [?*])
               (looking-at-p "\\*/ dog")))
     (should (from! (point-min)
-              (evil-snipe! 1 ?.)
+              (evil-snipe-s 1 [?.])
               (looking-at-p "\\.$")))))
 
 (ert-deftest evil-snipe-2char-exclusive-test ()
   (with! "The quick Brown fox jumps over the /*lazy*/ dog."
-    (let (evil-snipe--consume-match)
-      (evil-snipe! 1 ?o ?x)
-      (should (eq (point) 17))
-      (should (looking-at-p "fox"))
+    (evil-snipe-x 1 [?o ?x])
+    (should (eq (point) 17))
+    (should (looking-at-p "fox"))
 
-      
-      (should (from! (point-max)
-                (evil-snipe! -1 ?o ?x)
-                (looking-at-p " jumps"))))))
+    (should (from! (point-max)
+              (evil-snipe-X 1 [?o ?x])
+              (looking-at-p " jumps")))))
 
 (ert-deftest evil-snipe-1char-exclusive-test ()
   (with! "The quick Brown fox jumps over the /*lazy*/ dog."
-    (let (evil-snipe--consume-match)
-      (should (from! (point-min)
-                (evil-snipe! 1 ?x)
-                (looking-at-p "ox jumps")))
-      (should (from! (point-max)
-                (evil-snipe! -1 ?x)
-                (looking-at-p " jumps"))))))
+    (should (from! (point-min)
+              (evil-snipe-t 1 [?x])
+              (looking-at-p "ox jumps")))
+    (should (from! (point-max)
+              (evil-snipe-T 1 [?x])
+              (looking-at-p " jumps")))))
 
 (ert-deftest evil-snipe-repeat-test ()
   "Tests repeating forward and reverse: see `evil-snipe-repeat' and
 `evil-snipe-repeat-reverse'"
   (with! "She sourly sells Z-shells by the sullied C XOR, see?"
     (should (from! (point-min)
-              (evil-snipe! 1 ?  ?s)
+              (evil-snipe-s 1 [?  ?s])
               (looking-at-p " sourly")))
 
     (should (progn (evil-snipe-repeat) (looking-at-p " sells")))
@@ -76,7 +74,7 @@
 
     ;; Reverse
     (should (from! (point-max)
-              (evil-snipe! -1 ?  ?s)
+              (evil-snipe-S 1 [?  ?s])
               (looking-at-p " see\\?")))
 
     (should (progn (evil-snipe-repeat) (looking-at-p " sullied")))
