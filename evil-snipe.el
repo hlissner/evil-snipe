@@ -353,9 +353,7 @@ depending on what `evil-snipe-scope' is set to."
 
 (defun evil-snipe--transient-map (forward-key backward-key)
   (let ((map (make-sparse-keymap)))
-    ;; So ; and , are common to all sub keymaps
-    (define-key map ";" 'evil-snipe-repeat)
-    (define-key map "," 'evil-snipe-repeat-reverse)
+    (set-keymap-parent map evil-snipe-parent-transient-map)
     (when evil-snipe-repeat-keys
       (define-key map forward-key 'evil-snipe-repeat)
       (define-key map backward-key 'evil-snipe-repeat-reverse))
@@ -510,7 +508,7 @@ KEYS is a list of character codes or strings."
   :jump t
   :type inclusive
   (interactive "<+c><2C>")
-  (evil-snipe-seek count keys evil-snipe-mode-s-map))
+  (evil-snipe-seek count keys (evil-snipe--transient-map "s" "S")))
 
 (evil-define-motion evil-snipe-S (count keys)
   "Performs a reverse `evil-snipe-s'"
@@ -528,7 +526,7 @@ KEYS is a list of character codes or strings."
   :type inclusive
   (interactive "<+c><2C>")
   (let ((evil-snipe--consume-match nil))
-    (evil-snipe-seek count keys evil-snipe-mode-x-map)))
+    (evil-snipe-seek count keys (evil-snipe--transient-map "x" "X"))))
 
 (evil-define-motion evil-snipe-X (count keys)
   "Performs an backwards, exclusive `evil-snipe-S'"
@@ -546,7 +544,7 @@ KEYS is a list of character codes or strings."
   :type inclusive
   (interactive "<+c><1C>")
   (let ((evil-snipe-count-scope nil))
-    (evil-snipe-seek count keys evil-snipe-mode-f-map)))
+    (evil-snipe-seek count keys (evil-snipe--transient-map "f" "F"))))
 
 (evil-define-motion evil-snipe-F (count keys)
   "Jump forward to next match of {char}"
@@ -564,7 +562,7 @@ KEYS is a list of character codes or strings."
   :type inclusive
   (interactive "<+c><1C>")
   (let ((evil-snipe--consume-match nil))
-    (evil-snipe-seek count keys evil-snipe-mode-t-map)))
+    (evil-snipe-seek count keys (evil-snipe--transient-map "t" "T"))))
 
 (evil-define-motion evil-snipe-T (count keys)
   "Jump forward to next match of {char} (exclusive)"
@@ -602,13 +600,14 @@ KEYS is a list of character codes or strings."
       (evil-define-key 'motion map "," 'evil-snipe-repeat-reverse))
   map))
 
+(defvar evil-snipe-parent-transient-map
+  (let ((map (make-sparse-keymap)))
+    ;; So ; and , are common to all sub keymaps
+    (define-key map ";" 'evil-snipe-repeat)
+    (define-key map "," 'evil-snipe-repeat-reverse)))
+
 (unless (fboundp 'set-transient-map)
   (defalias 'set-transient-map 'set-temporary-overlay-map))
-
-(defvar evil-snipe-mode-s-map (evil-snipe--transient-map "s" "S"))
-(defvar evil-snipe-mode-x-map (evil-snipe--transient-map "x" "X"))
-(defvar evil-snipe-mode-f-map (evil-snipe--transient-map "f" "F"))
-(defvar evil-snipe-mode-t-map (evil-snipe--transient-map "t" "T"))
 
 ;;;###autoload
 (define-globalized-minor-mode evil-snipe-mode
