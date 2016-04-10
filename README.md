@@ -108,15 +108,6 @@ Specific characters can be aliased to regex patterns by modifying `evil-snipe-al
       (push '(?: "def .+:") evil-snipe-aliases)))
   ```
 
-### N-Char search
-
-`evil-snipe-count-scope` (default: `nil`) will control how evil-snipe treats
-a COUNT prefix. If set to `'letter'`, then COUNT determines how many characters
-snipe will accept. e.g.
-<kbd>4</kbd><kbd>s</kbd><kbd>a</kbd><kbd>b</kbd><kbd>c</kbd><kbd>d</kbd>.
-
-If nil, COUNT determines how many matches to jump forward (or backward).
-
 ### Faces
 
 * `evil-snipe-first-match-face`: The first highlighted match.
@@ -132,6 +123,20 @@ them with:
 (evil-define-key 'visual evil-snipe-mode-map "Z" 'evil-snipe-S)
 ```
 
+### Integration into avy/evil-easymotion
+
+This will allow you to quickly hop into avy/evil-easymotion right after a snipe.
+
+```elisp
+(define-key evil-snipe-parent-transient-map (kbd "C-;")
+  (evilem-create 'evil-snipe-repeat
+                 :bind ((evil-snipe-enable-highlight)
+                        (evil-snipe-enable-incremental-highlight))))
+```
+
+(Thanks to [PythonNut](https://github.com/PythonNut) for this.
+[More info here](https://github.com/hlissner/evil-snipe/issues/25#issuecomment-208068419))
+
 ## Conflicts with other plugins
 
 It seems `evil-snipe-override-mode` causes problems in Magit buffers, to fix this:
@@ -142,27 +147,27 @@ It seems `evil-snipe-override-mode` causes problems in Magit buffers, to fix thi
 
 ### Other settings
 
-* `evil-snipe-enable-highlight` (default: `t`) Highlight search
-* `evil-snipe-enable-incremental-highlight` (default: `t`) Highlight as-you-type
+* `evil-snipe-enable-highlight` (default: `t`) Highlight first match.
+* `evil-snipe-enable-incremental-highlight` (default: `t`) Incrementally highlight all
+  matches in scope.
 * `evil-snipe-override-evil-repeat-keys` (default: `t`) Whether or not evil-snipe will
   override evil's default <kbd>;</kbd> and <kbd>,</kbd> mappings with snipe's (when
   `evil-snipe-override-mode` is on).
 * `evil-snipe-repeat-keys` (default `t`) If non-nil, pressing <kbd>s</kbd>/<kbd>S</kbd>
   after a search will repeat it. If `evil-snipe-override-evil` is non-nil, this applies
   to f/F/t/T as well.
-* `evil-snipe-show-prompt` (default `t`) Whether or not to show the "N>" prompt, where
-  N is the number of characters left that snipe is waiting for.
+* `evil-snipe-show-prompt` (default `t`) Whether or not to show the "N>" prompt.
 * `evil-snipe-smart-case` (default `t`) If non-nil, searches will be case-insenstive
-  unless any of the keys are capitalized.
+  unless your search contains a capital letter.
 * `evil-snipe-auto-scroll` (default `nil`) If non-nil, the window will scroll to follow
   the cursor.
 * `evil-snipe-auto-disable-substitute` (default: `t`) Whether or not evil's default
-  substitute mappings (s/S) are unset. They can sometimes interfere with snipe.
-* `evil-snipe-skip-leading-whitespace` (default `t`) If non-nil, single char sniping
-  (f/F/t/T) will skip over leading whitespaces in a line (when you snipe for
-  whitespace).
+  substitute mappings (s/S) are unset. They can sometimes interfere with snipe. Must be
+  set _before_ evil-snipe-mode is enabled.
+* `evil-snipe-skip-leading-whitespace` (default `t`) If non-nil, sniping will skip over
+  leading whitespace when you search for whitespace.
 * `evil-snipe-tab-increment` (default `nil`) If non-nil, pressing TAB in the snipe
-  prompt will increment the maximum characters for your current search.
+  prompt will increase the size of the snipe buffer.
 
 ### Functions
 
