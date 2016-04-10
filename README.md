@@ -130,7 +130,8 @@ This will allow you to quickly hop into avy/evil-easymotion right after a snipe.
 ```elisp
 (define-key evil-snipe-parent-transient-map (kbd "C-;")
   (evilem-create 'evil-snipe-repeat
-                 :bind ((evil-snipe-enable-highlight)
+                 :bind ((evil-snipe-scope 'buffer)
+                        (evil-snipe-enable-highlight)
                         (evil-snipe-enable-incremental-highlight))))
 ```
 
