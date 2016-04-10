@@ -74,7 +74,7 @@ override evil's ; and , repeat keys in favor of its own."
   :group 'evil-snipe
   :type 'symbol)
 
-(defcustom evil-snipe-repeat-scope 'whole-line
+(defcustom evil-snipe-repeat-scope nil
   "Dictates the scope of repeat searches (see `evil-snipe-scope' for possible
 settings)"
   :group 'evil-snipe
