@@ -174,8 +174,6 @@ If nil, TAB will search for literal tab characters."
   for N characters. Do not set directly, unless you want to change the default
   number of characters to search.")
 
-(defvar evil-snipe--this-func nil)
-
 (defvar evil-snipe--transient-map-func nil)
 
 
