@@ -43,3 +43,25 @@
     (should (from! (point-max)
               (exec! [?d ?X ?o ?x])
               (looking-at-p "x$")))))
+
+(ert-deftest evil-snipe-2char-visual-test ()
+  (with! "The quick Brown fox jumps over the /*lazy*/ dog."
+    (should (from! (point-min)
+              (exec! [?v ?g ?z ?o ?x])
+              (selected! "The quick Brown fox"))))
+
+  (with! "The quick Brown fox jumps over the /*lazy*/ dog."
+    (should (from! (point-max)
+              (exec! [?v ?g ?Z ?o ?x])
+              (selected! "ox jumps over the /*lazy*/ dog.")))))
+
+(ert-deftest evil-snipe-2char-exclusive-visual-test ()
+  (with! "The quick Brown fox jumps over the /*lazy*/ dog."
+    (should (from! (point-min)
+              (exec! [?v ?g ?s ?o ?x])
+              (selected! "The quick Brown f"))))
+
+  (with! "The quick Brown fox jumps over the /*lazy*/ dog."
+    (should (from! (point-max)
+              (exec! [?v ?g ?S ?o ?x])
+              (selected! " jumps over the /*lazy*/ dog.")))))
