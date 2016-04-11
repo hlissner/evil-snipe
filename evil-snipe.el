@@ -72,7 +72,13 @@ override evil's ; and , repeat keys in favor of its own."
     'whole-buffer   ;; same as 'buffer, but highlight *all* matches in buffer
     'whole-visible  ;; same as 'visible, but highlight *all* visible matches in buffer"
   :group 'evil-snipe
-  :type 'symbol)
+  :type '(choice
+          (const :tag "Forward line" 'line)
+          (const :tag "Forward buffer" 'buffer)
+          (const :tag "Forward visible buffer" 'visible)
+          (const :tag "Whole line" 'whole-line)
+          (const :tag "Whole buffer" 'whole-buffer)
+          (const :tag "Whole visible buffer" 'whole-visible)))
 
 (defcustom evil-snipe-repeat-scope nil
   "Dictates the scope of repeat searches (see `evil-snipe-scope' for possible
@@ -87,7 +93,7 @@ and continue the search (until it finds something or even this scope fails).
 Accepts the same values as `evil-snipe-scope' and `evil-snipe-repeat-scope'.
 Is only useful if set to the same or broader scope than either."
   :group 'evil-snipe
-  :type 'boolean)
+  :type 'symbol)
 
 (defcustom evil-snipe-repeat-keys t
   "If non-nil, pressing s/S after a search will repeat it. If
@@ -112,7 +118,7 @@ letters."
   :group 'evil-snipe
   :type 'boolean)
 
-(defvar evil-snipe-aliases '()
+(defcustom evil-snipe-aliases '()
   "A list of characters mapped to regexps '(CHAR REGEX). If CHAR is used in a snipe, it
 will be replaced with REGEX. These aliases apply globally. To set an alias for a specific
 mode use:
@@ -120,8 +126,10 @@ mode use:
     (add-hook 'c++-mode-hook
       (lambda ()
         (make-variable-buffer-local 'evil-snipe-aliases)
-        (push '(?\[ \"[[{(]\") evil-snipe-aliases)))
-")
+        (push '(?\[ \"[[{(]\") evil-snipe-aliases)))"
+  :group 'evil-snipe
+  :type '(repeat (cons (character :tag "Key")
+                       (regexp :tag "Pattern"))))
 (define-obsolete-variable-alias 'evil-snipe-symbol-groups 'evil-snipe-aliases "v2.0.0")
 
 (defvar evil-snipe-auto-disable-substitute t
@@ -157,11 +165,9 @@ If nil, TAB will search for literal tab characters."
   :group 'evil-snipe)
 
 ;; State vars
-(defvar evil-snipe--last nil
-  "The last search performed.")
+(defvar evil-snipe--last nil)
 
-(defvar evil-snipe--last-repeat nil
-  "Whether the last search was a repeat.")
+(defvar evil-snipe--last-repeat nil)
 
 (defvar evil-snipe--last-direction t
   "Direction of the last search.")
