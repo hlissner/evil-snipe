@@ -26,11 +26,11 @@
     (with! "money money money is so funny in a rich man's world"
       (should (from! (point-min)
                 (evil-snipe--highlight 7 8 t)
-                (eq (face-at-pt! 7) 'evil-snipe-first-match-face)))
+                (eql (face-at-pt! 7) 'evil-snipe-first-match-face)))
 
       (should (from! (point-min)
-                (evil-snipe--highlight 7 8)
-                (eq (face-at-pt! 7) 'evil-snipe-matches-face))))))
+                (evil-snipe--highlight 11 12)
+                (eql (face-at-pt! 11) 'evil-snipe-matches-face))))))
 
 (ert-deftest evil-snipe-1char-highlight-test ()
   (let ((evil-snipe-scope 'whole-buffer)
