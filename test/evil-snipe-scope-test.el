@@ -43,19 +43,6 @@
         (should (progn (evil-snipe-repeat) (looking-at-p "azy dog")))))))
 
 
-;; `evil-snipe-count-scope'
-; (ert-deftest evil-snipe-count-scope-test ()
-;   (with! "The quick brown fox jumps over the lazier fox"
-;     (let ((evil-snipe-scope 'line)
-;           evil-snipe-count-scope)
-;       (should (from! (point-min) (evil-snipe! 1 ?o ?x)
-;                      (looking-at-p "ox jumps")))
-;       (should-error (from! (point-min) (evil-snipe! 4 ?l ?a ?z ?i)))
-;       (let ((evil-snipe-count-scope 'letters))
-;         (should (from! (point-min) (evil-snipe! 4 ?l ?a ?z ?i)
-;                        (looking-at-p "lazier fox")))))))
-
-
 ;; `evil-snipe-spillover-scope'
 (ert-deftest evil-snipe-spillover-scope-test ()
   (with! "The quick foxy\nbrown fox\njumped all fox-like over\nthe lazier\nfox"
