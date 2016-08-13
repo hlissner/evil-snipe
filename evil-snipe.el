@@ -139,6 +139,13 @@ via cl and S with cc (or C).
 
 MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 
+(defvar evil-snipe-use-vim-sneak-bindings nil
+  "Uses only Z and z under operator state, as vim-sneak does. This frees the
+x binding in operator state, if user wishes to use cx for evil-exchange or
+anything else.
+
+MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
+
 (defcustom evil-snipe-skip-leading-whitespace t
   "If non-nil, single char sniping (f/F/t/T) will skip over leading whitespaces
 in a line (when you snipe for whitespace, e.g. f<space> or f<tab>)."
@@ -500,10 +507,17 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
   (let ((map (make-sparse-keymap)))
     (evil-define-key 'motion map "s" 'evil-snipe-s)
     (evil-define-key 'motion map "S" 'evil-snipe-S)
-    (evil-define-key 'operator map "z" 'evil-snipe-s)
-    (evil-define-key 'operator map "Z" 'evil-snipe-S)
-    (evil-define-key 'operator map "x" 'evil-snipe-x)
-    (evil-define-key 'operator map "X" 'evil-snipe-X)
+
+    ;; Bind in operator state
+    (if evil-snipe-use-vim-sneak-bindings
+        (progn
+          (evil-define-key 'operator map "z" 'evil-snipe-x)
+          (evil-define-key 'operator map "Z" 'evil-snipe-X))
+      (progn
+        (evil-define-key 'operator map "z" 'evil-snipe-s)
+        (evil-define-key 'operator map "Z" 'evil-snipe-S)
+        (evil-define-key 'operator map "x" 'evil-snipe-x)
+        (evil-define-key 'operator map "X" 'evil-snipe-X)))
 
     ;; Disable s/S (substitute)
     (when evil-snipe-auto-disable-substitute

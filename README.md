@@ -170,6 +170,10 @@ It seems `evil-snipe-override-mode` causes problems in Magit buffers, to fix thi
   leading whitespace when you search for whitespace.
 * `evil-snipe-tab-increment` (default `nil`) If non-nil, pressing TAB in the snipe
   prompt will increase the size of the snipe buffer.
+* `evil-snipe-use-vim-sneak-bindings` (default `nil`) If non-nil, evil-snipe
+  binds z/Z to exclusive sniping in operator state, but leaves the x/X bindings
+  free. This mirrors the default bindings of vim-sneak, and frees up cx/cX to be
+  used by [evil-exchange](https://github.com/Dewdrops/evil-exchange).
 
 ### Functions
 
