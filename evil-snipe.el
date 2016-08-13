@@ -237,13 +237,13 @@ yourself too."
                          (nbutlast keys)))
                       (t ;; Otherwise add it
                        (when (eq key 'tab) (setq key ?\t)) ; literal tabs
-                       (setq keys (push key keys))
+                       (setq keys (append keys (list key)))
                        (cl-decf i)))
                 (when evil-snipe-enable-incremental-highlight
                   (evil-snipe--cleanup)
                   (evil-snipe--highlight-all count keys)
                   (add-hook 'pre-command-hook 'evil-snipe--cleanup))))))
-          (reverse keys)))))
+          keys))))
 
 (defun evil-snipe--bounds (&optional forward-p count)
   "Returns a cons cell containing (beg . end), which represents the search scope
