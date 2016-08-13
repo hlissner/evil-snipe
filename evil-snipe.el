@@ -214,29 +214,27 @@ yourself too."
     (unwind-protect
         (catch 'abort
           (while (> i 0)
-            (let ((key (read-event
-                        (and evil-snipe-show-prompt
-                             (format "%d>%s" i (mapconcat 'char-to-string keys ""))))))
+            (let* ((prompt (format "%d>%s" i (mapconcat 'char-to-string keys "")))
+                   (key (read-key (if evil-snipe-show-prompt prompt))))
               (cond
-               ;; Tab = adds more characters if `evil-snipe-tab-increment'
-               ((and evil-snipe-tab-increment (eq key 'tab))
-                (setq i (1+ i)))
+               ;; TAB adds more characters if `evil-snipe-tab-increment'
+               ((and evil-snipe-tab-increment (eq key ?\t))  ;; TAB
+                (cl-incf i))
                ;; Enter = do search with current chars
-               ((eq key 'return)
+               ((eq key ?\r)  ;; RET
                 (throw 'abort (if (= i evil-snipe--match-count) 'repeat keys)))
                ;; Abort
-               ((eq key 'escape)
+               ((eq key ?\e)  ;; ESC
                 (evil-snipe--cleanup)
                 (throw 'abort 'abort))
                (t ; Otherwise, process key
-                (cond ((eq key 'backspace)  ; if backspace, delete a character
+                (cond ((eq key ?\d)  ; DEL (backspace) deletes a character
                        (cl-incf i)
                        (if (<= (length keys) 1)
                            (progn (evil-snipe--cleanup)
                                   (throw 'abort 'abort))
                          (nbutlast keys)))
                       (t ;; Otherwise add it
-                       (when (eq key 'tab) (setq key ?\t)) ; literal tabs
                        (setq keys (append keys (list key)))
                        (cl-decf i)))
                 (when evil-snipe-enable-incremental-highlight
