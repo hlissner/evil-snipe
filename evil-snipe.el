@@ -215,13 +215,13 @@ yourself too."
         (catch 'abort
           (while (> i 0)
             (let* ((prompt (format "%d>%s" i (mapconcat 'char-to-string keys "")))
-                   (key (read-key (if evil-snipe-show-prompt prompt))))
+                   (key (evil-read-key (if evil-snipe-show-prompt prompt))))
               (cond
                ;; TAB adds more characters if `evil-snipe-tab-increment'
                ((and evil-snipe-tab-increment (eq key ?\t))  ;; TAB
                 (cl-incf i))
-               ;; Enter = do search with current chars
-               ((eq key ?\r)  ;; RET
+               ;; Enter starts search with current chars
+               ((memq key '(?\r ?\n))  ;; RET
                 (throw 'abort (if (= i evil-snipe--match-count) 'repeat keys)))
                ;; Abort
                ((eq key ?\e)  ;; ESC
