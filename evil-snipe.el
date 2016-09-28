@@ -161,6 +161,18 @@ If nil, TAB will search for literal tab characters."
   :group 'evil-snipe
   :type 'boolean)
 
+(defcustom evil-snipe-char-fold nil
+  "If non-nil, uses `char-fold-to-regexp' to include other ascii variants of a
+search string. CURRENTLY EXPERIMENTAL.
+
+e.g. The letter 'a' will match all of its accented cousins, even those composed
+of multiple characters, as well as many other symbols like U+249C (PARENTHESIZED
+LATIN SMALL LETTER A).
+
+Only works in Emacs 25.1+."
+  :group 'evil-snipe
+  :type 'boolean)
+
 (defface evil-snipe-first-match-face
   '((t (:inherit isearch)))
   "Face for first match when sniping"
@@ -199,7 +211,11 @@ If nil, TAB will search for literal tab characters."
   (let ((regex-p (assoc key evil-snipe-aliases))
         (keystr (char-to-string key)))
     (cons keystr
-          (if regex-p (elt regex-p 1) (regexp-quote keystr)))))
+          (if regex-p
+              (elt regex-p 1)
+            (if evil-snipe-char-fold
+                (char-fold-to-regexp keystr)
+              (regexp-quote keystr))))))
 
 (defun evil-snipe--collect-keys (&optional count forward-p)
   "The core of evil-snipe's N-character searching. Prompts for `evil-snipe--match-count'
