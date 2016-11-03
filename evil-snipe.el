@@ -132,6 +132,12 @@ mode use:
                        (regexp :tag "Pattern"))))
 (define-obsolete-variable-alias 'evil-snipe-symbol-groups 'evil-snipe-aliases "v2.0.0")
 
+(defcustom evil-snipe-disabled-modes '()
+  "A list of modes in which the global evil-snipe minor modes
+will not be turned on."
+  :group 'evil-snipe
+  :type  '(list symbol))
+
 (defvar evil-snipe-auto-disable-substitute t
   "Disables evil's native s/S functionality (substitute) if non-nil. By default
 this is t, since they are mostly redundant with other motions. s can be done
@@ -597,12 +603,14 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
 ;;;###autoload
 (defun turn-on-evil-snipe-mode ()
   "Enable evil-snipe-mode in the current buffer."
-  (evil-snipe-local-mode 1))
+  (unless (apply 'derived-mode-p evil-snipe-disabled-modes)
+    (evil-snipe-local-mode 1)))
 
 ;;;###autoload
 (defun turn-on-evil-snipe-override-mode ()
   "Enable evil-snipe-mode in the current buffer."
-  (evil-snipe-override-local-mode 1))
+  (unless (apply 'derived-mode-p evil-snipe-disabled-modes)
+    (evil-snipe-override-local-mode 1)))
 
 ;;;###autoload
 (defun turn-off-evil-snipe-mode ()
