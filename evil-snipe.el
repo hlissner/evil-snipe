@@ -437,7 +437,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                     (when evil-snipe-enable-highlight
                       (evil-snipe--highlight beg end t)))
                   ;; Activate the repeat keymap
-                  (when (and keymap)
+                  (when (and (boundp 'keymap) keymap)
                     (setq evil-snipe--transient-map-func (set-transient-map keymap)))))
             ;; Try to "spill over" into new scope on failed search
             (if evil-snipe-spillover-scope
