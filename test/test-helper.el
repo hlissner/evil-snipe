@@ -39,5 +39,3 @@
 
 (evil-define-key 'motion evil-snipe-mode-map "gs" 'evil-snipe-x)
 (evil-define-key 'motion evil-snipe-mode-map "gS" 'evil-snipe-X)
-
-(provide 'test-helper)
