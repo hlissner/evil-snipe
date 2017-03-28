@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: September 28, 2016
-;; Version: 2.0.4
+;; Modified: March 28, 2017
+;; Version: 2.0.5
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.8") (cl-lib "0.5"))
@@ -286,7 +286,7 @@ depending on what `evil-snipe-scope' is set to."
                    ('whole-line
                     `(,(line-beginning-position) . ,(line-end-position)))
                    ('whole-visible
-                    `(,(window-start) . ,(1- (window-end))))
+                    `(,(window-start) . ,(window-end)))
                    ('whole-buffer
                     `(,(point-min) . ,(point-max)))
                    (t
