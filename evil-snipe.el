@@ -6,7 +6,7 @@
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
 ;; Modified: March 28, 2017
-;; Version: 2.0.5
+;; Version: 2.0.6
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((evil "1.0.8") (cl-lib "0.5"))
@@ -309,15 +309,17 @@ depending on what `evil-snipe-scope' is set to."
     overlay))
 
 (defun evil-snipe--highlight-all (count keys)
-  "Highlight all instances of `keys' ahead of the cursor, or behind it if
-`forward-p' is nil."
-  (let* ((case-fold-search (evil-snipe--case-p keys))
-         (match (mapconcat 'char-to-string keys ""))
-         (forward-p (> count 0))
-         (bounds (evil-snipe--bounds forward-p))
-         (orig-pt (point))
-         (i 0)
-         overlays)
+  "Highlight all instances of KEYS ahead of the cursor at an interval of COUNT,
+or behind it if COUNT is negative."
+  (let ((case-fold-search (evil-snipe--case-p keys))
+        (match (mapconcat 'char-to-string keys ""))
+        (bounds
+         (let ((evil-snipe-scope (cl-case evil-snipe-scope
+                                   ('whole-buffer 'whole-visible)
+                                   ('buffer 'visible)
+                                   (t evil-snipe-scope))))
+           (evil-snipe--bounds (> count 0))))
+        overlays)
     (save-excursion
       (goto-char (car bounds))
       (while (search-forward match (cdr bounds) t 1)
@@ -326,7 +328,7 @@ depending on what `evil-snipe-scope' is set to."
           (if (and evil-snipe-skip-leading-whitespace
                    (looking-at-p "[ \t][ \t]+"))
               (progn
-                (re-search-forward-lax-whitespace " ")
+                (skip-chars-forward " \t")
                 (backward-char (- hl-end hl-beg)))
             (push (evil-snipe--highlight hl-beg hl-end) overlays)))))
     overlays))
