@@ -9,7 +9,7 @@
 ;; Version: 2.0.6
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
-;; Package-Requires: ((evil "1.0.8") (cl-lib "0.5"))
+;; Package-Requires: ((evil "1.2.12") (cl-lib "0.5"))
 ;;
 ;; This file is not part of GNU Emacs.
 
@@ -535,44 +535,42 @@ be inclusive or exclusive."
 
 (defvar evil-snipe-mode-map
   (let ((map (make-sparse-keymap)))
-    (evil-define-key 'motion map "s" 'evil-snipe-s)
-    (evil-define-key 'motion map "S" 'evil-snipe-S)
-
-    ;; Bind in operator state
+    (evil-define-key* 'motion map
+      "s" 'evil-snipe-s
+      "S" 'evil-snipe-S)
     (if evil-snipe-use-vim-sneak-bindings
-        (progn
-          (evil-define-key 'operator map "z" 'evil-snipe-x)
-          (evil-define-key 'operator map "Z" 'evil-snipe-X))
-      (progn
-        (evil-define-key 'operator map "z" 'evil-snipe-s)
-        (evil-define-key 'operator map "Z" 'evil-snipe-S)
-        (evil-define-key 'operator map "x" 'evil-snipe-x)
-        (evil-define-key 'operator map "X" 'evil-snipe-X)))
-
-    ;; Disable s/S (substitute)
-    (when evil-snipe-auto-disable-substitute
-      (define-key evil-normal-state-map "s" nil)
-      (define-key evil-normal-state-map "S" nil))
+        (evil-define-key* 'operator map
+          "z" 'evil-snipe-x
+          "Z" 'evil-snipe-X)
+      (evil-define-key* 'operator map
+        "z" 'evil-snipe-s
+        "Z" 'evil-snipe-S
+        "x" 'evil-snipe-x
+        "X" 'evil-snipe-X))
     map))
 
 (defvar evil-snipe-override-mode-map
   (let ((map (make-sparse-keymap)))
-    (evil-define-key 'motion map "f" 'evil-snipe-f)
-    (evil-define-key 'motion map "F" 'evil-snipe-F)
-    (evil-define-key 'motion map "t" 'evil-snipe-t)
-    (evil-define-key 'motion map "T" 'evil-snipe-T)
-
+    (evil-define-key* 'motion map
+      "f" 'evil-snipe-f
+      "F" 'evil-snipe-F
+      "t" 'evil-snipe-t
+      "T" 'evil-snipe-T)
     (when evil-snipe-override-evil-repeat-keys
-      (evil-define-key 'motion map ";" 'evil-snipe-repeat)
-      (evil-define-key 'motion map "," 'evil-snipe-repeat-reverse))
+      (evil-define-key* 'motion map
+        ";" 'evil-snipe-repeat
+        "," 'evil-snipe-repeat-reverse))
     map))
 
 (defvar evil-snipe-parent-transient-map
   (let ((map (make-sparse-keymap)))
-    ;; So ; and , are common to all sub keymaps
     (define-key map ";" 'evil-snipe-repeat)
     (define-key map "," 'evil-snipe-repeat-reverse)
     map))
+
+(when evil-snipe-auto-disable-substitute
+  (define-key evil-normal-state-map "s" nil)
+  (define-key evil-normal-state-map "S" nil))
 
 (unless (fboundp 'set-transient-map)
   (defalias 'set-transient-map 'set-temporary-overlay-map))
