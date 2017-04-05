@@ -273,7 +273,8 @@ COUNT's directionality."
 scope, determined from `evil-snipe-scope'. If abs(COUNT) > 1, use
 `evil-snipe-spillover-scope'."
   (let* ((point+1 (1+ (point)))
-         (evil-snipe-scope (or (if (and count (> (abs count) 1)) evil-snipe-spillover-scope) evil-snipe-scope))
+         (evil-snipe-scope (or (if (and count (> (abs count) 1)) evil-snipe-spillover-scope)
+                               evil-snipe-scope))
          (bounds (cl-case evil-snipe-scope
                    ('line
                     (if forward-p
@@ -481,12 +482,13 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
   (interactive "<c>")
   (evil-snipe-repeat (or (and count (- count)) -1)))
 
-
+;;;###autoload
 (defmacro evil-snipe-def (n type forward-key backward-key)
   "Define a N-char snipe, and bind it to FORWARD-KEY and BACKWARD-KEY. TYPE can
 be inclusive or exclusive."
   (let ((forward-fn (intern (format "evil-snipe-%s" forward-key)))
-        (backward-fn (intern (format "evil-snipe-%s" backward-key))))
+        (backward-fn (intern (format "evil-snipe-%s" backward-key)))
+        (inclusive-p (eq (evil-unquote type) 'inclusive)))
     `(progn
        (evil-define-motion ,forward-fn (count keys)
          ,(concat "Jumps to the next " (int-to-string n)
@@ -497,7 +499,7 @@ be inclusive or exclusive."
             (list (progn (setq evil-snipe--last-direction t) count)
                   (let ((evil-snipe--match-count ,n))
                     (evil-snipe--collect-keys count evil-snipe--last-direction)))))
-         (let ((evil-snipe--consume-match ,(eq type 'inclusive)))
+         (let ((evil-snipe--consume-match ,inclusive-p))
            (evil-snipe-seek
             count keys (evil-snipe--transient-map ,forward-key ,backward-key))))
 
@@ -509,26 +511,26 @@ be inclusive or exclusive."
             (list (progn (setq evil-snipe--last-direction nil) count)
                   (let ((evil-snipe--match-count ,n))
                     (evil-snipe--collect-keys count evil-snipe--last-direction)))))
-         (let ((evil-snipe--consume-match ,(eq type 'inclusive)))
+         (let ((evil-snipe--consume-match ,inclusive-p))
            (evil-snipe-seek
             (or (and count (- count)) -1) keys
             (evil-snipe--transient-map ,forward-key ,backward-key)))))))
 
 ;;;###autoload (autoload 'evil-snipe-s "evil-snipe" nil t)
 ;;;###autoload (autoload 'evil-snipe-S "evil-snipe" nil t)
-(evil-snipe-def 2 inclusive "s" "S")
+(evil-snipe-def 2 'inclusive "s" "S")
 
 ;;;###autoload (autoload 'evil-snipe-x "evil-snipe" nil t)
 ;;;###autoload (autoload 'evil-snipe-X "evil-snipe" nil t)
-(evil-snipe-def 2 exclusive "x" "X")
+(evil-snipe-def 2 'exclusive "x" "X")
 
 ;;;###autoload (autoload 'evil-snipe-f "evil-snipe" nil t)
 ;;;###autoload (autoload 'evil-snipe-F "evil-snipe" nil t)
-(evil-snipe-def 1 inclusive "f" "F")
+(evil-snipe-def 1 'inclusive "f" "F")
 
 ;;;###autoload (autoload 'evil-snipe-t "evil-snipe" nil t)
 ;;;###autoload (autoload 'evil-snipe-T "evil-snipe" nil t)
-(evil-snipe-def 1 exclusive "t" "T")
+(evil-snipe-def 1 'exclusive "t" "T")
 
 
 (defvar evil-snipe-mode-map
