@@ -224,9 +224,12 @@ Only works in Emacs 25.1+."
               (regexp-quote keystr))))))
 
 (defun evil-snipe--collect-keys (&optional count forward-p)
-  "The core of evil-snipe's N-character searching. Prompts for `evil-snipe--match-count'
-characters, which can be incremented by pressing TAB. Backspace works for correcting
-yourself too."
+  "The core of evil-snipe's N-character searching. Prompts for
+`evil-snipe--match-count' characters, which is incremented with tab.
+Backspace works for correcting yourself too.
+
+COUNT determines the key interval and directionality. FORWARD-P can override
+COUNT's directionality."
   (let ((echo-keystrokes 0) ; don't mess with the prompt, Emacs
         (count (or count 1))
         (i evil-snipe--match-count)
@@ -266,8 +269,9 @@ yourself too."
           keys))))
 
 (defun evil-snipe--bounds (&optional forward-p count)
-  "Returns a cons cell containing (beg . end), which represents the search scope
-depending on what `evil-snipe-scope' is set to."
+  "Returns a cons cell containing (beg . end), which represents the search
+scope, determined from `evil-snipe-scope'. If abs(COUNT) > 1, use
+`evil-snipe-spillover-scope'."
   (let* ((point+1 (1+ (point)))
          (evil-snipe-scope (or (if (and count (> (abs count) 1)) evil-snipe-spillover-scope) evil-snipe-scope))
          (bounds (cl-case evil-snipe-scope
@@ -457,7 +461,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
     (point)))
 
 (evil-define-motion evil-snipe-repeat (count)
-  "Repeat the last evil-snipe `count' times"
+  "Repeat the last evil-snipe COUNT times."
   (interactive "<c>")
   (unless (listp evil-snipe--last)
     (user-error "Nothing to repeat"))
@@ -479,6 +483,8 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
 
 
 (defmacro evil-snipe-def (n type forward-key backward-key)
+  "Define a N-char snipe, and bind it to FORWARD-KEY and BACKWARD-KEY. TYPE can
+be inclusive or exclusive."
   (let ((forward-fn (intern (format "evil-snipe-%s" forward-key)))
         (backward-fn (intern (format "evil-snipe-%s" backward-key))))
     `(progn
