@@ -576,12 +576,28 @@ be inclusive or exclusive."
   (defalias 'set-transient-map 'set-temporary-overlay-map))
 
 ;;;###autoload
-(define-globalized-minor-mode evil-snipe-mode
-  evil-snipe-local-mode turn-on-evil-snipe-mode)
+(defun turn-on-evil-snipe-mode ()
+  "Enable evil-snipe-mode in the current buffer."
+  (unless (or (minibufferp)
+              (apply 'derived-mode-p evil-snipe-disabled-modes))
+    (evil-snipe-local-mode 1)))
 
 ;;;###autoload
-(define-globalized-minor-mode evil-snipe-override-mode
-  evil-snipe-override-local-mode turn-on-evil-snipe-override-mode)
+(defun turn-on-evil-snipe-override-mode ()
+  "Enable evil-snipe-mode in the current buffer."
+  (unless (or (minibufferp)
+              (apply 'derived-mode-p evil-snipe-disabled-modes))
+    (evil-snipe-override-local-mode 1)))
+
+;;;###autoload
+(defun turn-off-evil-snipe-mode ()
+  "Disable evil-snipe-mode in the current buffer."
+  (evil-snipe-local-mode -1))
+
+;;;###autoload
+(defun turn-off-evil-snipe-override-mode ()
+  "Disable evil-snipe-override-mode in the current buffer."
+  (evil-snipe-override-local-mode -1))
 
 ;;;###autoload
 (define-minor-mode evil-snipe-local-mode
@@ -609,26 +625,12 @@ be inclusive or exclusive."
     (evil-snipe-local-mode -1)))
 
 ;;;###autoload
-(defun turn-on-evil-snipe-mode ()
-  "Enable evil-snipe-mode in the current buffer."
-  (unless (apply 'derived-mode-p evil-snipe-disabled-modes)
-    (evil-snipe-local-mode 1)))
+(define-globalized-minor-mode evil-snipe-mode
+  evil-snipe-local-mode turn-on-evil-snipe-mode)
 
 ;;;###autoload
-(defun turn-on-evil-snipe-override-mode ()
-  "Enable evil-snipe-mode in the current buffer."
-  (unless (apply 'derived-mode-p evil-snipe-disabled-modes)
-    (evil-snipe-override-local-mode 1)))
-
-;;;###autoload
-(defun turn-off-evil-snipe-mode ()
-  "Disable evil-snipe-mode in the current buffer."
-  (evil-snipe-local-mode -1))
-
-;;;###autoload
-(defun turn-off-evil-snipe-override-mode ()
-  "Disable evil-snipe-override-mode in the current buffer."
-  (evil-snipe-override-local-mode -1))
+(define-globalized-minor-mode evil-snipe-override-mode
+  evil-snipe-override-local-mode turn-on-evil-snipe-override-mode)
 
 (provide 'evil-snipe)
 ;;; evil-snipe.el ends here
