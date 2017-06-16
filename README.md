@@ -31,7 +31,7 @@ Then enable it globally with:
 Or in specific modes:
 
 ```elisp
-(add-hook 'python-mode 'evil-snipe-local-mode)
+(add-hook 'python-mode-hook 'evil-snipe-local-mode)
 ```
 
 ## Usage
@@ -50,7 +50,7 @@ Evil-snipe can override evil-mode's native motions with 1-char sniping:
 (evil-snipe-override-mode 1)
 
 ;; Or locally
-(add-hook 'ruby-mode 'evil-snipe-override-local-mode)
+(add-hook 'ruby-mode-hook 'evil-snipe-override-local-mode)
 ```
 
 The benefit of this is:
@@ -188,19 +188,24 @@ It seems `evil-snipe-override-mode` causes problems in Magit buffers, to fix thi
 ### Default keybindings
 
 ```elisp
-(evil-define-key 'motion evil-snipe-mode-map "s" 'evil-snipe-s)
-(evil-define-key 'motion evil-snipe-mode-map "S" 'evil-snipe-S)
-(evil-define-key 'operator evil-snipe-mode-map "z" 'evil-snipe-s)
-(evil-define-key 'operator evil-snipe-mode-map "Z" 'evil-snipe-S)
-(evil-define-key 'operator evil-snipe-mode-map "x" 'evil-snipe-x)
-(evil-define-key 'operator evil-snipe-mode-map "X" 'evil-snipe-X)
+(evil-define-key 'motion evil-snipe-mode-map
+  "s" 'evil-snipe-s
+  "S" 'evil-snipe-S)
 
-(evil-define-key 'motion evil-snipe-override-mode-map "f" 'evil-snipe-f)
-(evil-define-key 'motion evil-snipe-override-mode-map "F" 'evil-snipe-F)
-(evil-define-key 'motion evil-snipe-override-mode-map "t" 'evil-snipe-t)
-(evil-define-key 'motion evil-snipe-override-mode-map "T" 'evil-snipe-T)
+(evil-define-key 'operator evil-snipe-mode-map
+  "z" 'evil-snipe-s
+  "Z" 'evil-snipe-S
+  "x" 'evil-snipe-x
+  "X" 'evil-snipe-X)
+
+(evil-define-key 'motion evil-snipe-override-mode-map
+  "f" 'evil-snipe-f
+  "F" 'evil-snipe-F
+  "t" 'evil-snipe-t
+  "T" 'evil-snipe-T)
 
 (when evil-snipe-override-evil-repeat-keys
-  (evil-define-key 'motion map ";" 'evil-snipe-repeat)
-  (evil-define-key 'motion map "," 'evil-snipe-repeat-reverse))
+  (evil-define-key 'motion map
+    ";" 'evil-snipe-repeat
+    "," 'evil-snipe-repeat-reverse))
 ```
