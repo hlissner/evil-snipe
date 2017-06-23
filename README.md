@@ -1,3 +1,4 @@
+![evil-snipe](https://img.shields.io/badge/evil--snipe-v2.0.8-blue.svg)
 [![MIT](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 [![MELPA](http://melpa.org/packages/evil-snipe-badge.svg)](http://melpa.org/#/evil-snipe)
 [![MELPA Stable](http://stable.melpa.org/packages/evil-snipe-badge.svg)](http://stable.melpa.org/#/evil-snipe)

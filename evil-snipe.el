@@ -1,15 +1,15 @@
 ;;; evil-snipe.el --- emulate vim-sneak & vim-seek
 ;;
-;; Copyright (C) 2014-16 Henrik Lissner
+;; Copyright (C) 2014-17 Henrik Lissner
 ;;
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: April 05, 2017
-;; Version: 2.0.7
+;; Modified: June 23, 2017
+;; Version: 2.0.8
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
-;; Package-Requires: ((evil "1.2.12") (cl-lib "0.5"))
+;; Package-Requires: ((emacs "24.4") (evil "1.2.12") (cl-lib "0.5"))
 ;;
 ;; This file is not part of GNU Emacs.
 
