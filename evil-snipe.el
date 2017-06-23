@@ -273,23 +273,23 @@ scope, determined from `evil-snipe-scope'. If abs(COUNT) > 1, use
           (or (and count (> (abs count) 1) evil-snipe-spillover-scope)
               evil-snipe-scope))
          (bounds (pcase evil-snipe-scope
-                   ('line
+                   (`line
                     (if forward-p
                         `(,point+1 . ,(line-end-position))
                       `(,(line-beginning-position) . ,(point))))
-                   ('visible
+                   (`visible
                     (if forward-p
                         `(,point+1 . ,(1- (window-end)))
                       `(,(window-start) . ,(point))))
-                   ('buffer
+                   (`buffer
                     (if forward-p
                         `(,point+1 . ,(point-max))
                       `(,(point-min) . ,(point))))
-                   ('whole-line
+                   (`whole-line
                     `(,(line-beginning-position) . ,(line-end-position)))
-                   ('whole-visible
+                   (`whole-visible
                     `(,(window-start) . ,(window-end)))
-                   ('whole-buffer
+                   (`whole-buffer
                     `(,(point-min) . ,(point-max)))
                    (_
                     (error "Invalid scope: %s" evil-snipe-scope))))
@@ -318,8 +318,8 @@ or behind it if COUNT is negative."
         (bounds
          (let ((evil-snipe-scope
                 (pcase evil-snipe-scope
-                  ('whole-buffer 'whole-visible)
-                  ('buffer 'visible)
+                  (`whole-buffer 'whole-visible)
+                  (`buffer 'visible)
                   (_ evil-snipe-scope))))
            (evil-snipe--bounds (> count 0))))
         overlays)
@@ -362,13 +362,13 @@ or behind it if COUNT is negative."
 interactive codes. KEYMAP is the transient map to activate afterwards."
   (let ((case-fold-search (evil-snipe--case-p keys)))
     (pcase keys
-      ('abort (setq evil-inhibit-operator t))
+      (`abort (setq evil-inhibit-operator t))
       ;; if <enter>, repeat last search
-      ('repeat (if evil-snipe--last-direction
+      (`repeat (if evil-snipe--last-direction
                    (evil-snipe-repeat count)
                  (evil-snipe-repeat-reverse count)))
       ;; If KEYS is empty
-      ('() (user-error "No keys provided!"))
+      (`() (user-error "No keys provided!"))
       ;; Otherwise, perform the search
       (_ (let ((count (or count (if evil-snipe--last-direction 1 -1)))
                (keymap (if (keymapp keymap) keymap))
