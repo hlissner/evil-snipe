@@ -612,11 +612,7 @@ be inclusive or exclusive."
 (define-minor-mode evil-snipe-override-local-mode
   "evil-snipe minor mode that overrides evil-mode f/F/t/T/;/, bindings."
   :keymap evil-snipe-override-mode-map
-  :group 'evil-snipe
-  (if evil-snipe-override-local-mode
-      (unless evil-snipe-local-mode
-        (evil-snipe-local-mode 1))
-    (evil-snipe-local-mode -1)))
+  :group 'evil-snipe)
 
 ;;;###autoload
 (define-globalized-minor-mode evil-snipe-mode
