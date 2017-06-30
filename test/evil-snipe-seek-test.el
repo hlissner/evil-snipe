@@ -60,6 +60,19 @@
               (evil-snipe-T 1 [?x])
               (looking-at-p " jumps")))))
 
+(ert-deftest evil-snipe-invisible-test ()
+  "Should skip over matches in invisible sections."
+  (with! "brown brown brown brown"
+    (let ((ov (make-overlay 7 12)))
+      (overlay-put ov 'invisible t))
+    (should (invisible-p 7))
+    (should-not (from! (point-min)
+                  (evil-snipe-s 1 [?b ?r])
+                  (= (point) 7)))
+    (should (from! (point-min)
+              (evil-snipe-s 1 [?b ?r])
+              (= (point) 13)))))
+
 (ert-deftest evil-snipe-repeat-test ()
   "Tests repeating forward and reverse: see `evil-snipe-repeat' and
 `evil-snipe-repeat-reverse'"
