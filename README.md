@@ -164,9 +164,6 @@ It seems `evil-snipe-override-mode` causes problems in Magit buffers, to fix thi
   unless your search contains a capital letter.
 * `evil-snipe-auto-scroll` (default `nil`) If non-nil, the window will scroll to follow
   the cursor.
-* `evil-snipe-auto-disable-substitute` (default: `t`) Whether or not evil's default
-  substitute mappings (s/S) are unset. They can sometimes interfere with snipe. Must be
-  set _before_ evil-snipe-mode is enabled.
 * `evil-snipe-skip-leading-whitespace` (default `t`) If non-nil, sniping will skip over
   leading whitespace when you search for whitespace.
 * `evil-snipe-tab-increment` (default `nil`) If non-nil, pressing TAB in the snipe
@@ -189,7 +186,7 @@ It seems `evil-snipe-override-mode` causes problems in Magit buffers, to fix thi
 ### Default keybindings
 
 ```elisp
-(evil-define-key 'motion evil-snipe-mode-map
+(evil-define-key '(normal motion) evil-snipe-mode-map
   "s" 'evil-snipe-s
   "S" 'evil-snipe-S)
 

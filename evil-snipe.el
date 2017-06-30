@@ -533,7 +533,7 @@ be inclusive or exclusive."
 
 (defvar evil-snipe-mode-map
   (let ((map (make-sparse-keymap)))
-    (evil-define-key* 'motion map
+    (evil-define-key* '(normal motion) map
       "s" #'evil-snipe-s
       "S" #'evil-snipe-S)
     (if evil-snipe-use-vim-sneak-bindings
@@ -565,10 +565,6 @@ be inclusive or exclusive."
     (define-key map ";" #'evil-snipe-repeat)
     (define-key map "," #'evil-snipe-repeat-reverse)
     map))
-
-(when evil-snipe-auto-disable-substitute
-  (define-key evil-normal-state-map "s" nil)
-  (define-key evil-normal-state-map "S" nil))
 
 (unless (fboundp 'set-transient-map)
   (defalias 'set-transient-map #'set-temporary-overlay-map))
