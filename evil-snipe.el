@@ -132,7 +132,7 @@ mode use:
                        (regexp :tag "Pattern"))))
 (define-obsolete-variable-alias 'evil-snipe-symbol-groups 'evil-snipe-aliases "v2.0.0")
 
-(defcustom evil-snipe-disabled-modes '()
+(defcustom evil-snipe-disabled-modes '(magit-mode)
   "A list of modes in which the global evil-snipe minor modes
 will not be turned on."
   :group 'evil-snipe
@@ -586,15 +586,17 @@ be inclusive or exclusive."
 (defun turn-on-evil-snipe-mode ()
   "Enable evil-snipe-mode in the current buffer."
   (unless (or (minibufferp)
+              (eq major-mode 'fundamental-mode)
               (apply #'derived-mode-p evil-snipe-disabled-modes))
-    (evil-snipe-local-mode 1)))
+    (evil-snipe-local-mode +1)))
 
 ;;;###autoload
 (defun turn-on-evil-snipe-override-mode ()
   "Enable evil-snipe-mode in the current buffer."
   (unless (or (minibufferp)
+              (eq major-mode 'fundamental-mode)
               (apply #'derived-mode-p evil-snipe-disabled-modes))
-    (evil-snipe-override-local-mode 1)))
+    (evil-snipe-override-local-mode +1)))
 
 ;;;###autoload
 (defun turn-off-evil-snipe-mode ()
