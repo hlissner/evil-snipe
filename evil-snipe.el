@@ -340,13 +340,13 @@ or behind it if COUNT is negative."
 
 (defun evil-snipe--cleanup ()
   "Disables overlays and cleans up after evil-snipe."
-  (when evil-snipe-local-mode
-    (remove-overlays nil nil 'category 'evil-snipe))
-  (remove-hook 'pre-command-hook #'evil-snipe--cleanup))
+  (when (or evil-snipe-local-mode evil-snipe-override-local-mode)
+    (remove-overlays nil nil 'category 'evil-snipe)
+    (remove-hook 'pre-command-hook #'evil-snipe--cleanup)))
 
 (defun evil-snipe--disable-transient-map ()
   "Disable lingering transient map, if necessary."
-  (when (and evil-snipe-local-mode (functionp evil-snipe--transient-map-func))
+  (when (functionp evil-snipe--transient-map-func)
     (funcall evil-snipe--transient-map-func)
     (setq evil-snipe--transient-map-func nil)))
 
@@ -608,20 +608,16 @@ be inclusive or exclusive."
   "Disable evil-snipe-override-mode in the current buffer."
   (evil-snipe-override-local-mode -1))
 
+(when (fboundp 'advice-add)
+  (advice-add #'evil-force-normal-state :before #'evil-snipe--cleanup))
+(add-hook 'evil-insert-state-entry-hook #'evil-snipe--disable-transient-map)
+
 ;;;###autoload
 (define-minor-mode evil-snipe-local-mode
   "evil-snipe minor mode."
   :lighter " snipe"
   :keymap evil-snipe-mode-map
-  :group 'evil-snipe
-  (cond (evil-snipe-local-mode
-         (when (fboundp 'advice-add)
-           (advice-add #'evil-force-normal-state :before #'evil-snipe--cleanup))
-         (add-hook 'evil-insert-state-entry-hook #'evil-snipe--disable-transient-map nil t))
-        (t
-         (when (fboundp 'advice-remove)
-           (advice-remove #'evil-force-normal-state #'evil-snipe--cleanup))
-         (remove-hook 'evil-insert-state-entry-hook #'evil-snipe--disable-transient-map t))))
+  :group 'evil-snipe)
 
 ;;;###autoload
 (define-minor-mode evil-snipe-override-local-mode
