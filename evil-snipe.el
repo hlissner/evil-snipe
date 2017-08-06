@@ -600,7 +600,7 @@ be inclusive or exclusive."
 
 ;;;###autoload
 (defun turn-off-evil-snipe-mode ()
-  "Disable evil-snipe-mode in the current buffer."
+  "Disable `evil-snipe-local-mode' in the current buffer."
   (evil-snipe-local-mode -1))
 
 ;;;###autoload
