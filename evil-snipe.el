@@ -475,7 +475,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
 (evil-define-motion evil-snipe-repeat (count)
   "Repeat the last evil-snipe COUNT times."
   (interactive "<c>")
-  (unless (listp evil-snipe--last)
+  (unless evil-snipe--last
     (user-error "Nothing to repeat"))
   (let ((last-count (nth 0 evil-snipe--last))
         (last-keys (nth 1 evil-snipe--last))
@@ -486,12 +486,12 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
         (evil-snipe-scope (or evil-snipe-repeat-scope evil-snipe-scope)))
     (let ((evil-snipe--consume-match last-consume-match)
           (evil-snipe--match-count last-match-count))
-      (evil-snipe-seek (* (or count 1) last-count) last-keys last-keymap))))
+      (evil-snipe-seek (* (or count 1) (or last-count 1)) last-keys last-keymap))))
 
 (evil-define-motion evil-snipe-repeat-reverse (count)
   "Repeat the inverse of the last evil-snipe `count' times"
   (interactive "<c>")
-  (evil-snipe-repeat (or (and count (- count)) -1)))
+  (evil-snipe-repeat (or (and (integerp count) (- count)) -1)))
 
 ;;;###autoload
 (defmacro evil-snipe-def (n type forward-key backward-key)
