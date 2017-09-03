@@ -544,7 +544,7 @@ be inclusive or exclusive."
 (evil-snipe-def 1 'exclusive "t" "T")
 
 
-(defvar evil-snipe-mode-map
+(defvar evil-snipe-local-mode-map
   (let ((map (make-sparse-keymap)))
     (evil-define-key* '(normal motion) map
       "s" #'evil-snipe-s
@@ -560,7 +560,7 @@ be inclusive or exclusive."
         "X" #'evil-snipe-X))
     map))
 
-(defvar evil-snipe-override-mode-map
+(defvar evil-snipe-override-local-mode-map
   (let ((map (make-sparse-keymap)))
     (evil-define-key* 'motion map
       "f" #'evil-snipe-f
@@ -616,13 +616,11 @@ be inclusive or exclusive."
 (define-minor-mode evil-snipe-local-mode
   "evil-snipe minor mode."
   :lighter " snipe"
-  :keymap evil-snipe-mode-map
   :group 'evil-snipe)
 
 ;;;###autoload
 (define-minor-mode evil-snipe-override-local-mode
   "evil-snipe minor mode that overrides evil-mode f/F/t/T/;/, bindings."
-  :keymap evil-snipe-override-mode-map
   :group 'evil-snipe)
 
 ;;;###autoload
