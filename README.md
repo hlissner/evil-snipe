@@ -1,8 +1,8 @@
-![evil-snipe](https://img.shields.io/badge/evil--snipe-v2.0.9-blue.svg)
-[![MIT](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
-[![MELPA](http://melpa.org/packages/evil-snipe-badge.svg)](http://melpa.org/#/evil-snipe)
-[![MELPA Stable](http://stable.melpa.org/packages/evil-snipe-badge.svg)](http://stable.melpa.org/#/evil-snipe)
-[![Build Status](https://travis-ci.org/hlissner/evil-snipe.png?branch=master)](https://travis-ci.org/hlissner/evil-snipe)
+![Release tag](https://img.shields.io/github/tag/hlissner/evil-snipe.svg?label=release&style=flat-square)
+[![MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](./LICENSE)
+[![MELPA](http://melpa.org/packages/evil-snipe-badge.svg?style=flat-square)](http://melpa.org/#/evil-snipe)
+[![MELPA Stable](http://stable.melpa.org/packages/evil-snipe-badge.svg?style=flat-square)](http://stable.melpa.org/#/evil-snipe)
+[![Build Status](https://travis-ci.org/hlissner/evil-snipe.png?branch=master&style=flat-square)](https://travis-ci.org/hlissner/evil-snipe)
 
 # evil-snipe
 
@@ -22,17 +22,33 @@ Evil-snipe is available on MELPA.
 
 `M-x package-install evil-snipe`
 
-Then enable it globally with:
-
-```elisp
+```emacs-lisp
 (require 'evil-snipe)
-(evil-snipe-mode 1)
 ```
 
-Or in specific modes:
+`evil-snipe` comes with two global modes: `evil-snipe-mode` and
+`evil-snipe-override-mode`, and two local modes: `evil-snipe-local-mode` and
+`evil-snipe-override-local-mode`.
+
+You can either a) enable one or both globally:
 
 ```elisp
-(add-hook 'python-mode-hook 'evil-snipe-local-mode)
+(evil-snipe-mode +1)
+(evil-snipe-override-mode +1)
+
+;; and disable in specific modes
+(push 'python-mode evil-snipe-disabled-modes)
+
+;; or disable it manually
+(add-hook 'python-mode-hook #'turn-off-evil-snipe-mode)
+(add-hook 'python-mode-hook #'turn-off-evil-snipe-override-mode)
+```
+
+Or b) enable one or both locally, where you need it:
+
+```elisp
+(add-hook 'python-mode-hook 'turn-on-evil-snipe-mode
+(add-hook 'python-mode-hook 'turn-on-evil-snipe-override-local-mode)
 ```
 
 ## Usage
