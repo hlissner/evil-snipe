@@ -34,8 +34,8 @@
 (setq evil-snipe-show-prompt nil)
 
 ;;
-(evil-define-key 'visual evil-snipe-mode-map "gz" 'evil-snipe-s)
-(evil-define-key 'visual evil-snipe-mode-map "gZ" 'evil-snipe-S)
+(evil-define-key 'visual evil-snipe-local-mode-map "gz" 'evil-snipe-s)
+(evil-define-key 'visual evil-snipe-local-mode-map "gZ" 'evil-snipe-S)
 
-(evil-define-key 'motion evil-snipe-mode-map "gs" 'evil-snipe-x)
-(evil-define-key 'motion evil-snipe-mode-map "gS" 'evil-snipe-X)
+(evil-define-key 'motion evil-snipe-local-mode-map "gs" 'evil-snipe-x)
+(evil-define-key 'motion evil-snipe-local-mode-map "gS" 'evil-snipe-X)
