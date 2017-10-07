@@ -138,13 +138,6 @@ will not be turned on."
   :group 'evil-snipe
   :type  '(list symbol))
 
-(defvar evil-snipe-auto-disable-substitute t
-  "Disables evil's native s/S functionality (substitute) if non-nil. By default
-this is t, since they are mostly redundant with other motions. s can be done
-via cl and S with cc (or C).
-
-MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
-
 (defvar evil-snipe-use-vim-sneak-bindings nil
   "Uses only Z and z under operator state, as vim-sneak does. This frees the
 x binding in operator state, if user wishes to use cx for evil-exchange or
