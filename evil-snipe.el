@@ -627,5 +627,8 @@ be inclusive or exclusive."
 (define-globalized-minor-mode evil-snipe-override-mode
   evil-snipe-override-local-mode turn-on-evil-snipe-override-mode)
 
+(define-obsolete-variable-alias 'evil-snipe-mode-map 'evil-snipe-local-mode-map "2.0.8")
+(define-obsolete-variable-alias 'evil-snipe-override-mode-map 'evil-snipe-override-local-mode-map "2.0.8")
+
 (provide 'evil-snipe)
 ;;; evil-snipe.el ends here
