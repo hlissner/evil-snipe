@@ -456,9 +456,12 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
               ;; If, at last, it fails...
               (t
                (goto-char orig-point)
-               (user-error "Can't find %s" ;; show invisible keys
-                           (replace-regexp-in-string "\t" "<TAB>"
-                                                     (replace-regexp-in-string "\s" "<SPC>" (mapconcat #'car data ""))))))
+               (message "Can't find %s" ;; show invisible keys
+                        (replace-regexp-in-string "\t" "<TAB>"
+                                                  (replace-regexp-in-string "\s" "<SPC>" (mapconcat #'car data ""))))
+               (when (and evil-snipe--last-repeat (boundp 'keymap) keymap)
+                 (setq evil-snipe--transient-map-func
+                       (set-transient-map keymap)))))
       (unless internal-p
         (when evil-snipe-enable-highlight
           (evil-snipe--highlight-all count string))
