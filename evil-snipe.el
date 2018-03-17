@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: October 08, 2017
-;; Version: 2.0.9
+;; Modified: March 17, 2018
+;; Version: 2.1.0
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((emacs "24.4") (evil "1.2.12") (cl-lib "0.5"))
