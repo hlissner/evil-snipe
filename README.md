@@ -137,8 +137,8 @@ To avoid binding conflicts, evil-snipe has no visual mode bindings. You can add
 them with:
 
 ```elisp
-(evil-define-key 'visual evil-snipe-mode-map "z" 'evil-snipe-s)
-(evil-define-key 'visual evil-snipe-mode-map "Z" 'evil-snipe-S)
+(evil-define-key 'visual evil-snipe-local-mode-map "z" 'evil-snipe-s)
+(evil-define-key 'visual evil-snipe-local-mode-map "Z" 'evil-snipe-S)
 ```
 
 ### Integration into avy/evil-easymotion
@@ -205,17 +205,17 @@ It seems `evil-snipe-override-mode` causes problems in Magit buffers, to fix thi
 ### Default keybindings
 
 ```elisp
-(evil-define-key '(normal motion) evil-snipe-mode-map
+(evil-define-key '(normal motion) evil-snipe-local-mode-map
   "s" 'evil-snipe-s
   "S" 'evil-snipe-S)
 
-(evil-define-key 'operator evil-snipe-mode-map
+(evil-define-key 'operator evil-snipe-local-mode-map
   "z" 'evil-snipe-s
   "Z" 'evil-snipe-S
   "x" 'evil-snipe-x
   "X" 'evil-snipe-X)
 
-(evil-define-key 'motion evil-snipe-override-mode-map
+(evil-define-key 'motion evil-snipe-override-local-mode-map
   "f" 'evil-snipe-f
   "F" 'evil-snipe-F
   "t" 'evil-snipe-t
