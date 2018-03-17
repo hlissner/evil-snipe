@@ -13,7 +13,8 @@
                   (when (eq (overlay-get ov 'category) 'evil-snipe)
                     (push (list (overlay-start ov) (overlay-end ov))
                           list)))
-                (evil-snipe--highlight-all count keys))
+                (evil-snipe--highlight-all
+                 count (> count 0) (mapcar #'evil-snipe--process-key keys)))
           (unless list (error "List is empty"))
           list)
         (sort list (lambda (a b) (< (car a) (car b))))
