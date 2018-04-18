@@ -584,7 +584,6 @@ be inclusive or exclusive."
 (defun turn-on-evil-snipe-mode ()
   "Enable evil-snipe-mode in the current buffer."
   (unless (or (minibufferp)
-              (eq major-mode 'fundamental-mode)
               (apply #'derived-mode-p evil-snipe-disabled-modes))
     (evil-snipe-local-mode +1)))
 
@@ -592,7 +591,6 @@ be inclusive or exclusive."
 (defun turn-on-evil-snipe-override-mode ()
   "Enable evil-snipe-mode in the current buffer."
   (unless (or (minibufferp)
-              (eq major-mode 'fundamental-mode)
               (apply #'derived-mode-p evil-snipe-disabled-modes))
     (evil-snipe-override-local-mode +1)))
 
