@@ -229,7 +229,7 @@ COUNT's directionality."
         (reverse
          (catch 'abort
            (while (> i 0)
-             (let* ((prompt (format "%d>%s" i (mapconcat #'char-to-string keys "")))
+             (let* ((prompt (format "%d>%s" i (mapconcat #'char-to-string (reverse keys) "")))
                     (key (evil-read-key (if evil-snipe-show-prompt prompt))))
                (cond
                 ;; TAB adds more characters if `evil-snipe-tab-increment'
@@ -254,7 +254,7 @@ COUNT's directionality."
                         (cl-decf i)))
                  (when evil-snipe-enable-incremental-highlight
                    (evil-snipe--cleanup)
-                   (evil-snipe--highlight-all count forward-p (mapcar #'evil-snipe--process-key keys))
+                   (evil-snipe--highlight-all count forward-p (mapcar #'evil-snipe--process-key (reverse keys)))
                    (add-hook 'pre-command-hook #'evil-snipe--cleanup))))))
            keys)))))
 
