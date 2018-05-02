@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
 ;; Created: December 5, 2014
-;; Modified: March 17, 2018
-;; Version: 2.1.0
+;; Modified: May 2, 2018
+;; Version: 2.1.1
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((emacs "24.4") (evil "1.2.12") (cl-lib "0.5"))
@@ -132,7 +132,10 @@ mode use:
                        (regexp :tag "Pattern"))))
 (define-obsolete-variable-alias 'evil-snipe-symbol-groups 'evil-snipe-aliases "v2.0.0")
 
-(defcustom evil-snipe-disabled-modes '(magit-mode)
+(defcustom evil-snipe-disabled-modes
+  (org-agenda-mode magit-mode git-rebase-mode elfeed-show-mode
+   elfeed-search-mode ranger-mode magit-repolist-mode mu4e-main-mode
+   mu4e-view-mode mu4e-headers-mode mu4e~update-mail-mode)
   "A list of modes in which the global evil-snipe minor modes
 will not be turned on."
   :group 'evil-snipe
@@ -441,6 +444,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                        (evil-snipe--highlight beg end t)))
                    ;; Activate the repeat keymap
                    (when (and (boundp 'keymap) keymap)
+                     (evil-snipe--disable-transient-map)
                      (setq evil-snipe--transient-map-func
                            (set-transient-map keymap))))))
 
@@ -455,6 +459,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
               (t
                (goto-char orig-point)
                (when (and evil-snipe--last-repeat (boundp 'keymap) keymap)
+                 (evil-snipe--disable-transient-map)
                  (setq evil-snipe--transient-map-func
                        (set-transient-map keymap)))
                (user-error "Can't find %s" ; show invisible keys
