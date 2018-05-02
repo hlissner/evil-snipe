@@ -441,6 +441,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
                        (evil-snipe--highlight beg end t)))
                    ;; Activate the repeat keymap
                    (when (and (boundp 'keymap) keymap)
+                     (evil-snipe--disable-transient-map)
                      (setq evil-snipe--transient-map-func
                            (set-transient-map keymap))))))
 
@@ -455,6 +456,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
               (t
                (goto-char orig-point)
                (when (and evil-snipe--last-repeat (boundp 'keymap) keymap)
+                 (evil-snipe--disable-transient-map)
                  (setq evil-snipe--transient-map-func
                        (set-transient-map keymap)))
                (user-error "Can't find %s" ; show invisible keys
