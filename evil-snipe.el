@@ -132,7 +132,10 @@ mode use:
                        (regexp :tag "Pattern"))))
 (define-obsolete-variable-alias 'evil-snipe-symbol-groups 'evil-snipe-aliases "v2.0.0")
 
-(defcustom evil-snipe-disabled-modes '(magit-mode)
+(defcustom evil-snipe-disabled-modes
+  (org-agenda-mode magit-mode git-rebase-mode elfeed-show-mode
+   elfeed-search-mode ranger-mode magit-repolist-mode mu4e-main-mode
+   mu4e-view-mode mu4e-headers-mode mu4e~update-mail-mode)
   "A list of modes in which the global evil-snipe minor modes
 will not be turned on."
   :group 'evil-snipe
