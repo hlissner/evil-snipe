@@ -134,9 +134,12 @@ mode use:
 
 (defcustom evil-snipe-disabled-modes
   '(org-agenda-mode magit-mode git-rebase-mode elfeed-show-mode
-    elfeed-search-mode ranger-mode magit-repolist-mode mu4e-main-mode
-    mu4e-view-mode mu4e-headers-mode mu4e~update-mail-mode
-    undo-tree-visualizer-mode Info-mode)
+    elfeed-search-mode ranger-mode magit-repolist-mode
+    undo-tree-visualizer-mode Info-mode
+    ;; `mu4e'
+    mu4e-main-mode mu4e-view-mode mu4e-headers-mode mu4e~update-mail-mode
+    ;; `notmuch'
+    notmuch-tree-mode notmuch-hello-mode notmuch-search-mode notmuch-show-mode)
   "A list of modes in which the global evil-snipe minor modes
 will not be turned on."
   :group 'evil-snipe
