@@ -37,10 +37,25 @@
 (require 'evil)
 (eval-when-compile (require 'cl-lib))
 
+
 (defgroup evil-snipe nil
   "vim-seek/sneak emulation for Emacs"
   :prefix "evil-snipe-"
   :group 'evil)
+
+(defcustom evil-snipe-override-evil-repeat-keys-forward-key ";"
+  "Override forward-key for when evil-snipe-override-evil-repeat-keys is not
+nill. Should be set before evil-snipe is loaded as the functions in use are
+macro generated."
+  :group 'evil-snipe
+  :type 'string)
+
+(defcustom evil-snipe-override-evil-repeat-keys-backward-key ","
+  "Override backward-key for when evil-snipe-override-evil-repeat-keys is not
+nill. Should be set before evil-snipe is loaded as the functions in use are
+macro generated."
+  :group 'evil-snipe
+  :type 'string)
 
 (defcustom evil-snipe-enable-highlight t
   "If non-nil, all matches will be highlighted after the initial jump.
@@ -576,14 +591,14 @@ be inclusive or exclusive."
       "T" #'evil-snipe-T)
     (when evil-snipe-override-evil-repeat-keys
       (evil-define-key* 'motion map
-        ";" #'evil-snipe-repeat
-        "," #'evil-snipe-repeat-reverse))
+        evil-snipe-override-evil-repeat-keys-forward-key #'evil-snipe-repeat
+        evil-snipe-override-evil-repeat-keys-forward-key #'evil-snipe-repeat-reverse))
     map))
 
 (defvar evil-snipe-parent-transient-map
   (let ((map (make-sparse-keymap)))
-    (define-key map ";" #'evil-snipe-repeat)
-    (define-key map "," #'evil-snipe-repeat-reverse)
+    (define-key map evil-snipe-override-evil-repeat-keys-forward-key  #'evil-snipe-repeat)
+    (define-key map evil-snipe-override-evil-repeat-keys-backward-key #'evil-snipe-repeat-reverse)
     map))
 
 (unless (fboundp 'set-transient-map)
