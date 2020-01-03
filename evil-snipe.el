@@ -1,6 +1,6 @@
 ;;; evil-snipe.el --- emulate vim-sneak & vim-seek
 ;;
-;; Copyright (C) 2014-18 Henrik Lissner
+;; Copyright (C) 2014-20 Henrik Lissner
 ;;
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <henrik@lissner.net>
