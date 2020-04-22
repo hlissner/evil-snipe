@@ -501,11 +501,15 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
   (evil-snipe-repeat (or (and (integerp count) (- count)) -1)))
 
 ;;;###autoload
-(defmacro evil-snipe-def (n type forward-key backward-key)
+(cl-defmacro evil-snipe-def (n type forward-key backward-key
+                               &key forward-fn backward-fn)
   "Define a N-char snipe, and bind it to FORWARD-KEY and BACKWARD-KEY. TYPE can
-be inclusive or exclusive."
-  (let ((forward-fn  (intern (format "evil-snipe-%s" forward-key)))
-        (backward-fn (intern (format "evil-snipe-%s" backward-key)))
+be inclusive or exclusive. Specify FORWARD-FN and/or BACKWARD-FN to explicitly
+choose the function names."
+  (let ((forward-fn  (or forward-fn
+                         (intern (format "evil-snipe-%s" forward-key))))
+        (backward-fn (or backward-fn
+                         (intern (format "evil-snipe-%s" backward-key))))
         (inclusive-p (eq (evil-unquote type) 'inclusive)))
     `(progn
        (evil-define-motion ,forward-fn (count keys)
