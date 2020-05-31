@@ -390,6 +390,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
   (let ((regex (mapconcat #'cdr data ""))
         result)
     (when (and evil-snipe-skip-leading-whitespace
+               (looking-at-p "[ \t]+")
                (string-match-p "^[ \t]+" (mapconcat #'car data "")))
       (setq regex (concat regex "[^ \t]")))
     (when (setq result (re-search-forward regex scope t count))
