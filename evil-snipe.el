@@ -527,7 +527,7 @@ choose the function names."
             count keys (evil-snipe--transient-map ,forward-key ,backward-key))))
 
        (evil-define-motion ,backward-fn (count keys)
-         ,(concat "Performs an backwards `" (symbol-name forward-fn) "'.")
+         ,(concat "Performs a backwards `" (symbol-name forward-fn) "'.")
          :jump t
          (interactive
           (let ((count (when current-prefix-arg (prefix-numeric-value current-prefix-arg))))
