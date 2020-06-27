@@ -357,8 +357,8 @@ or behind it if COUNT is negative."
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map evil-snipe-parent-transient-map)
     (when evil-snipe-repeat-keys
-      (define-key map forward-key  #'evil-snipe-repeat)
-      (define-key map backward-key #'evil-snipe-repeat-reverse))
+      (define-key map (kbd forward-key)  #'evil-snipe-repeat)
+      (define-key map (kbd backward-key) #'evil-snipe-repeat-reverse))
     map))
 
 
