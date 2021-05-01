@@ -47,7 +47,7 @@ You can either a) enable one or both globally:
 Or b) enable one or both locally, where you need it:
 
 ```elisp
-(add-hook 'python-mode-hook 'turn-on-evil-snipe-mode
+(add-hook 'python-mode-hook 'turn-on-evil-snipe-mode)
 (add-hook 'python-mode-hook 'turn-on-evil-snipe-override-local-mode)
 ```
 
