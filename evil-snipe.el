@@ -17,9 +17,9 @@
 ;;
 ;; Evil-snipe emulates vim-seek and/or vim-sneak in evil-mode.
 ;;
-;; It provides 2-character motions for quickly (and more accurately) jumping around
-;; text, compared to evil's built-in f/F/t/T motions, incrementally highlighting
-;; candidate targets as you type.
+;; It provides 2-character versions of evil's f/F/t/T motions, for quick and
+;; more accurately jumping around text, plus incremental highlighting (for
+;; f/F/t/T as well).
 ;;
 ;; To enable globally:
 ;;
@@ -37,8 +37,12 @@
 (require 'evil)
 (eval-when-compile (require 'cl-lib))
 
+
+;;
+;;; Settings
+
 (defgroup evil-snipe nil
-  "vim-seek/sneak emulation for Emacs"
+  "An evil plugin that emulates vim-seek/vim-sneak's 2-character motions."
   :prefix "evil-snipe-"
   :group 'evil)
 
@@ -50,27 +54,42 @@ cursor."
   :type 'boolean)
 
 (defcustom evil-snipe-enable-incremental-highlight t
-  "If non-nil, each additional keypress will incrementally search and highlight
-matches. Otherwise, only highlight after you've finished skulking."
+  "If non-nil, incrementally highlight matches.
+Otherwise, only highlight after you've finished skulking."
   :group 'evil-snipe
   :type 'boolean)
 
 (defcustom evil-snipe-override-evil-repeat-keys t
-  "If non-nil (while `evil-snipe-override-evil' is non-nil) evil-snipe will
-override evil's ; and , repeat keys in favor of its own."
+  "If non-nil evil-snipe will replace evil's ; and , repeat keys with its own.
+
+Only effective if `evil-snipe-override-mode' is active.
+
+Evil-snipe improves these repeat keys with incremental highlighting and support
+for repeating snipes."
   :group 'evil-snipe
   :type 'boolean)
 
 (defcustom evil-snipe-scope 'line
   "Dictates the scope of searches, which can be one of:
 
-    'line    ;; search line after the cursor (this is vim-seek behavior) (default)
-    'buffer  ;; search rest of the buffer after the cursor (vim-sneak behavior)
-    'visible ;; search rest of visible buffer (Is more performant than 'buffer, but
-             ;; will not highlight/jump past the visible buffer)
-    'whole-line     ;; same as 'line, but highlight matches on either side of cursor
-    'whole-buffer   ;; same as 'buffer, but highlight *all* matches in buffer
-    'whole-visible  ;; same as 'visible, but highlight *all* visible matches in buffer"
+'line
+  Search line after the cursor (this is vim-seek behavior) (default)
+'buffer
+  Search rest of the buffer after the cursor (vim-sneak behavior)
+'visible
+  Search rest of visible buffer (Is more performant than 'buffer, but will not
+  highlight/jump past the visible buffer)
+'whole-line
+  Same as 'line, but highlight matches on either side of cursor
+'whole-buffer
+  Same as 'buffer, but highlight *all* matches in buffer
+'whole-visible
+  Same as 'visible, but highlight *all* visible matches in buffer
+
+See `evil-snipe-repeat-scope' to change scope only when repeating snipes.
+
+See `evil-snipe-spillover-scope' to fall back to another scope if the first
+snipe yields no matches."
   :group 'evil-snipe
   :type '(choice
           (const :tag "Forward line" 'line)
@@ -81,14 +100,14 @@ override evil's ; and , repeat keys in favor of its own."
           (const :tag "Whole visible buffer" 'whole-visible)))
 
 (defcustom evil-snipe-repeat-scope nil
-  "Dictates the scope of repeat searches (see `evil-snipe-scope' for possible
-settings). When nil, defaults to `evil-snipe-scope'."
+  "Dictates the scope of repeat searches.
+See `evil-snipe-scope' for possible settings. When nil, defaults to whatever
+`evil-snipe-scope' is set to."
   :group 'evil-snipe
   :type 'symbol)
 
 (defcustom evil-snipe-spillover-scope nil
-  "If non-nil, snipe will expand the search scope to this when a snipe fails,
-and continue the search (until it finds something or even this scope fails).
+  "If non-nil, snipe will expand the search scope to this when a snipe fails.
 
 Accepts the same values as `evil-snipe-scope' and `evil-snipe-repeat-scope'.
 Is only useful if set to the same or broader scope than either."
@@ -96,8 +115,8 @@ Is only useful if set to the same or broader scope than either."
   :type 'symbol)
 
 (defcustom evil-snipe-repeat-keys t
-  "If non-nil, pressing s/S after a search will repeat it. If
-`evil-snipe-override-evil' is non-nil, this applies to f/F/t/T as well."
+  "If non-nil, pressing s/S after a search will repeat it.
+If `evil-snipe-override-evil' is non-nil, this applies to f/F/t/T as well."
   :group 'evil-snipe
   :type 'boolean)
 
@@ -107,9 +126,9 @@ Is only useful if set to the same or broader scope than either."
   :type 'boolean)
 
 (defcustom evil-snipe-smart-case nil
-  "By default, searches are case sensitive. If `evil-snipe-smart-case' is
-enabled, searches are case sensitive only if search contains capital
-letters."
+  "By default, searches are case sensitive.
+If `evil-snipe-smart-case' is enabled, searches are case sensitive only if
+search contains capital letters."
   :group 'evil-snipe
   :type 'boolean)
 
@@ -119,13 +138,13 @@ letters."
   :type 'boolean)
 
 (defcustom evil-snipe-aliases '()
-  "A list of characters mapped to regexps '(CHAR REGEX). If CHAR is used in a snipe, it
-will be replaced with REGEX. These aliases apply globally. To set an alias for a specific
-mode use:
+  "A list of characters mapped to regexps '(CHAR REGEX).
+If CHAR is used in a snipe, it will be replaced with REGEX. These aliases apply
+globally. To set an alias for a specific mode use:
 
     (add-hook 'c++-mode-hook
       (lambda ()
-        (make-variable-buffer-local 'evil-snipe-aliases)
+        (make-local-variable 'evil-snipe-aliases)
         (push '(?\[ \"[[{(]\") evil-snipe-aliases)))"
   :group 'evil-snipe
   :type '(repeat (cons (character :tag "Key")
@@ -140,15 +159,15 @@ mode use:
     mu4e-main-mode mu4e-view-mode mu4e-headers-mode mu4e~update-mail-mode
     ;; `notmuch'
     notmuch-tree-mode notmuch-hello-mode notmuch-search-mode notmuch-show-mode)
-  "A list of modes in which the global evil-snipe minor modes
-will not be turned on."
+  "A list of major modes where evil-snipe should not activate."
   :group 'evil-snipe
   :type  '(list symbol))
 
 (defvar evil-snipe-use-vim-sneak-bindings nil
-  "Uses only Z and z under operator state, as vim-sneak does. This frees the
-x binding in operator state, if user wishes to use cx for evil-exchange or
-anything else.
+  "Uses only Z and z under operator state, as vim-sneak does.
+
+This frees the x binding in operator state, if user wishes to use cx for
+evil-exchange or anything else.
 
 MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 
@@ -179,36 +198,36 @@ Only works in Emacs 25.1+."
   :group 'evil-snipe
   :type 'boolean)
 
-(defface evil-snipe-first-match-face
-  '((t (:inherit isearch)))
-  "Face for first match when sniping"
-  :group 'evil-snipe)
-
-(defface evil-snipe-matches-face
-  '((t (:inherit region)))
-  "Face for other matches when sniping"
-  :group 'evil-snipe)
-
 ;; State vars
 (defvar evil-snipe--last nil)
-
 (defvar evil-snipe--last-repeat nil)
-
-(defvar evil-snipe--last-direction t
-  "Direction of the last search.")
-
-(defvar evil-snipe--consume-match t
-  "Whether the search should be inclusive of the match or not.")
-
+(defvar evil-snipe--last-direction t)
+(defvar evil-snipe--consume-match t)
 (defvar evil-snipe--match-count 2
-  "Number of characters to match. Can be let-bound to create motions that search
-  for N characters. Do not set directly, unless you want to change the default
-  number of characters to search.")
-
+  "Number of characters to match.
+Can be let-bound to create motions that search for N characters. Do not set
+directly, unless you want to change the default number of characters to
+search.")
 (defvar evil-snipe--transient-map-func nil)
 
 
+;;
+;;; Faces
+
+(defface evil-snipe-first-match-face '((t :inherit isearch))
+  "Face for first match when sniping."
+  :group 'evil-snipe)
+
+(defface evil-snipe-matches-face '((t :inherit region))
+  "Face for other matches when sniping."
+  :group 'evil-snipe)
+
+
+;;
+;;; Helpers
+
 (defun evil-snipe--case-p (data)
+  "Return non-nil if a capital letter exists in DATA."
   (and evil-snipe-smart-case
        (let ((case-fold-search nil))
          (not (string-match-p "[A-Z]" (mapconcat #'cdr data ""))))))
@@ -220,8 +239,9 @@ Only works in Emacs 25.1+."
                        (t (regexp-quote keystr))))))
 
 (defun evil-snipe--collect-keys (&optional count forward-p)
-  "The core of evil-snipe's N-character searching. Prompts for
-`evil-snipe--match-count' characters, which is incremented with tab.
+  "Prompts for `evil-snipe--match-count' characters.
+
+Number of characters is incremented with tab.
 Backspace works for correcting yourself too.
 
 COUNT determines the key interval and directionality. FORWARD-P can override
@@ -264,9 +284,12 @@ COUNT's directionality."
       (reverse keys))))
 
 (defun evil-snipe--bounds (&optional forward-p count)
-  "Returns a cons cell containing (beg . end), which represents the search
-scope, determined from `evil-snipe-scope'. If abs(COUNT) > 1, use
-`evil-snipe-spillover-scope'."
+  "Return a cons cell containing (beg . end).
+
+This represents the boundaries of the current search scope, determined from
+`evil-snipe-scope'. If abs(COUNT) > 1, use `evil-snipe-spillover-scope'.
+
+If FORWARD-P, expand scope from point onwards, otherwise do so backwards."
   (let* ((point+1 (1+ (point)))
          (evil-snipe-scope
           (or (and count (> (abs count) 1) evil-snipe-spillover-scope)
@@ -298,8 +321,8 @@ scope, determined from `evil-snipe-scope'. If abs(COUNT) > 1, use
       bounds)))
 
 (defun evil-snipe--highlight (beg end &optional first-p)
-  "Highlights region between beg and end. If first-p is t, then use
-`evil-snipe-first-p-match-face'"
+  "Highlight region between BEG and END.
+If FIRST-P is t, then use `evil-snipe-first-p-match-face'"
   (when (and first-p (overlays-in beg end))
     (remove-overlays beg end 'category 'evil-snipe))
   (let ((overlay (make-overlay beg end nil nil nil)))
@@ -310,8 +333,8 @@ scope, determined from `evil-snipe-scope'. If abs(COUNT) > 1, use
     overlay))
 
 (defun evil-snipe--highlight-all (count forward-p data)
-  "Highlight all instances of KEYS ahead of the cursor at an interval of COUNT,
-or behind it if COUNT is negative."
+  "Highlight instances of keys in DATA at COUNT intervals.
+Goes backward if FORWARD-P is nil."
   (let ((case-fold-search (evil-snipe--case-p data))
         (match (mapconcat #'cdr data ""))
         (bounds
@@ -340,7 +363,7 @@ or behind it if COUNT is negative."
     overlays))
 
 (defun evil-snipe--cleanup ()
-  "Disables overlays and cleans up after evil-snipe."
+  "Disable overlays and clean up after evil-snipe."
   (when (or evil-snipe-local-mode evil-snipe-override-local-mode)
     (remove-overlays nil nil 'category 'evil-snipe)
     (remove-hook 'pre-command-hook #'evil-snipe--cleanup)))
@@ -361,8 +384,9 @@ or behind it if COUNT is negative."
 
 
 (defun evil-snipe-seek (count keys &optional keymap)
-  "Perform a snipe. KEYS is a list of characters provided by <-c> and <+c>
-interactive codes. KEYMAP is the transient map to activate afterwards."
+  "Perform a snipe with KEYS at COUNT intervals.
+KEYS is a list of characters provided by <-c> and <+c> interactive codes. KEYMAP
+is the transient map to activate afterwards."
   (pcase keys
     (`abort (setq evil-inhibit-operator t))
     ;; if <enter>, repeat last search
@@ -398,7 +422,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
         result))))
 
 (defun evil-snipe--seek (count data &optional internal-p)
-  "(INTERNAL) Perform a snipe and adjust cursor position depending on mode."
+  "Perform a snipe and adjust cursor position depending on mode."
   (let ((orig-point (point))
         (forward-p (> count 0))
         (match (mapconcat #'cdr data "")))
@@ -502,9 +526,9 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
 ;;;###autoload
 (cl-defmacro evil-snipe-def (n type forward-key backward-key
                                &key forward-fn backward-fn)
-  "Define a N-char snipe, and bind it to FORWARD-KEY and BACKWARD-KEY. TYPE can
-be inclusive or exclusive. Specify FORWARD-FN and/or BACKWARD-FN to explicitly
-choose the function names."
+  "Define a N char snipe and bind it to FORWARD-KEY and BACKWARD-KEY.
+TYPE can be inclusive or exclusive. Specify FORWARD-FN and/or BACKWARD-FN to
+explicitly choose the function names."
   (let ((forward-fn  (or forward-fn
                          (intern (format "evil-snipe-%s" forward-key))))
         (backward-fn (or backward-fn
@@ -622,13 +646,13 @@ choose the function names."
 
 ;;;###autoload
 (define-minor-mode evil-snipe-local-mode
-  "evil-snipe minor mode."
+  "Enable `evil-snipe' in the current buffer."
   :lighter " snipe"
   :group 'evil-snipe)
 
 ;;;###autoload
 (define-minor-mode evil-snipe-override-local-mode
-  "evil-snipe minor mode that overrides evil-mode f/F/t/T/;/, bindings."
+  "Override evil-mode's f/F/t/T/;/, motions."
   :group 'evil-snipe)
 
 ;;;###autoload
