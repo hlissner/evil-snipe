@@ -615,9 +615,6 @@ explicitly choose the function names."
     (define-key map "," #'evil-snipe-repeat-reverse)
     map))
 
-(unless (fboundp 'set-transient-map)
-  (defalias 'set-transient-map #'set-temporary-overlay-map))
-
 ;;;###autoload
 (defun turn-on-evil-snipe-mode ()
   "Enable evil-snipe-mode in the current buffer."
