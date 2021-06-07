@@ -395,7 +395,7 @@ interactive codes. KEYMAP is the transient map to activate afterwards."
       (setq regex (concat regex "[^ \t]")))
     (when (setq result (re-search-forward regex scope t count))
       (if (or (invisible-p (match-beginning 0))
-              (invisible-p (match-end 0)))
+              (invisible-p (1- (match-end 0))))
           (evil-snipe--seek-re data scope count)
         result))))
 
