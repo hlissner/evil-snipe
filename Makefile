@@ -1,4 +1,4 @@
-all: compile test
+all: autoloads compile test
 
 autoloads:
 	@emacs -batch \
@@ -6,12 +6,12 @@ autoloads:
 		-f batch-update-autoloads .
 
 compile:
-	@emacs -batch -L . -f batch-byte-compile *.el
+	@emacs -batch -L . -l test/setup.el -f batch-byte-compile *.el
 
 test:
-	@emacs -batch -L . -L themes/ -l test/test-helper.el test/*-test.el
+	@emacs -batch -L . -l test/setup.el -l test/test-helper.el test/*-test.el
 
 clean:
-	@rm -vf *.elc *-autoloads.el *~
+	@rm -vrf *.elc *-autoloads.el *~ test/.packages
 
 .PHONY: test

@@ -1,8 +1,7 @@
+[![Made with Doom Emacs](https://img.shields.io/badge/Made_with-Doom_Emacs-blueviolet.svg?style=flat-square&logo=GNU%20Emacs&logoColor=white)](https://github.com/hlissner/doom-emacs)
 ![Release tag](https://img.shields.io/github/tag/hlissner/evil-snipe.svg?label=release&style=flat-square)
-[![MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](./LICENSE)
 [![MELPA](http://melpa.org/packages/evil-snipe-badge.svg?style=flat-square)](http://melpa.org/#/evil-snipe)
-[![MELPA Stable](http://stable.melpa.org/packages/evil-snipe-badge.svg?style=flat-square)](http://stable.melpa.org/#/evil-snipe)
-[![Build Status](https://travis-ci.org/hlissner/evil-snipe.png?branch=master&style=flat-square)](https://travis-ci.org/hlissner/evil-snipe)
+![Build status](https://img.shields.io/github/workflow/status/hlissner/evil-snipe/CI/master?style=flat-square)
 
 # evil-snipe
 

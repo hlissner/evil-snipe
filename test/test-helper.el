@@ -1,19 +1,9 @@
-
-(setq package-user-dir (expand-file-name ".packages/" (file-name-directory load-file-name))
-      package-gnupghome-dir (expand-file-name "gpg" package-user-dir)
-      package-archives '(("melpa" . "https://melpa.org/packages/")))
-
-(package-initialize)
-(unless (package-installed-p 'evil)
-  (package-refresh-contents)
-  (package-install 'evil))
+;;; test-helper.el --- Set up test environment -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
 
 (require 'ert)
 (require 'evil-snipe)
-
-
-;;
-;;; Helpers
 
 (defmacro with! (initial &rest rest)
   (declare (indent 1)
