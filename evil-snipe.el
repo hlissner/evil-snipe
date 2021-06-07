@@ -558,14 +558,14 @@ choose the function names."
 
 (defvar evil-snipe-local-mode-map
   (let ((map (make-sparse-keymap)))
-    (evil-define-key* '(normal motion) map
+    (evil-define-minor-mode-key '(normal motion) 'evil-snipe-local-mode
       "s" #'evil-snipe-s
       "S" #'evil-snipe-S)
     (if evil-snipe-use-vim-sneak-bindings
-        (evil-define-key* 'operator map
+        (evil-define-minor-mode-key 'operator 'evil-snipe-local-mode
           "z" #'evil-snipe-x
           "Z" #'evil-snipe-X)
-      (evil-define-key* 'operator map
+      (evil-define-minor-mode-key 'operator 'evil-snipe-local-mode
         "z" #'evil-snipe-s
         "Z" #'evil-snipe-S
         "x" #'evil-snipe-x
@@ -574,13 +574,13 @@ choose the function names."
 
 (defvar evil-snipe-override-local-mode-map
   (let ((map (make-sparse-keymap)))
-    (evil-define-key* 'motion map
+    (evil-define-minor-mode-key 'motion 'evil-snipe-local-mode
       "f" #'evil-snipe-f
       "F" #'evil-snipe-F
       "t" #'evil-snipe-t
       "T" #'evil-snipe-T)
     (when evil-snipe-override-evil-repeat-keys
-      (evil-define-key* 'motion map
+      (evil-define-minor-mode-key 'motion 'evil-snipe-local-mode
         ";" #'evil-snipe-repeat
         "," #'evil-snipe-repeat-reverse))
     map))
