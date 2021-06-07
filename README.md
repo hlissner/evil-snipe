@@ -175,7 +175,7 @@ It seems `evil-snipe-override-mode` causes problems in Magit buffers, to fix thi
   after a search will repeat it. If `evil-snipe-override-evil` is non-nil, this applies
   to f/F/t/T as well.
 * `evil-snipe-show-prompt` (default `t`) Whether or not to show the "N>" prompt.
-* `evil-snipe-smart-case` (default `t`) If non-nil, searches will be case-insenstive
+* `evil-snipe-smart-case` (default `nil`) If non-nil, searches will be case-insenstive
   unless your search contains a capital letter.
 * `evil-snipe-auto-scroll` (default `nil`) If non-nil, the window will scroll to follow
   the cursor.
