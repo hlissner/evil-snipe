@@ -1,6 +1,19 @@
 
+(setq package-user-dir (expand-file-name ".packages/" (file-name-directory load-file-name))
+      package-gnupghome-dir (expand-file-name "gpg" package-user-dir)
+      package-archives '(("melpa" . "https://melpa.org/packages/")))
+
+(package-initialize)
+(unless (package-installed-p 'evil)
+  (package-refresh-contents)
+  (package-install 'evil))
+
 (require 'ert)
 (require 'evil-snipe)
+
+
+;;
+;;; Helpers
 
 (defmacro with! (initial &rest rest)
   (declare (indent 1)
@@ -39,3 +52,18 @@
 
 (evil-define-key 'motion evil-snipe-local-mode-map "gs" 'evil-snipe-x)
 (evil-define-key 'motion evil-snipe-local-mode-map "gS" 'evil-snipe-X)
+
+
+;;
+;;; Run tests
+
+(while command-line-args-left
+  (let ((regexp "\\.el\\'")
+        (path (expand-file-name (pop command-line-args-left))))
+    (if (file-directory-p path)
+        (setq command-line-args-left
+              (append (directory-files path nil regexp)
+                      command-line-args-left))
+      (when (string-match-p regexp path)
+        (load path nil t)))))
+(ert-run-tests-batch)

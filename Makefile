@@ -1,12 +1,17 @@
+all: compile test
 
-all:
-	@cask
+autoloads:
+	@emacs -batch \
+        --eval '(setq generated-autoload-file (expand-file-name "evil-snipe-autoloads.el"))' \
+		-f batch-update-autoloads .
+
+compile:
+	@emacs -batch -L . -f batch-byte-compile *.el
 
 test:
-	@cask exec ert-runner -l evil-snipe.el
+	@emacs -batch -L . -L themes/ -l test/test-helper.el test/*-test.el
 
 clean:
-	@rm -rf .cask
-	@rm -f *.elc test/*.elc
+	@rm -vf *.elc *-autoloads.el *~
 
 .PHONY: test
