@@ -597,15 +597,13 @@ choose the function names."
 ;;;###autoload
 (defun turn-on-evil-snipe-mode ()
   "Enable evil-snipe-mode in the current buffer."
-  (unless (or (minibufferp)
-              (apply #'derived-mode-p evil-snipe-disabled-modes))
+  (unless (apply #'derived-mode-p evil-snipe-disabled-modes)
     (evil-snipe-local-mode +1)))
 
 ;;;###autoload
 (defun turn-on-evil-snipe-override-mode ()
   "Enable evil-snipe-mode in the current buffer."
-  (unless (or (minibufferp)
-              (apply #'derived-mode-p evil-snipe-disabled-modes))
+  (unless (apply #'derived-mode-p evil-snipe-disabled-modes)
     (evil-snipe-override-local-mode +1)))
 
 ;;;###autoload
