@@ -232,38 +232,36 @@ COUNT's directionality."
         keys)
     (unless forward-p
       (setq count (- count)))
-    (unwind-protect
-        (reverse
-         (catch 'abort
-           (while (> i 0)
-             (let* ((prompt (format "%d>%s" i (mapconcat #'char-to-string (reverse keys) "")))
-                    (key (evil-read-key (if evil-snipe-show-prompt prompt))))
-               (cond
-                ;; TAB adds more characters if `evil-snipe-tab-increment'
-                ((and evil-snipe-tab-increment (eq key ?\t))  ;; TAB
-                 (cl-incf i))
-                ;; Enter starts search with current chars
-                ((memq key '(?\r ?\n))  ;; RET
-                 (throw 'abort (if (= i evil-snipe--match-count) 'repeat keys)))
-                ;; Abort
-                ((eq key ?\e)  ;; ESC
-                 (evil-snipe--cleanup)
-                 (throw 'abort 'abort))
-                (t ; Otherwise, process key
-                 (cond ((eq key ?\d)  ; DEL (backspace) deletes a character
-                        (cl-incf i)
-                        (if (<= (length keys) 1)
-                            (progn (evil-snipe--cleanup)
-                                   (throw 'abort 'abort))
-                          (pop keys)))
-                       (t ;; Otherwise add it
-                        (push key keys)
-                        (cl-decf i)))
-                 (when evil-snipe-enable-incremental-highlight
-                   (evil-snipe--cleanup)
-                   (evil-snipe--highlight-all count forward-p (mapcar #'evil-snipe--process-key (reverse keys)))
-                   (add-hook 'pre-command-hook #'evil-snipe--cleanup))))))
-           keys)))))
+    (catch 'abort
+      (while (> i 0)
+        (let* ((prompt (format "%d>%s" i (mapconcat #'char-to-string (reverse keys) "")))
+               (key (evil-read-key (if evil-snipe-show-prompt prompt))))
+          (cond
+           ;; TAB adds more characters if `evil-snipe-tab-increment'
+           ((and evil-snipe-tab-increment (eq key ?\t))  ;; TAB
+            (cl-incf i))
+           ;; Enter starts search with current chars
+           ((memq key '(?\r ?\n))  ;; RET
+            (throw 'abort (if (= i evil-snipe--match-count) 'repeat (reverse keys))))
+           ;; Abort
+           ((eq key ?\e)  ;; ESC
+            (evil-snipe--cleanup)
+            (throw 'abort 'abort))
+           (t ; Otherwise, process key
+            (cond ((eq key ?\d)  ; DEL (backspace) deletes a character
+                   (cl-incf i)
+                   (if (<= (length keys) 1)
+                       (progn (evil-snipe--cleanup)
+                              (throw 'abort 'abort))
+                     (pop keys)))
+                  (t ;; Otherwise add it
+                   (push key keys)
+                   (cl-decf i)))
+            (when evil-snipe-enable-incremental-highlight
+              (evil-snipe--cleanup)
+              (evil-snipe--highlight-all count forward-p (mapcar #'evil-snipe--process-key (reverse keys)))
+              (add-hook 'pre-command-hook #'evil-snipe--cleanup))))))
+      (reverse keys))))
 
 (defun evil-snipe--bounds (&optional forward-p count)
   "Returns a cons cell containing (beg . end), which represents the search
@@ -522,6 +520,7 @@ choose the function names."
             (list (progn (setq evil-snipe--last-direction t) count)
                   (let ((evil-snipe--match-count ,n))
                     (evil-snipe--collect-keys count evil-snipe--last-direction)))))
+         (if (eq keys 'abort) (user-error "Aborted"))
          (let ((evil-snipe--consume-match ,inclusive-p))
            (evil-snipe-seek
             count keys (evil-snipe--transient-map ,forward-key ,backward-key))))
@@ -534,6 +533,7 @@ choose the function names."
             (list (progn (setq evil-snipe--last-direction nil) count)
                   (let ((evil-snipe--match-count ,n))
                     (evil-snipe--collect-keys count evil-snipe--last-direction)))))
+         (if (eq keys 'abort) (user-error "Aborted"))
          (let ((evil-snipe--consume-match ,inclusive-p))
            (evil-snipe-seek
             (or (and count (- count)) -1) keys
