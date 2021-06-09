@@ -598,13 +598,13 @@ explicitly choose the function names."
 
 (defvar evil-snipe-override-local-mode-map
   (let ((map (make-sparse-keymap)))
-    (evil-define-minor-mode-key 'motion 'evil-snipe-local-mode
+    (evil-define-minor-mode-key 'motion 'evil-snipe-override-local-mode
       "f" #'evil-snipe-f
       "F" #'evil-snipe-F
       "t" #'evil-snipe-t
       "T" #'evil-snipe-T)
     (when evil-snipe-override-evil-repeat-keys
-      (evil-define-minor-mode-key 'motion 'evil-snipe-local-mode
+      (evil-define-minor-mode-key 'motion 'evil-snipe-override-local-mode
         ";" #'evil-snipe-repeat
         "," #'evil-snipe-repeat-reverse))
     map))
