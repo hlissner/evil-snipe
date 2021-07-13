@@ -582,14 +582,14 @@ explicitly choose the function names."
 
 (defvar evil-snipe-local-mode-map
   (let ((map (make-sparse-keymap)))
-    (evil-define-minor-mode-key '(normal motion) 'evil-snipe-local-mode
+    (evil-define-key* '(normal motion) map
       "s" #'evil-snipe-s
       "S" #'evil-snipe-S)
     (if evil-snipe-use-vim-sneak-bindings
-        (evil-define-minor-mode-key 'operator 'evil-snipe-local-mode
+        (evil-define-key* 'operator map
           "z" #'evil-snipe-x
           "Z" #'evil-snipe-X)
-      (evil-define-minor-mode-key 'operator 'evil-snipe-local-mode
+      (evil-define-key* 'operator map
         "z" #'evil-snipe-s
         "Z" #'evil-snipe-S
         "x" #'evil-snipe-x
@@ -598,13 +598,13 @@ explicitly choose the function names."
 
 (defvar evil-snipe-override-local-mode-map
   (let ((map (make-sparse-keymap)))
-    (evil-define-minor-mode-key 'motion 'evil-snipe-override-local-mode
+    (evil-define-key* 'motion map
       "f" #'evil-snipe-f
       "F" #'evil-snipe-F
       "t" #'evil-snipe-t
       "T" #'evil-snipe-T)
     (when evil-snipe-override-evil-repeat-keys
-      (evil-define-minor-mode-key 'motion 'evil-snipe-override-local-mode
+      (evil-define-key* 'motion map
         ";" #'evil-snipe-repeat
         "," #'evil-snipe-repeat-reverse))
     map))
@@ -641,16 +641,24 @@ explicitly choose the function names."
   (advice-add #'evil-force-normal-state :before #'evil-snipe--cleanup))
 (add-hook 'evil-insert-state-entry-hook #'evil-snipe--disable-transient-map)
 
+(defvar evil-snipe--keymaps-init nil)
+(defun evil-snipe--normalize-keymaps ()
+  (unless evil-snipe--keymaps-init
+    (set (make-local-variable 'evil-snipe--keymaps-init)
+         (and (evil-normalize-keymaps) t))))
+
 ;;;###autoload
 (define-minor-mode evil-snipe-local-mode
   "Enable `evil-snipe' in the current buffer."
   :lighter " snipe"
-  :group 'evil-snipe)
+  :group 'evil-snipe
+  (if evil-snipe-local-mode (evil-snipe--normalize-keymaps)))
 
 ;;;###autoload
 (define-minor-mode evil-snipe-override-local-mode
   "Override evil-mode's f/F/t/T/;/, motions."
-  :group 'evil-snipe)
+  :group 'evil-snipe
+  (if evil-snipe-override-local-mode (evil-snipe--normalize-keymaps)))
 
 ;;;###autoload
 (define-globalized-minor-mode evil-snipe-mode
