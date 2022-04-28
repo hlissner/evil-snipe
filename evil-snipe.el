@@ -152,7 +152,7 @@ globally. To set an alias for a specific mode use:
 (define-obsolete-variable-alias 'evil-snipe-symbol-groups 'evil-snipe-aliases "v2.0.0")
 
 (defcustom evil-snipe-disabled-modes
-  '(org-agenda-mode magit-mode git-rebase-mode elfeed-show-mode
+  '(org-agenda-mode magit-mode git-rebase-mode ebib-index-mode elfeed-show-mode
     elfeed-search-mode ranger-mode magit-repolist-mode undo-tree-visualizer-mode
     Info-mode calc-mode treemacs-mode ibuffer-mode dired-mode
     ;; `mu4e'
