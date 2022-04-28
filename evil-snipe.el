@@ -153,7 +153,8 @@ globally. To set an alias for a specific mode use:
 
 (defcustom evil-snipe-disabled-modes
   '(org-agenda-mode magit-mode git-rebase-mode elfeed-show-mode
-    elfeed-search-mode ranger-mode magit-repolist-mode undo-tree-visualizer-mode
+    elfeed-search-mode ranger-mode magit-repolist-mode
+    undo-tree-visualizer-mode tabulated-list-mode
     Info-mode calc-mode treemacs-mode ibuffer-mode dired-mode
     ;; `mu4e'
     mu4e-main-mode mu4e-view-mode mu4e-headers-mode mu4e~update-mail-mode
