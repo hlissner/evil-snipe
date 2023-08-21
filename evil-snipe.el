@@ -5,8 +5,8 @@
 ;; Author: Henrik Lissner <http://github/hlissner>
 ;; Maintainer: Henrik Lissner <contact@henrik.io>
 ;; Created: December 5, 2014
-;; Modified: July 31, 2018
-;; Version: 2.1.2
+;; Modified: August 21, 2023
+;; Version: 2.1.3
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
 ;; Package-Requires: ((emacs "24.4") (evil "1.2.12") (cl-lib "0.5"))
@@ -533,8 +533,7 @@ explicitly choose the function names."
   (let ((forward-fn  (or forward-fn
                          (intern (format "evil-snipe-%s" forward-key))))
         (backward-fn (or backward-fn
-                         (intern (format "evil-snipe-%s" backward-key))))
-        (inclusive-p (eq (evil-unquote type) 'inclusive)))
+                         (intern (format "evil-snipe-%s" backward-key)))))
     `(progn
        (evil-define-motion ,forward-fn (count keys)
          ,(concat "Jumps to the next " (int-to-string n)
@@ -546,7 +545,7 @@ explicitly choose the function names."
                   (let ((evil-snipe--match-count ,n))
                     (evil-snipe--collect-keys count evil-snipe--last-direction)))))
          (if (eq keys 'abort) (user-error "Aborted"))
-         (let ((evil-snipe--consume-match ,inclusive-p))
+         (let ((evil-snipe--consume-match (eq ,type 'inclusive)))
            (evil-snipe-seek
             count keys (evil-snipe--transient-map ,forward-key ,backward-key))))
 
@@ -559,7 +558,7 @@ explicitly choose the function names."
                   (let ((evil-snipe--match-count ,n))
                     (evil-snipe--collect-keys count evil-snipe--last-direction)))))
          (if (eq keys 'abort) (user-error "Aborted"))
-         (let ((evil-snipe--consume-match ,inclusive-p))
+         (let ((evil-snipe--consume-match (eq ,type 'inclusive)))
            (evil-snipe-seek
             (or (and count (- count)) -1) keys
             (evil-snipe--transient-map ,forward-key ,backward-key)))))))
