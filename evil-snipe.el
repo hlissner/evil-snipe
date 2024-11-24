@@ -9,7 +9,7 @@
 ;; Version: 2.1.3
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
-;; Package-Requires: ((emacs "24.4") (evil "1.2.12") (cl-lib "0.5"))
+;; Package-Requires: ((emacs "25.1") (evil "1.2.12") (cl-lib "0.5"))
 ;;
 ;; This file is not part of GNU Emacs.
 
