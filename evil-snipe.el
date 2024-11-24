@@ -174,14 +174,14 @@ evil-exchange or anything else.
 MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 
 (defcustom evil-snipe-skip-leading-whitespace t
-  "If non-nil, single char sniping (f/F/t/T) will skip over leading whitespaces
-in a line (when you snipe for whitespace, e.g. f<space> or f<tab>)."
+  "If non-nil, single char sniping (f/F/t/T) will skip over leading whitespaces.
+(when you snipe for whitespace, e.g. f<space> or f<tab>)."
   :group 'evil-snipe
   :type 'boolean)
 
 (defcustom evil-snipe-tab-increment nil
-  "If non-nil, pressing TAB while sniping will add another character to your
-current search. For example, typing sab will search for 'ab'. In order to search
+  "If non-nil, pressing TAB while sniping adds another character to the search.
+For example, typing sab will search for 'ab'. In order to search
 for 'abcd', you do sa<tab><tab>bcd.
 
 If nil, TAB will search for literal tab characters."
@@ -189,8 +189,8 @@ If nil, TAB will search for literal tab characters."
   :type 'boolean)
 
 (defcustom evil-snipe-char-fold nil
-  "If non-nil, uses `char-fold-to-regexp' to include other ascii variants of a
-search string. CURRENTLY EXPERIMENTAL.
+  "Non-nil to use `char-fold-to-regexp' to include ASCII variants search string.
+CURRENTLY EXPERIMENTAL.
 
 e.g. The letter 'a' will match all of its accented cousins, even those composed
 of multiple characters, as well as many other symbols like U+249C (PARENTHESIZED
