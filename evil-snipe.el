@@ -525,7 +525,7 @@ is the transient map to activate afterwards."
                        last-keys last-keymap))))
 
 (evil-define-motion evil-snipe-repeat-reverse (count)
-  "Repeat the inverse of the last evil-snipe `count' times"
+  "Repeat the inverse of the last evil-snipe `count' times."
   (interactive "<c>")
   (evil-snipe-repeat (or (and (integerp count) (- count)) -1)))
 
@@ -542,7 +542,8 @@ explicitly choose the function names."
     `(progn
        (evil-define-motion ,forward-fn (count keys)
          ,(concat "Jumps to the next " (int-to-string n)
-                  "-char match COUNT matches away. Including KEYS is a list of character codes.")
+                  "-char match COUNT matches away.
+Including KEYS is a list of character codes.")
          :jump t
          (interactive
           (let ((count (if current-prefix-arg (prefix-numeric-value current-prefix-arg))))
