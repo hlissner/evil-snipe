@@ -137,6 +137,8 @@ search contains capital letters."
   :group 'evil-snipe
   :type 'boolean)
 
+(define-obsolete-variable-alias 'evil-snipe-symbol-groups 'evil-snipe-aliases "v2.0.0")
+
 (defcustom evil-snipe-aliases '()
   "A list of characters mapped to regexps '(CHAR REGEX).
 If CHAR is used in a snipe, it will be replaced with REGEX. These aliases apply
@@ -149,7 +151,6 @@ globally. To set an alias for a specific mode use:
   :group 'evil-snipe
   :type '(repeat (cons (character :tag "Key")
                        (regexp :tag "Pattern"))))
-(define-obsolete-variable-alias 'evil-snipe-symbol-groups 'evil-snipe-aliases "v2.0.0")
 
 (defcustom evil-snipe-disabled-modes
   '(org-agenda-mode magit-mode git-rebase-mode elfeed-show-mode
@@ -583,6 +584,7 @@ explicitly choose the function names."
 ;;;###autoload (autoload 'evil-snipe-T "evil-snipe" nil t)
 (evil-snipe-def 1 'exclusive "t" "T")
 
+(define-obsolete-variable-alias 'evil-snipe-mode-map 'evil-snipe-local-mode-map "2.0.8")
 
 (defvar evil-snipe-local-mode-map
   (let ((map (make-sparse-keymap)))
@@ -599,6 +601,8 @@ explicitly choose the function names."
         "x" #'evil-snipe-x
         "X" #'evil-snipe-X))
     map))
+
+(define-obsolete-variable-alias 'evil-snipe-override-mode-map 'evil-snipe-override-local-mode-map "2.0.8")
 
 (defvar evil-snipe-override-local-mode-map
   (let ((map (make-sparse-keymap)))
@@ -665,9 +669,6 @@ explicitly choose the function names."
 ;;;###autoload
 (define-globalized-minor-mode evil-snipe-override-mode
   evil-snipe-override-local-mode turn-on-evil-snipe-override-mode)
-
-(define-obsolete-variable-alias 'evil-snipe-mode-map 'evil-snipe-local-mode-map "2.0.8")
-(define-obsolete-variable-alias 'evil-snipe-override-mode-map 'evil-snipe-override-local-mode-map "2.0.8")
 
 (provide 'evil-snipe)
 ;;; evil-snipe.el ends here
