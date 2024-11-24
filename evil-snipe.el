@@ -1,4 +1,4 @@
-;;; evil-snipe.el --- emulate vim-sneak & vim-seek
+;;; evil-snipe.el --- emulate vim-sneak & vim-seek  -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2014-20 Henrik Lissner
 ;;
