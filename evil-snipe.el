@@ -211,6 +211,11 @@ directly, unless you want to change the default number of characters to
 search.")
 (defvar evil-snipe--transient-map-func nil)
 
+(defvar evil-snipe-parent-transient-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map ";" #'evil-snipe-repeat)
+    (define-key map "," #'evil-snipe-repeat-reverse)
+    map))
 
 ;;
 ;;; Faces
@@ -606,12 +611,6 @@ explicitly choose the function names."
       (evil-define-key* 'motion map
         ";" #'evil-snipe-repeat
         "," #'evil-snipe-repeat-reverse))
-    map))
-
-(defvar evil-snipe-parent-transient-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map ";" #'evil-snipe-repeat)
-    (define-key map "," #'evil-snipe-repeat-reverse)
     map))
 
 ;;;###autoload
