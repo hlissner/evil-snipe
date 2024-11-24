@@ -425,8 +425,7 @@ is the transient map to activate afterwards."
 (defun evil-snipe--seek (count data &optional internal-p)
   "Perform a snipe and adjust cursor position depending on mode."
   (let ((orig-point (point))
-        (forward-p (> count 0))
-        (match (mapconcat #'cdr data "")))
+        (forward-p (> count 0)))
     ;; Adjust search starting point
     (if forward-p (forward-char))
     (unless evil-snipe--consume-match
