@@ -72,18 +72,18 @@ for repeating snipes."
 (defcustom evil-snipe-scope 'line
   "Dictates the scope of searches, which can be one of:
 
-'line
+\='line
   Search line after the cursor (this is vim-seek behavior) (default)
-'buffer
+\='buffer
   Search rest of the buffer after the cursor (vim-sneak behavior)
-'visible
+\='visible
   Search rest of visible buffer (Is more performant than 'buffer, but will not
   highlight/jump past the visible buffer)
-'whole-line
+\='whole-line
   Same as 'line, but highlight matches on either side of cursor
-'whole-buffer
+\='whole-buffer
   Same as 'buffer, but highlight *all* matches in buffer
-'whole-visible
+\='whole-visible
   Same as 'visible, but highlight *all* visible matches in buffer
 
 See `evil-snipe-repeat-scope' to change scope only when repeating snipes.
@@ -121,7 +121,7 @@ If `evil-snipe-override-evil' is non-nil, this applies to f/F/t/T as well."
   :type 'boolean)
 
 (defcustom evil-snipe-show-prompt t
-  "If non-nil, show 'N>' prompt while sniping."
+  "If non-nil, show N> prompt while sniping."
   :group 'evil-snipe
   :type 'boolean)
 
@@ -140,14 +140,14 @@ search contains capital letters."
 (define-obsolete-variable-alias 'evil-snipe-symbol-groups 'evil-snipe-aliases "v2.0.0")
 
 (defcustom evil-snipe-aliases '()
-  "A list of characters mapped to regexps '(CHAR REGEX).
+  "A list of characters mapped to regexps \='(CHAR REGEX).
 If CHAR is used in a snipe, it will be replaced with REGEX. These aliases apply
 globally. To set an alias for a specific mode use:
 
-    (add-hook 'c++-mode-hook
+    (add-hook \='c++-mode-hook
       (lambda ()
-        (make-local-variable 'evil-snipe-aliases)
-        (push '(?\[ \"[[{(]\") evil-snipe-aliases)))"
+        (make-local-variable \='evil-snipe-aliases)
+        (push \='(?\[ \"[[{(]\") evil-snipe-aliases)))"
   :group 'evil-snipe
   :type '(repeat (cons (character :tag "Key")
                        (regexp :tag "Pattern"))))
@@ -181,8 +181,8 @@ MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 
 (defcustom evil-snipe-tab-increment nil
   "If non-nil, pressing TAB while sniping adds another character to the search.
-For example, typing sab will search for 'ab'. In order to search
-for 'abcd', you do sa<tab><tab>bcd.
+For example, typing sab will search for \='ab\='. In order to search
+for \='abcd\=', you do sa<tab><tab>bcd.
 
 If nil, TAB will search for literal tab characters."
   :group 'evil-snipe
@@ -192,7 +192,7 @@ If nil, TAB will search for literal tab characters."
   "Non-nil to use `char-fold-to-regexp' to include ASCII variants search string.
 CURRENTLY EXPERIMENTAL.
 
-e.g. The letter 'a' will match all of its accented cousins, even those composed
+e.g. The letter \='a\=' will match all of its accented cousins, even those composed
 of multiple characters, as well as many other symbols like U+249C (PARENTHESIZED
 LATIN SMALL LETTER A).
 
