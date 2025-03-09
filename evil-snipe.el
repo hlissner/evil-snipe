@@ -339,8 +339,8 @@ If FIRST-P is t, then use `evil-snipe-first-p-match-face'"
                                  'evil-snipe-matches-face))
     overlay))
 
-(defun evil-snipe--highlight-all (count forward-p data)
-  "Highlight instances of keys in DATA at COUNT intervals.
+(defun evil-snipe--highlight-all (_count forward-p data)
+  "Highlight instances of keys in DATA intervals.
 Goes backward if FORWARD-P is nil."
   (let ((case-fold-search (evil-snipe--case-p data))
         (match (mapconcat #'cdr data ""))
