@@ -1,4 +1,4 @@
-;;; evil-snipe.el --- emulate vim-sneak & vim-seek
+;;; evil-snipe.el --- emulate vim-sneak & vim-seek  -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2014-20 Henrik Lissner
 ;;
@@ -9,7 +9,7 @@
 ;; Version: 2.1.3
 ;; Keywords: emulation, vim, evil, sneak, seek
 ;; Homepage: https://github.com/hlissner/evil-snipe
-;; Package-Requires: ((emacs "24.4") (evil "1.2.12") (cl-lib "0.5"))
+;; Package-Requires: ((emacs "25.1") (evil "1.2.12") (cl-lib "0.5"))
 ;;
 ;; This file is not part of GNU Emacs.
 
@@ -72,18 +72,18 @@ for repeating snipes."
 (defcustom evil-snipe-scope 'line
   "Dictates the scope of searches, which can be one of:
 
-'line
+\='line
   Search line after the cursor (this is vim-seek behavior) (default)
-'buffer
+\='buffer
   Search rest of the buffer after the cursor (vim-sneak behavior)
-'visible
+\='visible
   Search rest of visible buffer (Is more performant than 'buffer, but will not
   highlight/jump past the visible buffer)
-'whole-line
+\='whole-line
   Same as 'line, but highlight matches on either side of cursor
-'whole-buffer
+\='whole-buffer
   Same as 'buffer, but highlight *all* matches in buffer
-'whole-visible
+\='whole-visible
   Same as 'visible, but highlight *all* visible matches in buffer
 
 See `evil-snipe-repeat-scope' to change scope only when repeating snipes.
@@ -121,7 +121,7 @@ If `evil-snipe-override-evil' is non-nil, this applies to f/F/t/T as well."
   :type 'boolean)
 
 (defcustom evil-snipe-show-prompt t
-  "If non-nil, show 'N>' prompt while sniping."
+  "If non-nil, show N> prompt while sniping."
   :group 'evil-snipe
   :type 'boolean)
 
@@ -137,19 +137,20 @@ search contains capital letters."
   :group 'evil-snipe
   :type 'boolean)
 
+(define-obsolete-variable-alias 'evil-snipe-symbol-groups 'evil-snipe-aliases "v2.0.0")
+
 (defcustom evil-snipe-aliases '()
-  "A list of characters mapped to regexps '(CHAR REGEX).
+  "A list of characters mapped to regexps \='(CHAR REGEX).
 If CHAR is used in a snipe, it will be replaced with REGEX. These aliases apply
 globally. To set an alias for a specific mode use:
 
-    (add-hook 'c++-mode-hook
+    (add-hook \='c++-mode-hook
       (lambda ()
-        (make-local-variable 'evil-snipe-aliases)
-        (push '(?\[ \"[[{(]\") evil-snipe-aliases)))"
+        (make-local-variable \='evil-snipe-aliases)
+        (push \='(?\[ \"[[{(]\") evil-snipe-aliases)))"
   :group 'evil-snipe
   :type '(repeat (cons (character :tag "Key")
                        (regexp :tag "Pattern"))))
-(define-obsolete-variable-alias 'evil-snipe-symbol-groups 'evil-snipe-aliases "v2.0.0")
 
 (defcustom evil-snipe-disabled-modes
   '(org-agenda-mode magit-mode git-rebase-mode elfeed-show-mode
@@ -173,25 +174,25 @@ evil-exchange or anything else.
 MUST BE SET BEFORE EVIL-SNIPE IS LOADED.")
 
 (defcustom evil-snipe-skip-leading-whitespace t
-  "If non-nil, single char sniping (f/F/t/T) will skip over leading whitespaces
-in a line (when you snipe for whitespace, e.g. f<space> or f<tab>)."
+  "If non-nil, single char sniping (f/F/t/T) will skip over leading whitespaces.
+(when you snipe for whitespace, e.g. f<space> or f<tab>)."
   :group 'evil-snipe
   :type 'boolean)
 
 (defcustom evil-snipe-tab-increment nil
-  "If non-nil, pressing TAB while sniping will add another character to your
-current search. For example, typing sab will search for 'ab'. In order to search
-for 'abcd', you do sa<tab><tab>bcd.
+  "If non-nil, pressing TAB while sniping adds another character to the search.
+For example, typing sab will search for \='ab\='. In order to search
+for \='abcd\=', you do sa<tab><tab>bcd.
 
 If nil, TAB will search for literal tab characters."
   :group 'evil-snipe
   :type 'boolean)
 
 (defcustom evil-snipe-char-fold nil
-  "If non-nil, uses `char-fold-to-regexp' to include other ascii variants of a
-search string. CURRENTLY EXPERIMENTAL.
+  "Non-nil to use `char-fold-to-regexp' to include ASCII variants search string.
+CURRENTLY EXPERIMENTAL.
 
-e.g. The letter 'a' will match all of its accented cousins, even those composed
+e.g. The letter \='a\=' will match all of its accented cousins, even those composed
 of multiple characters, as well as many other symbols like U+249C (PARENTHESIZED
 LATIN SMALL LETTER A).
 
@@ -211,6 +212,11 @@ directly, unless you want to change the default number of characters to
 search.")
 (defvar evil-snipe--transient-map-func nil)
 
+(defvar evil-snipe-parent-transient-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map ";" #'evil-snipe-repeat)
+    (define-key map "," #'evil-snipe-repeat-reverse)
+    map))
 
 ;;
 ;;; Faces
@@ -333,8 +339,8 @@ If FIRST-P is t, then use `evil-snipe-first-p-match-face'"
                                  'evil-snipe-matches-face))
     overlay))
 
-(defun evil-snipe--highlight-all (count forward-p data)
-  "Highlight instances of keys in DATA at COUNT intervals.
+(defun evil-snipe--highlight-all (_count forward-p data)
+  "Highlight instances of keys in DATA intervals.
 Goes backward if FORWARD-P is nil."
   (let ((case-fold-search (evil-snipe--case-p data))
         (match (mapconcat #'cdr data ""))
@@ -425,8 +431,7 @@ is the transient map to activate afterwards."
 (defun evil-snipe--seek (count data &optional internal-p)
   "Perform a snipe and adjust cursor position depending on mode."
   (let ((orig-point (point))
-        (forward-p (> count 0))
-        (match (mapconcat #'cdr data "")))
+        (forward-p (> count 0)))
     ;; Adjust search starting point
     (if forward-p (forward-char))
     (unless evil-snipe--consume-match
@@ -520,7 +525,7 @@ is the transient map to activate afterwards."
                        last-keys last-keymap))))
 
 (evil-define-motion evil-snipe-repeat-reverse (count)
-  "Repeat the inverse of the last evil-snipe `count' times"
+  "Repeat the inverse of the last evil-snipe `count' times."
   (interactive "<c>")
   (evil-snipe-repeat (or (and (integerp count) (- count)) -1)))
 
@@ -537,7 +542,8 @@ explicitly choose the function names."
     `(progn
        (evil-define-motion ,forward-fn (count keys)
          ,(concat "Jumps to the next " (int-to-string n)
-                  "-char match COUNT matches away. Including KEYS is a list of character codes.")
+                  "-char match COUNT matches away.
+Including KEYS is a list of character codes.")
          :jump t
          (interactive
           (let ((count (if current-prefix-arg (prefix-numeric-value current-prefix-arg))))
@@ -579,6 +585,7 @@ explicitly choose the function names."
 ;;;###autoload (autoload 'evil-snipe-T "evil-snipe" nil t)
 (evil-snipe-def 1 'exclusive "t" "T")
 
+(define-obsolete-variable-alias 'evil-snipe-mode-map 'evil-snipe-local-mode-map "2.0.8")
 
 (defvar evil-snipe-local-mode-map
   (let ((map (make-sparse-keymap)))
@@ -596,6 +603,8 @@ explicitly choose the function names."
         "X" #'evil-snipe-X))
     map))
 
+(define-obsolete-variable-alias 'evil-snipe-override-mode-map 'evil-snipe-override-local-mode-map "2.0.8")
+
 (defvar evil-snipe-override-local-mode-map
   (let ((map (make-sparse-keymap)))
     (evil-define-key* 'motion map
@@ -607,12 +616,6 @@ explicitly choose the function names."
       (evil-define-key* 'motion map
         ";" #'evil-snipe-repeat
         "," #'evil-snipe-repeat-reverse))
-    map))
-
-(defvar evil-snipe-parent-transient-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map ";" #'evil-snipe-repeat)
-    (define-key map "," #'evil-snipe-repeat-reverse)
     map))
 
 ;;;###autoload
@@ -667,9 +670,6 @@ explicitly choose the function names."
 ;;;###autoload
 (define-globalized-minor-mode evil-snipe-override-mode
   evil-snipe-override-local-mode turn-on-evil-snipe-override-mode)
-
-(define-obsolete-variable-alias 'evil-snipe-mode-map 'evil-snipe-local-mode-map "2.0.8")
-(define-obsolete-variable-alias 'evil-snipe-override-mode-map 'evil-snipe-override-local-mode-map "2.0.8")
 
 (provide 'evil-snipe)
 ;;; evil-snipe.el ends here
